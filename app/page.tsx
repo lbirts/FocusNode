@@ -21,7 +21,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 const priorityStyles: Record<Priority, string> = {
   Urgent: "bg-red-light text-red",
@@ -43,6 +43,20 @@ function totals(board: Board) {
 }
 
 export default function KanbanPage() {
+  return (
+    <Suspense fallback={<KanbanPageFallback />}>
+      <KanbanBoard />
+    </Suspense>
+  );
+}
+
+function KanbanPageFallback() {
+  return (
+    <div className="h-full w-full animate-pulse bg-primary-50" aria-hidden />
+  );
+}
+
+function KanbanBoard() {
   const searchParams = useSearchParams();
   const boardId = searchParams.get("board");
   const board = useMemo(() => getBoard(boardId), [boardId]);
