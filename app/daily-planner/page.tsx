@@ -1,0 +1,369 @@
+"use client";
+
+import { Button } from "@/ui/button";
+import { Separator } from "@/ui/separator";
+import { cn } from "@/app/lib/utils";
+import { Menu } from "@base-ui/react/menu";
+import {
+  Check,
+  ChevronDown,
+  Clock,
+  LayoutGrid,
+  Plus,
+  Timer,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+
+type Priority = "Urgent" | "Medium" | "Normal";
+type Category = "Design" | "Docs" | "Dev";
+
+type Task = {
+  id: number;
+  title: string;
+  board: string;
+  priority: Priority;
+  category: Category;
+  estimate: string;
+  status: "Not started" | "In progress" | "Completed";
+  progress?: string;
+};
+
+const initialTasks: Task[] = [
+  {
+    id: 1,
+    title: "Build notification preferences panel",
+    board: "Product Launch Q2",
+    priority: "Urgent",
+    category: "Docs",
+    estimate: "2h",
+    status: "In progress",
+    progress: "25m in",
+  },
+  {
+    id: 2,
+    title: "Implement auth token refresh logic",
+    board: "Product Launch Q2",
+    priority: "Medium",
+    category: "Dev",
+    estimate: "3h",
+    status: "Not started",
+  },
+  {
+    id: 3,
+    title: "Review PR #142 — payment flow",
+    board: "Sprint 24",
+    priority: "Medium",
+    category: "Dev",
+    estimate: "30m",
+    status: "Not started",
+  },
+  {
+    id: 4,
+    title: "Write unit tests for payment module",
+    board: "Product Launch Q2",
+    priority: "Normal",
+    category: "Dev",
+    estimate: "1.5h",
+    status: "Not started",
+  },
+  {
+    id: 5,
+    title: "Update API documentation v2.3",
+    board: "Documentation",
+    priority: "Normal",
+    category: "Docs",
+    estimate: "45m",
+    status: "Not started",
+  },
+];
+
+const boards = [
+  { name: "Product Launch Q2", count: 12, connected: true },
+  { name: "Sprint 24", count: 8, connected: true },
+  { name: "Documentation", count: 4, connected: true },
+  { name: "Daily Ops", count: 3, connected: false },
+];
+
+const filterOptions: ("All" | Category)[] = ["All", "Design", "Docs", "Dev"];
+
+const rankOptions = ["Priority", "Time"] as const;
+type RankBy = (typeof rankOptions)[number];
+
+const priorityOrder: Record<Priority, number> = {
+  Urgent: 0,
+  Medium: 1,
+  Normal: 2,
+};
+
+function estimateMinutes(estimate: string) {
+  const match = estimate.match(/^([\d.]+)([hm])$/);
+  if (!match) return 0;
+  const value = parseFloat(match[1]);
+  return match[2] === "h" ? value * 60 : value;
+}
+
+const priorityStyles: Record<Priority, string> = {
+  Urgent: "bg-red-light text-red",
+  Medium: "bg-brand-light text-brand",
+  Normal: "bg-secondary-50 text-secondary-400",
+};
+
+export default function DailyPlannerPage() {
+  const [filter, setFilter] = useState<(typeof filterOptions)[number]>("All");
+  const [rankBy, setRankBy] = useState<RankBy>("Priority");
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+
+  const visibleTasks = useMemo(() => {
+    const filtered =
+      filter === "All" ? tasks : tasks.filter((t) => t.category === filter);
+    const sorted = [...filtered].sort((a, b) =>
+      rankBy === "Priority"
+        ? priorityOrder[a.priority] - priorityOrder[b.priority]
+        : estimateMinutes(a.estimate) - estimateMinutes(b.estimate),
+    );
+    return sorted;
+  }, [tasks, filter, rankBy]);
+
+  const completed = tasks.filter((t) => t.status === "Completed").length;
+  const remaining = tasks.length - completed;
+
+  function addTask() {
+    const id = tasks.length + 1;
+    setTasks((prev) => [
+      ...prev,
+      {
+        id,
+        title: `New task ${id}`,
+        board: "Product Launch Q2",
+        priority: "Normal",
+        category: "Docs",
+        estimate: "30m",
+        status: "Not started",
+      },
+    ]);
+  }
+
+  return (
+    <div className="h-full w-full flex flex-col bg-primary-50">
+      <div className="border-b border-primary-200 px-3 h-[58px] flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <h3 className="text-base text-primary-600 font-medium">
+            Daily Planner
+          </h3>
+          <Separator orientation="vertical" />
+          <p className="text-primary-400 text-xs">Saturday, March 14, 2026</p>
+          <Separator orientation="vertical" />
+          <p className="text-primary-400 text-xs">
+            {visibleTasks.length} tasks queued
+          </p>
+          <Separator orientation="vertical" />
+          <p className="text-primary-400 text-xs">~7h 45m estimated</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline">
+            <LayoutGrid />
+            Pull from boards
+          </Button>
+          <Button
+            size="sm"
+            className="bg-secondary-400 text-white hover:bg-secondary-400/90"
+          >
+            Auto-rank
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-1 min-h-0">
+        <div className="flex-1 min-w-0 px-3 pt-4 pb-12 flex flex-col gap-4 overflow-y-auto">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium uppercase text-primary-400">
+              Ranked tasks
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-primary-400">Rank by:</p>
+                <Menu.Root>
+                  <Menu.Trigger
+                    render={
+                      <Button size="sm" variant="outline">
+                        {rankBy}
+                        <ChevronDown />
+                      </Button>
+                    }
+                  />
+                  <Menu.Portal>
+                    <Menu.Positioner sideOffset={4} align="end">
+                      <Menu.Popup className="min-w-[140px] rounded-lg border border-primary-200 bg-white p-1 text-xs text-primary-500 shadow-md outline-none">
+                        <Menu.RadioGroup
+                          value={rankBy}
+                          onValueChange={(v) => setRankBy(v as RankBy)}
+                        >
+                          {rankOptions.map((opt) => (
+                            <Menu.RadioItem
+                              key={opt}
+                              value={opt}
+                              className="flex cursor-default items-center justify-between gap-2 rounded px-2 py-1.5 outline-none data-highlighted:bg-primary-100"
+                            >
+                              {opt}
+                              <Menu.RadioItemIndicator>
+                                <Check className="size-3" />
+                              </Menu.RadioItemIndicator>
+                            </Menu.RadioItem>
+                          ))}
+                        </Menu.RadioGroup>
+                      </Menu.Popup>
+                    </Menu.Positioner>
+                  </Menu.Portal>
+                </Menu.Root>
+              </div>
+              <div className="flex items-center gap-2">
+                {filterOptions.map((opt) => {
+                  const active = opt === filter;
+                  return (
+                    <Button
+                      key={opt}
+                      size="sm"
+                      variant={active ? "default" : "outline"}
+                      onClick={() => setFilter(opt)}
+                      className={cn(
+                        active &&
+                          "bg-secondary-400 text-white border-transparent hover:bg-secondary-400/90",
+                      )}
+                    >
+                      {opt}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {visibleTasks.map((task, idx) => (
+              <div
+                key={task.id}
+                className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[2px_4px_40px_10px_rgba(31,53,51,0.04)]"
+              >
+                <div className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500">
+                  {idx + 1}
+                </div>
+                <div className="flex-1 min-w-0 rounded-lg border border-primary-100 bg-primary-50 p-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "rounded px-1.5 py-0.5 text-xs",
+                          priorityStyles[task.priority],
+                        )}
+                      >
+                        {task.priority}
+                      </span>
+                      <span className="rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
+                        {task.category}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-1.5 text-xs text-primary-400">
+                        <Clock className="size-3" />
+                        {task.estimate}
+                      </span>
+                      {task.progress ? (
+                        <span className="flex items-center gap-1.5 rounded bg-secondary-50 px-1.5 py-0.5 text-xs text-secondary-400">
+                          <Timer className="size-3" />
+                          {task.progress}
+                        </span>
+                      ) : (
+                        <span className="rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
+                          {task.status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-col gap-2">
+                    <p className="text-sm text-primary-500">{task.title}</p>
+                    <p className="text-xs text-primary-400">{task.board}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addTask}
+              className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-dashed border-primary-300 text-xs text-primary-400 hover:bg-primary-100/50"
+            >
+              <Plus className="size-4" />
+              Add task to today
+            </button>
+          </div>
+        </div>
+
+        <aside className="w-[300px] shrink-0 border-l border-primary-200 px-3 py-5 flex flex-col gap-5">
+          <h3 className="text-base text-primary-600 font-medium">
+            Connected Boards
+          </h3>
+          <div className="flex flex-1 flex-col gap-1">
+            {boards.map((board) => (
+              <div
+                key={board.name}
+                className="flex items-center justify-between rounded-lg border border-primary-200 bg-primary-50 p-4"
+              >
+                <div className="flex flex-col gap-2 min-w-0">
+                  <p className="text-sm text-primary-400">{board.name}</p>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={cn(
+                        "size-3 rounded-full border-[1.125px] border-primary-100",
+                        board.connected ? "bg-brand" : "bg-primary-500",
+                      )}
+                    />
+                    <p className="text-[10px] text-primary-400">
+                      {board.connected ? "Synced" : "Not connected"}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-[10px] text-primary-400">
+                  {board.count} tasks
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col gap-4 rounded-lg border border-primary-200 bg-primary-50 p-4">
+            <p className="text-xs font-medium uppercase text-primary-400">
+              Today&apos;s stats
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <Stat value={completed} label="Completed" highlight />
+              <Stat value={remaining} label="Remaining" />
+              <Stat value="78%" label="Capacity" />
+              <Stat value="2:35" label="Focus time" />
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function Stat({
+  value,
+  label,
+  highlight,
+}: {
+  value: number | string;
+  label: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1 rounded-lg bg-primary-100 px-3 pt-2 pb-3">
+      <p
+        className={cn(
+          "text-3xl font-semibold",
+          highlight ? "text-brand" : "text-secondary-400",
+        )}
+      >
+        {value}
+      </p>
+      <p className="text-xs text-primary-400">{label}</p>
+    </div>
+  );
+}
