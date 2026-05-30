@@ -1,0 +1,43 @@
+{
+  "name": "focusnode",
+  "framework": "nextjs",
+
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "serveCommand": "npm run start",
+
+  "readyHeuristic": {
+    "url": "http://127.0.0.1:3000/",
+    "waitFor": "networkidle",
+    "timeoutMs": 30000,
+  },
+
+  "routes": [
+    {
+      "name": "kanban",
+      "url": "/",
+      "states": [{ "name": "default", "setup": [] }],
+      "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
+    },
+    {
+      "name": "focus-timer",
+      "url": "/focus-timer",
+      "states": [{ "name": "default", "setup": [] }],
+      "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
+    },
+    {
+      "name": "daily-planner",
+      "url": "/daily-planner",
+      "states": [{ "name": "default", "setup": [] }],
+      "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
+    },
+    {
+      "name": "team",
+      "url": "/team",
+      "states": [{ "name": "default", "setup": [] }],
+      "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
+    },
+  ],
+
+  "fixedClock": "2026-03-14T12:00:00Z",
+}

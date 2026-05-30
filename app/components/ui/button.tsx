@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/app/lib/utils";
 
 const buttonVariants = cva(
-  "group/button gap-2 flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button gap-2 flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
   {
     variants: {
       variant: {
@@ -14,6 +14,7 @@ const buttonVariants = cva(
           "border-primary-200 text-primary-400 hover:bg-black/5 hover:text-primary-600 aria-expanded:text-primary-600",
         ghost:
           "text-primary-400 hover:bg-black/5 aria-expanded:bg-black/5 hover:text-primary-600 aria-expanded:text-primary-600 disabled:opacity-50",
+        link: "text-primary-400 hover:text-primary-600 aria-expanded:text-primary-600 disabled:opacity-50 data-[active=true]:border-b-1.5 data-[active=true]:border-b-secondary-400 data-[active=true]:text-secondary-400 rounded-none",
         orange:
           "text-primary-50 bg-brand hover:bg-brand/80 aria-expanded:bg-brand/80 disabled:opacity-50",
       },

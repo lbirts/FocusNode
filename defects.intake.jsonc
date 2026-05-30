@@ -1,0 +1,295 @@
+// One entry per defect. Several entries point at the same branch
+// (`defects/v1`, `defects/v2`, `defects/v3`) instead of one branch per defect.
+{
+  "defects": [
+    // ─────────────────────────────────────────────────────────────────────────
+    // BRANCH: defects/v1  (concentrated on the Kanban page)
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      "branch": "defects/v1",
+      "id": "d1",
+      "category": "spacing-alignment",
+      "tier": "high",
+      "selector": "[data-testid=\"swimlane-columns\"]",
+      "whatsWrong": "swimlane columns row has no gap",
+      "checks": [{ "type": "computed-style", "target": "gap" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v1",
+      "id": "d2",
+      "category": "color",
+      "tier": "high",
+      // Every Urgent badge across all expanded swimlanes carries this testid.
+      // The defect affects all of them, so the check must pass on every match.
+      "selector": "[data-testid=\"priority-badge-urgent\"]",
+      "whatsWrong": "Urgent badge uses off-palette hard-coded #ffcc00 / #000 instead of the bg-red-light / text-red tokens",
+      "checks": [
+        { "type": "computed-style", "target": "background-color" },
+        { "type": "computed-style", "target": "color" },
+      ],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v1",
+      "id": "d3",
+      "category": "layout",
+      "tier": "high",
+      "selector": "[data-testid=\"page-header\"]",
+      "whatsWrong": "Kanban page header has flex-direction: column instead of row, stacking the title cluster and the action buttons vertically",
+      "checks": [{ "type": "computed-style", "target": "flex-direction" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v1",
+      "id": "d4",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"swimlane-columns\"]",
+      "whatsWrong": "swimlane columns wrapper has align-items: flex-start, so columns hug their content height instead of stretching to match siblings (golden uses default stretch)",
+      "checks": [{ "type": "computed-style", "target": "align-items" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v1",
+      "id": "d5",
+      "category": "overflow-clipping",
+      "tier": "mid",
+      // The clipping defect applies to every card title on the board; the check must pass on every match.
+      "selector": "[data-testid=\"card-title\"]",
+      "whatsWrong": "card title has whitespace: nowrap and overflow: hidden, so long titles get hard-clipped mid-word",
+      "checks": [
+        { "type": "computed-style", "target": "overflow" },
+        { "type": "computed-style", "target": "white-space" },
+      ],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BRANCH: defects/v2  (spread across all four pages)
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      "branch": "defects/v2",
+      "id": "d6",
+      "category": "color",
+      "tier": "high",
+      "selector": "[data-testid=\"nav-link\"][data-active=\"true\"]",
+      "whatsWrong": "active nav button uses hard-coded off-palette bg-[#e0e0ff] with text-[#1a1a4d] instead of the bg-brand / text-primary-50 tokens delivered by the orange Button variant",
+      "checks": [
+        { "type": "computed-style", "target": "background-color" },
+        { "type": "computed-style", "target": "color" },
+      ],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v2",
+      "id": "d7",
+      "category": "iconography",
+      "tier": "mid",
+      "selector": "[data-testid^=\"nav-icon-\"]",
+      "whatsWrong": "three of the four left-nav icons render the wrong lucide glyph: Kanban Boards shows lucide-calendar (should be lucide-layout-grid), Focus Timer shows lucide-hourglass (should be lucide-timer), Daily Planner shows lucide-layout-grid (should be lucide-calendar); Team Workload's lucide-users is correct",
+      // Lucide-react sets a semantic class on each rendered. On the broken branch the class names don't match the labels.
+      // Custom `attribute` check on the svg's `class` catches each wrong icon directly.
+      "checks": [{ "type": "attribute", "target": "class" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v2",
+      "id": "d8",
+      "category": "spacing-alignment",
+      "tier": "high",
+      "selector": "[data-testid=\"focus-timer-presets\"]",
+      "whatsWrong": "the minute preset button row gap is 0",
+      "checks": [{ "type": "computed-style", "target": "gap" }],
+      "where": [
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v2",
+      "id": "d9",
+      "category": "layout",
+      "tier": "high",
+      "selector": "[data-testid=\"today-stats-grid\"]",
+      "whatsWrong": "`Today's stats` grid is grid-template-columns: 1fr (one column) instead of two in a 2x2 grid; the bottom tiles also get clipped by the fixed-height sidebar with no scroll affordance",
+      "checks": [
+        { "type": "computed-style", "target": "grid-template-columns" },
+        {
+          "type": "bounding-box",
+          "target": "all four stat tiles must be visible inside the sidebar and must not be clipped by their container",
+        },
+      ],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defects/v2",
+      "id": "d10",
+      "category": "iconography",
+      "tier": "high",
+      // Every assignee avatar carries this testid; the oval-stretch defect
+      // affects all of them, so the check must pass on every match.
+      "selector": "[data-testid=\"task-assignee-avatar\"]",
+      "whatsWrong": "assignee avatar width was widened from size-5 to w-9 (keeping h-5), and object-fit: cover was dropped, so portraits stretch horizontally to fill an oval instead of fitting in a circle",
+      "checks": [
+        { "type": "computed-style", "target": "width" },
+        { "type": "computed-style", "target": "object-fit" },
+      ],
+      "where": [
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v2",
+      "id": "d11",
+      "category": "typography",
+      "tier": "mid",
+      "selector": "[data-testid=\"page-title\"]",
+      "whatsWrong": "Team Workload header title is italic and font-light instead of font-medium, mismatching the matching headers on the other three pages",
+      "checks": [
+        { "type": "computed-style", "target": "font-style" },
+        { "type": "computed-style", "target": "font-weight" },
+      ],
+      "where": [
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BRANCH: defects/v3  (hard defects)
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      "branch": "defects/v3",
+      "id": "d12",
+      "category": "color",
+      "tier": "low",
+      // The same `muted-text-sample` testid is placed on one stable
+      // text-primary-400 element on each of the four pages
+      // Checking color on all four confirms the token shift is uniform
+      // and the symptom shows everywhere expected.
+      "selector": "[data-testid=\"muted-text-sample\"]",
+      "whatsWrong": "the --color-primary-400 design token shifted from #8f938a to #a8aba2 (a few percent lighter), so every text-primary-400 element across the app looks slightly washed out",
+      "checks": [{ "type": "computed-style", "target": "color" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v3",
+      "id": "d13",
+      "category": "typography",
+      "tier": "low",
+      // Daily Planner and Team h3s share the same page-title testid.
+      "selector": "[data-testid=\"page-title\"]",
+      "whatsWrong": "page header h3 has an inline style overriding font-family to Inter; the rest of the app uses Plus Jakarta Sans for headings",
+      "checks": [{ "type": "computed-style", "target": "font-family" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v3",
+      "id": "d14",
+      "category": "typography",
+      "tier": "low",
+      // The same `eyebrow-label` testid is placed on one representative
+      // uppercase element on each of the four pages.
+      "selector": "[data-testid=\"eyebrow-label\"]",
+      "whatsWrong": "every .uppercase element has letter-spacing: -0.04em (negative tracking), making all uppercase eyebrows on every page look cramped",
+      "checks": [{ "type": "computed-style", "target": "letter-spacing" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v3",
+      "id": "d15",
+      "category": "layout",
+      "tier": "high",
+      // The defect is observable as: on page load, the list view is missing and
+      // the board placeholder is shown instead. The bounding-box check directly catches that user-visible symptom.
+      "selector": "[data-testid=\"team-list-view\"]",
+      "whatsWrong": "Team page initializes tab state to 'board' instead of 'list', so it lands on the 'Board view coming soon' placeholder by default instead of the actual task list",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "the [data-testid=\"team-list-view\"] element must be present and visible on page load",
+        },
+      ],
+      "where": [
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defects/v3",
+      "id": "d16",
+      "category": "spacing-alignment",
+      "tier": "low",
+      "selector": "[data-testid=\"page-header\"]",
+      "whatsWrong": "Daily Planner header uses pl-6 pr-1 instead of the px-3 used on every other page header, so the title sits noticeably further from the sidebar and the Auto-rank button hugs the right edge",
+      "checks": [
+        { "type": "computed-style", "target": "padding-left" },
+        { "type": "computed-style", "target": "padding-right" },
+      ],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+  ],
+}

@@ -123,13 +123,24 @@ export default function FocusTimer() {
   return (
     <div className="h-full w-full flex">
       <div className="bg-primary-50 h-full flex-1 flex flex-col">
-        <div className="border-b border-primary-200 px-3 py-4.5 flex justify-between gap-2">
+        <div
+          data-testid="page-header"
+          className="border-b border-primary-200 px-3 py-4.5 flex justify-between gap-2"
+        >
           <div className="flex gap-2 items-center">
-            <h3 className="text-lg text-primary-600 font-medium">
+            <h3
+              data-testid="page-title"
+              className="text-lg text-primary-600 font-medium"
+            >
               Focus Timer
             </h3>
             <Separator orientation="vertical" />
-            <p className="text-primary-400 text-sm">Pomodoro</p>
+            <p
+              data-testid="muted-text-sample"
+              className="text-primary-400 text-sm"
+            >
+              Pomodoro
+            </p>
             <Separator orientation="vertical" />
             {/* TODO: Update with dynamic count */}
             <p className="text-primary-400 text-sm">Session 5 of 8</p>
@@ -143,26 +154,27 @@ export default function FocusTimer() {
         </div>
 
         <div className="flex flex-1 min-h-0 flex-col items-center gap-10 overflow-y-auto px-3 pt-12 pb-12">
-          <div className="flex items-center justify-center gap-2">
+          <div
+            data-testid="focus-timer-presets"
+            className="flex items-center justify-center gap-2"
+          >
             {presets.map(({ mode: m, minutes, label }) => {
               const active = m === mode;
               return (
-                <button
+                <Button
                   key={m}
-                  type="button"
+                  size="lg"
                   onClick={() => selectMode(m)}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl border bg-primary-100 px-5 py-5 transition-colors",
-                    active
-                      ? "border-brand"
-                      : "border-primary-200 hover:border-primary-300",
+                    "gap-3 rounded-xl p-5 h-19.5",
+                    active ? "border-brand" : "hover:border-primary-300",
                   )}
                 >
                   <p className="text-3xl font-semibold text-secondary-400">
                     {minutes}
                   </p>
                   <p className="text-xs text-primary-500">{label}</p>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -218,7 +230,10 @@ export default function FocusTimer() {
             >
               <CardHeader className="gap-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-medium uppercase text-primary-400">
+                  <p
+                    data-testid="eyebrow-label"
+                    className="text-xs font-medium uppercase text-primary-400"
+                  >
                     Currently working on
                   </p>
                   <div className="flex items-center gap-2 rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">

@@ -1,17 +1,16 @@
 "use client";
 
-import { Button } from "@/ui/button";
-import { Separator } from "@/ui/separator";
 import { cn } from "@/app/lib/utils";
-import { Menu } from "@base-ui/react/menu";
+import { Button } from "@/ui/button";
 import {
-  Check,
-  ChevronDown,
-  Clock,
-  LayoutGrid,
-  Plus,
-  Timer,
-} from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/ui/dropdown-menu";
+import { Separator } from "@/ui/separator";
+import { ChevronDown, Clock, LayoutGrid, Plus, Timer } from "lucide-react";
 import { useMemo, useState } from "react";
 
 type Priority = "Urgent" | "Medium" | "Normal";
@@ -145,13 +144,24 @@ export default function DailyPlannerPage() {
 
   return (
     <div className="h-full w-full flex flex-col bg-primary-50">
-      <div className="border-b border-primary-200 px-3 h-[58px] flex items-center justify-between gap-2">
+      <div
+        data-testid="page-header"
+        className="border-b border-primary-200 px-3 h-[58px] flex items-center justify-between gap-2"
+      >
         <div className="flex items-center gap-2">
-          <h3 className="text-base text-primary-600 font-medium">
+          <h3
+            data-testid="page-title"
+            className="text-base text-primary-600 font-medium"
+          >
             Daily Planner
           </h3>
           <Separator orientation="vertical" />
-          <p className="text-primary-400 text-xs">Saturday, March 14, 2026</p>
+          <p
+            data-testid="muted-text-sample"
+            className="text-primary-400 text-xs"
+          >
+            Saturday, March 14, 2026
+          </p>
           <Separator orientation="vertical" />
           <p className="text-primary-400 text-xs">
             {visibleTasks.length} tasks queued
@@ -176,45 +186,39 @@ export default function DailyPlannerPage() {
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 min-w-0 px-3 pt-4 pb-12 flex flex-col gap-4 overflow-y-auto">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium uppercase text-primary-400">
+            <p
+              data-testid="eyebrow-label"
+              className="text-xs font-medium uppercase text-primary-400"
+            >
               Ranked tasks
             </p>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <p className="text-xs text-primary-400">Rank by:</p>
-                <Menu.Root>
-                  <Menu.Trigger
-                    render={
-                      <Button size="sm" variant="outline">
-                        {rankBy}
-                        <ChevronDown />
-                      </Button>
-                    }
-                  />
-                  <Menu.Portal>
-                    <Menu.Positioner sideOffset={4} align="end">
-                      <Menu.Popup className="min-w-[140px] rounded-lg border border-primary-200 bg-white p-1 text-xs text-primary-500 shadow-md outline-none">
-                        <Menu.RadioGroup
-                          value={rankBy}
-                          onValueChange={(v) => setRankBy(v as RankBy)}
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Button size="sm" variant="outline">
+                      {rankBy}
+                      <ChevronDown />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="min-w-[140px] rounded-lg border border-primary-200 p-1! shadow-md outline-none">
+                    <DropdownMenuRadioGroup
+                      value={rankBy}
+                      onValueChange={(v) => setRankBy(v as RankBy)}
+                    >
+                      {rankOptions.map((opt) => (
+                        <DropdownMenuRadioItem
+                          className="text-xs text-primary-500 px-2 py-1.5 rounded"
+                          key={opt}
+                          value={opt}
                         >
-                          {rankOptions.map((opt) => (
-                            <Menu.RadioItem
-                              key={opt}
-                              value={opt}
-                              className="flex cursor-default items-center justify-between gap-2 rounded px-2 py-1.5 outline-none data-highlighted:bg-primary-100"
-                            >
-                              {opt}
-                              <Menu.RadioItemIndicator>
-                                <Check className="size-3" />
-                              </Menu.RadioItemIndicator>
-                            </Menu.RadioItem>
-                          ))}
-                        </Menu.RadioGroup>
-                      </Menu.Popup>
-                    </Menu.Positioner>
-                  </Menu.Portal>
-                </Menu.Root>
+                          {opt}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               <div className="flex items-center gap-2">
                 {filterOptions.map((opt) => {
@@ -297,7 +301,7 @@ export default function DailyPlannerPage() {
           </div>
         </div>
 
-        <aside className="w-[300px] shrink-0 border-l border-primary-200 px-3 py-5 flex flex-col gap-5">
+        <aside className="w-[300px] shrink-0 border-l border-primary-200 px-3 py-5 flex flex-col gap-5 min-h-0 overflow-y-auto">
           <h3 className="text-base text-primary-600 font-medium">
             Connected Boards
           </h3>
@@ -331,7 +335,10 @@ export default function DailyPlannerPage() {
             <p className="text-xs font-medium uppercase text-primary-400">
               Today&apos;s stats
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div
+              data-testid="today-stats-grid"
+              className="grid grid-cols-2 gap-2"
+            >
               <Stat value={completed} label="Completed" highlight />
               <Stat value={remaining} label="Remaining" />
               <Stat value="78%" label="Capacity" />

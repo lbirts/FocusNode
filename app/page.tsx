@@ -1,8 +1,5 @@
 "use client";
 
-import { Button } from "@/ui/button";
-import { Separator } from "@/ui/separator";
-import { cn } from "@/app/lib/utils";
 import {
   type Board,
   type Card,
@@ -11,6 +8,10 @@ import {
   type Swimlane,
   getBoard,
 } from "@/app/lib/boards";
+import { cn } from "@/app/lib/utils";
+import { Avatar, AvatarImage } from "@/ui/avatar";
+import { Button } from "@/ui/button";
+import { Separator } from "@/ui/separator";
 import {
   Calendar,
   ChevronDown,
@@ -68,9 +69,7 @@ function KanbanBoard() {
 
   useEffect(() => {
     setSwimlanes(board.swimlanes);
-    setOpen(
-      Object.fromEntries(board.swimlanes.map((s, i) => [s.id, i === 0])),
-    );
+    setOpen(Object.fromEntries(board.swimlanes.map((s, i) => [s.id, i === 0])));
   }, [board]);
 
   function toggleSwimlane(id: string) {
@@ -151,33 +150,50 @@ function KanbanBoard() {
 
   return (
     <div className="h-full w-full flex flex-col bg-primary-50">
-      <div className="border-b border-primary-200 px-3 h-[58px] flex items-center justify-between gap-2">
+      <div
+        data-testid="page-header"
+        className="border-b border-primary-200 px-3 h-[58px] flex items-center justify-between gap-2"
+      >
         <div className="flex items-center gap-2">
-          <h3 className="text-base text-primary-600 font-medium">
+          <h3
+            data-testid="page-title"
+            className="text-base text-primary-600 font-medium"
+          >
             {board.title}
           </h3>
           <Pencil className="size-4 text-primary-400" />
           <Separator orientation="vertical" />
-          <p className="text-primary-400 text-xs">{stats.swimlanes} swimlanes</p>
+          <p
+            data-testid="muted-text-sample"
+            className="text-primary-400 text-xs"
+          >
+            {stats.swimlanes} swimlanes
+          </p>
           <Separator orientation="vertical" />
           <p className="text-primary-400 text-xs">{stats.tasks} tasks</p>
           <Separator orientation="vertical" />
           <div className="flex items-center">
             {Array.from({ length: Math.min(board.memberCount, 3) }).map(
               (_, i) => (
-                <img
+                <Avatar
                   key={i}
-                  src={`/avatars/Copy of 069-05_img${i + 1}.jpg`}
-                  alt=""
                   className={cn(
-                    "size-5 rounded-full border-[3px] border-primary-50 object-cover",
+                    "size-5 border-[3px] border-primary-50",
                     i < 2 && "-mr-1",
                   )}
-                />
+                >
+                  <AvatarImage
+                    src={`/avatars/Copy of 069-05_img${i + 1}.jpg`}
+                    alt="User profile pic"
+                  />
+                </Avatar>
               ),
             )}
           </div>
-          <p className="text-primary-400 text-xs">
+          <p
+            data-testid="member-count-label"
+            className="text-primary-400 text-xs"
+          >
             {board.memberCount} members
           </p>
           <Button size="sm" variant="outline">
@@ -209,10 +225,10 @@ function KanbanBoard() {
               key={swimlane.id}
               className="border-b border-primary-200 px-3 pt-4 pb-12 flex flex-col gap-4"
             >
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 onClick={() => toggleSwimlane(swimlane.id)}
-                className="flex items-center gap-3 self-start"
+                className="gap-3 self-start p-0 h-fit hover:bg-transparent border-0"
               >
                 <span className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-primary-500">
                   {expanded ? (
@@ -221,13 +237,16 @@ function KanbanBoard() {
                     <ChevronDown className="size-3" />
                   )}
                 </span>
-                <span className="text-xs font-medium uppercase text-primary-600">
+                <span
+                  data-testid="eyebrow-label"
+                  className="text-xs font-medium uppercase text-primary-600"
+                >
                   {swimlane.title}
                 </span>
-              </button>
+              </Button>
 
               {expanded && swimlane.columns.length > 0 && (
-                <div className="flex gap-2">
+                <div data-testid="swimlane-columns" className="flex gap-2">
                   {swimlane.columns.map((column) => (
                     <KanbanColumn
                       key={column.id}
@@ -324,14 +343,14 @@ function KanbanColumn({
             columnId={column.id}
           />
         ))}
-        <button
-          type="button"
+        <Button
+          size="sm"
           onClick={onAddCard}
-          className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-dashed border-primary-300 text-xs text-primary-400 hover:bg-primary-100/50"
+          className="w-full rounded-lg border-dashed border-primary-300 text-xs bg-transparent"
         >
           <Plus className="size-4" />
           Add card
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -358,10 +377,11 @@ function KanbanCard({
         e.dataTransfer.setData("application/json", JSON.stringify(payload));
         e.dataTransfer.effectAllowed = "move";
       }}
-      className="flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-grab active:cursor-grabbing">
-
+      className="flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-grab active:cursor-grabbing"
+    >
       <div className="flex items-start justify-between">
         <span
+          data-testid={`priority-badge-${card.priority.toLowerCase()}`}
           className={cn(
             "rounded px-1.5 py-0.5 text-xs",
             priorityStyles[card.priority],
@@ -376,16 +396,16 @@ function KanbanCard({
           </span>
         )}
       </div>
-      <p className="text-sm text-primary-500">{card.title}</p>
+      <p data-testid="card-title" className="text-sm text-primary-500">
+        {card.title}
+      </p>
       <div className="flex items-center justify-between">
         <span className="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] text-primary-400">
           {card.tag}
         </span>
-        <img
-          src={card.assignee}
-          alt=""
-          className="size-5 rounded-full object-cover"
-        />
+        <Avatar size="sm" className="size-5!">
+          <AvatarImage src={card.assignee} alt="User profile pic" />
+        </Avatar>
       </div>
     </div>
   );

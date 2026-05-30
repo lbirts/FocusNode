@@ -1,24 +1,39 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
-import { Button } from "@/ui/button";
 import { boards } from "@/app/lib/boards";
 import { cn } from "@/app/lib/utils";
-import {
-  Calendar,
-  ChevronDown,
-  LayoutGrid,
-  Timer,
-  Users,
-} from "lucide-react";
+import { Avatar, AvatarImage } from "@/ui/avatar";
+import { Button } from "@/ui/button";
+import { Calendar, ChevronDown, LayoutGrid, Timer, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const navItems = [
-  { href: "/", label: "Kanban Boards", icon: LayoutGrid, expandable: true },
-  { href: "/focus-timer", label: "Focus Timer", icon: Timer },
-  { href: "/daily-planner", label: "Daily Planner", icon: Calendar },
-  { href: "/team", label: "Team Workload", icon: Users },
+  {
+    href: "/",
+    label: "Kanban Boards",
+    icon: LayoutGrid,
+    iconTestId: "nav-icon-kanban",
+    expandable: true,
+  },
+  {
+    href: "/focus-timer",
+    label: "Focus Timer",
+    icon: Timer,
+    iconTestId: "nav-icon-focus-timer",
+  },
+  {
+    href: "/daily-planner",
+    label: "Daily Planner",
+    icon: Calendar,
+    iconTestId: "nav-icon-daily-planner",
+  },
+  {
+    href: "/team",
+    label: "Team Workload",
+    icon: Users,
+    iconTestId: "nav-icon-team",
+  },
 ];
 
 export default function SideNav() {
@@ -31,10 +46,9 @@ export default function SideNav() {
       <div className="px-4 py-3 border-b border-primary-200 flex items-center gap-2">
         <Avatar>
           <AvatarImage
-            src="https://github.com/shadcn.png"
+            src="/avatars/Copy of 069-05_img1.jpg"
             alt="User profile pic"
           />
-          <AvatarFallback>AM</AvatarFallback>
         </Avatar>
         <div>
           <p className="text-primary-600 text-lg">Alex Morgan</p>
@@ -43,7 +57,7 @@ export default function SideNav() {
         <ChevronDown className="size-5 text-primary-400" />
       </div>
       <div className="px-3 py-4 flex flex-col">
-        {navItems.map(({ href, label, icon: Icon, expandable }) => {
+        {navItems.map(({ href, label, icon: Icon, iconTestId, expandable }) => {
           const isActive =
             pathname === href ||
             (href !== "/" && pathname.startsWith(`${href}/`));
@@ -52,11 +66,13 @@ export default function SideNav() {
               <Button
                 size="lg"
                 variant={isActive ? "orange" : "ghost"}
+                data-testid="nav-link"
+                data-active={isActive}
                 className="w-full justify-start"
                 render={<Link href={href} />}
                 nativeButton={false}
               >
-                <Icon />
+                <Icon data-testid={iconTestId} />
                 <span className="flex-1 text-left">{label}</span>
                 {expandable && isActive && <ChevronDown className="size-4" />}
               </Button>

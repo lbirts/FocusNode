@@ -1,11 +1,16 @@
 "use client";
 
-import { Button } from "@/ui/button";
 import { cn } from "@/app/lib/utils";
-import { Menu } from "@base-ui/react/menu";
+import { Button } from "@/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/ui/dropdown-menu";
 import {
   Calendar,
-  Check,
   ChevronDown,
   ChevronUp,
   LayoutGrid,
@@ -14,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Avatar, AvatarImage } from "../components/ui/avatar";
 
 type Priority = "Urgent" | "Medium" | "Normal" | "Low";
 type Category = "Engineering" | "Design";
@@ -158,8 +164,14 @@ export default function TeamWorkloadPage() {
 
   return (
     <div className="h-full w-full flex flex-col bg-primary-50">
-      <div className="border-b border-primary-200 px-3 h-[58px] flex items-center justify-between gap-2">
-        <h3 className="text-base text-primary-600 font-medium">
+      <div
+        data-testid="page-header"
+        className="border-b border-primary-200 px-3 h-[58px] flex items-center justify-between gap-2"
+      >
+        <h3
+          data-testid="page-title"
+          className="text-base text-primary-600 font-medium"
+        >
           Team Workload
         </h3>
         <Button size="sm" variant="outline">
@@ -172,20 +184,17 @@ export default function TeamWorkloadPage() {
         {tabs.map(({ id, label, icon: Icon }) => {
           const active = id === tab;
           return (
-            <button
+            <Button
+              variant="link"
               key={id}
-              type="button"
+              data-testid={`team-tab-${id}`}
+              data-active={active ? "true" : undefined}
               onClick={() => setTab(id)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 pt-3 pb-2 text-xs border-b-2 -mb-px transition-colors",
-                active
-                  ? "border-secondary-400 text-secondary-400"
-                  : "border-transparent text-primary-400 hover:text-primary-600",
-              )}
+              className={cn("pt-3 pb-2 text-xs")}
             >
               <Icon className="size-3" />
               {label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -213,7 +222,9 @@ function Placeholder({ label }: { label: string }) {
 function ListView() {
   const [filter, setFilter] = useState<Filter>("All");
   const [rankBy, setRankBy] = useState<RankBy>("Priority");
-  const [openCategories, setOpenCategories] = useState<Record<Category, boolean>>({
+  const [openCategories, setOpenCategories] = useState<
+    Record<Category, boolean>
+  >({
     Engineering: true,
     Design: true,
   });
@@ -228,43 +239,39 @@ function ListView() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div data-testid="team-list-view" className="flex flex-col gap-3">
       <div className="flex items-center justify-end gap-4">
         <div className="flex items-center gap-2">
-          <p className="text-xs text-primary-400">Rank by:</p>
-          <Menu.Root>
-            <Menu.Trigger
-              render={
-                <Button size="sm" variant="outline">
-                  {rankBy}
-                  <ChevronDown />
-                </Button>
-              }
-            />
-            <Menu.Portal>
-              <Menu.Positioner sideOffset={4} align="end">
-                <Menu.Popup className="min-w-[140px] rounded-lg border border-primary-200 bg-white p-1 text-xs text-primary-500 shadow-md outline-none">
-                  <Menu.RadioGroup
-                    value={rankBy}
-                    onValueChange={(v) => setRankBy(v as RankBy)}
+          <p
+            data-testid="muted-text-sample"
+            className="text-xs text-primary-400"
+          >
+            Rank by:
+          </p>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button size="sm" variant="outline">
+                {rankBy}
+                <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="min-w-[140px] rounded-lg border border-primary-200 p-1! shadow-md outline-none">
+              <DropdownMenuRadioGroup
+                value={rankBy}
+                onValueChange={(v) => setRankBy(v as RankBy)}
+              >
+                {rankOptions.map((opt) => (
+                  <DropdownMenuRadioItem
+                    className="text-xs text-primary-500 px-2 py-1.5 rounded"
+                    key={opt}
+                    value={opt}
                   >
-                    {rankOptions.map((opt) => (
-                      <Menu.RadioItem
-                        key={opt}
-                        value={opt}
-                        className="flex cursor-default items-center justify-between gap-2 rounded px-2 py-1.5 outline-none data-highlighted:bg-primary-100"
-                      >
-                        {opt}
-                        <Menu.RadioItemIndicator>
-                          <Check className="size-3" />
-                        </Menu.RadioItemIndicator>
-                      </Menu.RadioItem>
-                    ))}
-                  </Menu.RadioGroup>
-                </Menu.Popup>
-              </Menu.Positioner>
-            </Menu.Portal>
-          </Menu.Root>
+                    {opt}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="flex items-center gap-2">
           {filterOptions.map((opt) => {
@@ -293,10 +300,11 @@ function ListView() {
         const groups: Status[] = ["Approved", "In Progress", "Not Started"];
         return (
           <div key={category} className="flex flex-col gap-3">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              data-active={open}
               onClick={() => toggleCategory(category)}
-              className="flex items-center gap-3 self-start"
+              className="gap-3 self-start p-0 h-fit border-0 hover:bg-transparent"
             >
               <span className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-primary-500">
                 {open ? (
@@ -305,10 +313,13 @@ function ListView() {
                   <ChevronDown className="size-3" />
                 )}
               </span>
-              <span className="text-xs font-medium uppercase text-primary-600">
+              <span
+                data-testid="eyebrow-label"
+                className="text-xs font-medium uppercase text-primary-600"
+              >
                 {category}
               </span>
-            </button>
+            </Button>
 
             {open && (
               <div className="flex flex-col gap-3">
@@ -355,12 +366,14 @@ function StatusGroup({
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-[2px_4px_20px_rgba(31,53,51,0.04)]">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
         onClick={() => setOpen((o) => !o)}
+        data-active={open}
         className={cn(
-          "flex items-center gap-2 self-start rounded-full px-2 py-1 transition-colors",
-          open && "bg-secondary-50 pl-1.5",
+          "gap-2 self-start rounded-full px-2 py-1 h-fit border-0",
+          open &&
+            "bg-secondary-50 pl-1.5 data-[active=true]:hover:bg-secondary-50",
         )}
       >
         {open ? (
@@ -371,7 +384,7 @@ function StatusGroup({
         <span className="text-xs font-medium uppercase text-secondary-400">
           {status} ({tasks.length})
         </span>
-      </button>
+      </Button>
 
       {open && tasks.length > 0 && (
         <div className="mt-2 flex flex-col">
@@ -392,15 +405,16 @@ function StatusGroup({
               <p className="w-[300px] text-sm text-primary-500">{task.name}</p>
               <div className="flex w-[100px] items-center justify-center">
                 {task.assignees.map((src, i) => (
-                  <img
+                  <Avatar
                     key={src}
-                    src={src}
-                    alt=""
+                    data-testid="task-assignee-avatar"
                     className={cn(
-                      "size-5 rounded-full border-[3px] border-primary-50 object-cover",
+                      "size-5 border-[3px] border-primary-50",
                       i < task.assignees.length - 1 && "-mr-1",
                     )}
-                  />
+                  >
+                    <AvatarImage src={src} alt="User profile pic" />
+                  </Avatar>
                 ))}
               </div>
               <div className="flex w-[100px] justify-center">
