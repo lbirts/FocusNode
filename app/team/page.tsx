@@ -249,12 +249,14 @@ function ListView() {
             Rank by:
           </p>
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button size="sm" variant="outline">
-                {rankBy}
-                <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              render={
+                <Button size="sm" variant="outline">
+                  {rankBy}
+                  <ChevronDown />
+                </Button>
+              }
+            />
             <DropdownMenuContent className="min-w-[140px] rounded-lg border border-primary-200 p-1! shadow-md outline-none">
               <DropdownMenuRadioGroup
                 value={rankBy}

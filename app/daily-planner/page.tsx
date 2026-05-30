@@ -196,12 +196,14 @@ export default function DailyPlannerPage() {
               <div className="flex items-center gap-2">
                 <p className="text-xs text-primary-400">Rank by:</p>
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <Button size="sm" variant="outline">
-                      {rankBy}
-                      <ChevronDown />
-                    </Button>
-                  </DropdownMenuTrigger>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button size="sm" variant="outline">
+                        {rankBy}
+                        <ChevronDown />
+                      </Button>
+                    }
+                  />
                   <DropdownMenuContent className="min-w-[140px] rounded-lg border border-primary-200 p-1! shadow-md outline-none">
                     <DropdownMenuRadioGroup
                       value={rankBy}
@@ -290,14 +292,14 @@ export default function DailyPlannerPage() {
                 </div>
               </div>
             ))}
-            <button
-              type="button"
+            <Button
+              size="sm"
               onClick={addTask}
-              className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border border-dashed border-primary-300 text-xs text-primary-400 hover:bg-primary-100/50"
+              className="w-full rounded-lg border-dashed border-primary-300 text-xs bg-transparent"
             >
               <Plus className="size-4" />
               Add task to today
-            </button>
+            </Button>
           </div>
         </div>
 
