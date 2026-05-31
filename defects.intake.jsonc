@@ -1,12 +1,10 @@
-// One entry per defect. Several entries point at the same branch
-// (`defects/v1`, `defects/v2`, `defects/v3`) instead of one branch per defect.
 {
   "defects": [
     // ─────────────────────────────────────────────────────────────────────────
     // BRANCH: defects/v1  (concentrated on the Kanban page)
     // ─────────────────────────────────────────────────────────────────────────
     {
-      "branch": "defects/v1",
+      "branch": "defect/d1-swimlane-gap",
       "id": "d1",
       "category": "spacing-alignment",
       "tier": "high",
@@ -18,7 +16,7 @@
       ],
     },
     {
-      "branch": "defects/v1",
+      "branch": "defect/d2-urgent-badge-color",
       "id": "d2",
       "category": "color",
       "tier": "high",
@@ -35,7 +33,7 @@
       ],
     },
     {
-      "branch": "defects/v1",
+      "branch": "defect/d3-kanban-header-direction",
       "id": "d3",
       "category": "layout",
       "tier": "high",
@@ -47,7 +45,7 @@
       ],
     },
     {
-      "branch": "defects/v1",
+      "branch": "defect/d4-swimlane-align-items",
       "id": "d4",
       "category": "layout",
       "tier": "mid",
@@ -59,7 +57,7 @@
       ],
     },
     {
-      "branch": "defects/v1",
+      "branch": "defect/d5-card-title-clip",
       "id": "d5",
       "category": "overflow-clipping",
       "tier": "mid",
@@ -79,7 +77,7 @@
     // BRANCH: defects/v2  (spread across all four pages)
     // ─────────────────────────────────────────────────────────────────────────
     {
-      "branch": "defects/v2",
+      "branch": "defect/d6-nav-active-color",
       "id": "d6",
       "category": "color",
       "tier": "high",
@@ -101,7 +99,7 @@
       ],
     },
     {
-      "branch": "defects/v2",
+      "branch": "defect/d7-nav-wrong-icons",
       "id": "d7",
       "category": "iconography",
       "tier": "mid",
@@ -122,7 +120,7 @@
       ],
     },
     {
-      "branch": "defects/v2",
+      "branch": "defect/d8-focus-timer-presets-gap",
       "id": "d8",
       "category": "spacing-alignment",
       "tier": "high",
@@ -134,7 +132,7 @@
       ],
     },
     {
-      "branch": "defects/v2",
+      "branch": "defect/d9-stats-grid-and-clip",
       "id": "d9",
       "category": "layout",
       "tier": "high",
@@ -156,7 +154,7 @@
       ],
     },
     {
-      "branch": "defects/v2",
+      "branch": "defect/d10-avatar-oval",
       "id": "d10",
       "category": "iconography",
       "tier": "high",
@@ -173,7 +171,7 @@
       ],
     },
     {
-      "branch": "defects/v2",
+      "branch": "defect/d11-team-title-italic-light",
       "id": "d11",
       "category": "typography",
       "tier": "mid",
@@ -192,7 +190,7 @@
     // BRANCH: defects/v3  (hard defects)
     // ─────────────────────────────────────────────────────────────────────────
     {
-      "branch": "defects/v3",
+      "branch": "defect/d12-primary-400-token",
       "id": "d12",
       "category": "color",
       "tier": "low",
@@ -215,7 +213,7 @@
       ],
     },
     {
-      "branch": "defects/v3",
+      "branch": "defect/d13-page-title-font-fallback",
       "id": "d13",
       "category": "typography",
       "tier": "low",
@@ -233,7 +231,7 @@
       ],
     },
     {
-      "branch": "defects/v3",
+      "branch": "defect/d14-uppercase-tracking",
       "id": "d14",
       "category": "typography",
       "tier": "low",
@@ -254,7 +252,7 @@
       ],
     },
     {
-      "branch": "defects/v3",
+      "branch": "defect/d15-team-default-tab",
       "id": "d15",
       "category": "layout",
       "tier": "high",
@@ -273,7 +271,7 @@
       ],
     },
     {
-      "branch": "defects/v3",
+      "branch": "defect/d16-daily-planner-header-padding",
       "id": "d16",
       "category": "spacing-alignment",
       "tier": "low",
