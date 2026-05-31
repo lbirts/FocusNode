@@ -161,11 +161,8 @@
       // Every assignee avatar carries this testid; the oval-stretch defect
       // affects all of them, so the check must pass on every match.
       "selector": "[data-testid=\"task-assignee-avatar\"]",
-      "whatsWrong": "assignee avatar width was widened from size-5 to w-9 (keeping h-5), and object-fit: cover was dropped, so portraits stretch horizontally to fill an oval instead of fitting in a circle",
-      "checks": [
-        { "type": "computed-style", "target": "width" },
-        { "type": "computed-style", "target": "object-fit" },
-      ],
+      "whatsWrong": "assignee avatar width was widened from size-5 to w-9 (keeping h-5), so portraits stretch horizontally to fill an oval instead of fitting in a circle",
+      "checks": [{ "type": "computed-style", "target": "width" }],
       "where": [
         { "screen": "team", "state": "default", "viewport": "desktop" },
       ],
