@@ -46,7 +46,7 @@ export default function SideNav() {
       <div className="px-4 py-3 border-b border-primary-200 flex items-center gap-2">
         <Avatar>
           <AvatarImage
-            src="/avatars/Copy of 069-05_img1.jpg"
+            src="/avatars/avatar-1.jpg"
             alt="User profile pic"
           />
         </Avatar>

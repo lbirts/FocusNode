@@ -1,8 +1,9 @@
 import Header from "@/components/Header";
 import SideNav from "@/components/SideNav";
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { Suspense } from "react";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 
 function SideNavFallback() {
@@ -10,16 +11,6 @@ function SideNavFallback() {
     <aside className="flex w-[220px] shrink-0 flex-col self-stretch border-r border-primary-200 bg-primary-50" />
   );
 }
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta-sans",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "FocusNode",
@@ -32,10 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${plusJakartaSans.variable} antialiased`}
-    >
+    <html lang="en" className="antialiased">
       <body className="flex h-dvh flex-col overflow-hidden">
         <div className="flex min-h-0 flex-1 flex-col bg-primary-100">
           <Header />

@@ -31,7 +31,7 @@ const priorityStyles: Record<Priority, string> = {
   Low: "bg-primary-100 text-primary-400",
 };
 
-const newCardAvatar = "/avatars/Copy of 069-05_img1.jpg";
+const newCardAvatar = "/avatars/avatar-1.jpg";
 
 function totals(board: Board) {
   let tasks = 0;
@@ -183,7 +183,7 @@ function KanbanBoard() {
                   )}
                 >
                   <AvatarImage
-                    src={`/avatars/Copy of 069-05_img${i + 1}.jpg`}
+                    src={`/avatars/avatar-${i + 1}.jpg`}
                     alt="User profile pic"
                   />
                 </Avatar>

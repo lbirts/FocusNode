@@ -30,9 +30,9 @@ export type Board = {
 };
 
 const avatars = [
-  "/avatars/Copy of 069-05_img1.jpg",
-  "/avatars/Copy of 069-05_img2.jpg",
-  "/avatars/Copy of 069-05_img3.jpg",
+  "/avatars/avatar-1.jpg",
+  "/avatars/avatar-2.jpg",
+  "/avatars/avatar-3.jpg",
 ];
 
 export const boards: Board[] = [
