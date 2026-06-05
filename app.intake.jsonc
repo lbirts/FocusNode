@@ -16,13 +16,49 @@
     {
       "name": "kanban",
       "url": "/",
-      "states": [{ "name": "default", "setup": [] }],
+      "states": [
+        { "name": "default", "setup": [] },
+        {
+          "name": "add-card-col2",
+          "setup": [
+            {
+              "click": "[data-testid=\"kanban-column-1\"] [data-testid=\"add-card\"]",
+            },
+          ],
+        },
+      ],
       "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
     },
     {
       "name": "focus-timer",
       "url": "/focus-timer",
-      "states": [{ "name": "default", "setup": [] }],
+      "states": [
+        { "name": "default", "setup": [] },
+        {
+          "name": "short-break",
+          "setup": [
+            { "click": "[data-testid=\"timer-preset-short\"]" },
+            { "waitForSelector": "[data-testid=\"timer-countdown\"]" },
+          ],
+        },
+        {
+          "name": "running",
+          "setup": [
+            { "click": "[data-testid=\"timer-preset-short\"]" },
+            { "click": "[data-testid=\"timer-play\"]" },
+            { "waitMs": 15000 },
+          ],
+        },
+        {
+          "name": "paused",
+          "setup": [
+            { "click": "[data-testid=\"timer-play\"]" },
+            { "waitMs": 2000 },
+            { "click": "[data-testid=\"timer-play\"]" },
+            { "waitMs": 4000 },
+          ],
+        },
+      ],
       "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
     },
     {

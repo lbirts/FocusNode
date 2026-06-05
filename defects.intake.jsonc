@@ -1,211 +1,96 @@
 {
   "defects": [
+    // CLUSTER 1 — Daily Planner
     {
-      "branch": "defect/d1-swimlane-gap",
-      "id": "d1",
+      "branch": "defect/cluster-1",
+      "id": "c1-btn-height",
       "category": "spacing-alignment",
-      "tier": "high",
-      "selector": "[data-testid=\"swimlane-columns\"]",
-      "whatsWrong": "swimlane columns row has no gap",
-      "checks": [{ "type": "computed-style", "target": "gap" }],
+      "tier": "mid",
+      "selector": "[data-testid=\"pull-from-boards\"]",
+      "whatsWrong": "Button cva `sm` size is h-9 (36px) instead of h-8 (32px); every small button is 4px too tall. Cause is in the primitive, not the call sites. Pull-from-boards is outline (no compoundVariant bg) so it isolates the height.",
+      "checks": [{ "type": "computed-style", "target": "height" }],
       "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
       ],
     },
     {
-      "branch": "defect/d2-urgent-badge-color",
-      "id": "d2",
+      "branch": "defect/cluster-1",
+      "id": "c1-card-pad",
+      "category": "spacing-alignment",
+      "tier": "low",
+      "selector": "[data-testid=\"planner-task\"]",
+      "whatsWrong": "Conservation split on the task row: outer p-3->p-2 (12->8px) and inner card p-3->p-4 (12->16px), sum constant. The title text stays put, only the inner bordered box shifts; fixing either alone moves the text. padding-left reads 8px vs golden 12px.",
+      "checks": [{ "type": "computed-style", "target": "padding-left" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster-1",
+      "id": "c1-stat",
+      "category": "typography",
+      "tier": "low",
+      "selector": "[data-testid=\"stat-value\"]",
+      "whatsWrong": "Stat sub-component: number text-3xl->text-2xl (30->24px) plus a tile pad-swap pt-2 pb-3->pt-3 pb-2 (vertical sum constant, graded by the diff). All four tiles change; call sites are correct, fix is in the Stat primitive. font-size reads 24px vs golden 30px.",
+      "checks": [{ "type": "computed-style", "target": "font-size" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster-1",
+      "id": "c1-separator",
       "category": "color",
-      "tier": "high",
-      // Every Urgent badge across all expanded swimlanes carries this testid.
-      // The defect affects all of them, so the check must pass on every match.
-      "selector": "[data-testid=\"priority-badge-urgent\"]",
-      "whatsWrong": "Urgent badge uses off-palette hard-coded #ffcc00 / #000 instead of the bg-red-light / text-red tokens",
+      "tier": "low",
+      "selector": "[data-testid=\"header-divider\"]",
+      "whatsWrong": "Separator primitive: bg-border->bg-primary-300 and (vertical) w-px->w-0.5; header dividers are darker + thicker. Symptom in the page, fix in ui/separator.tsx. Width reads 2px vs golden 1px.",
       "checks": [
         { "type": "computed-style", "target": "background-color" },
-        { "type": "computed-style", "target": "color" },
+        { "type": "computed-style", "target": "width" },
       ],
       "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d3-kanban-header-direction",
-      "id": "d3",
-      "category": "layout",
-      "tier": "high",
-      "selector": "[data-testid=\"page-header\"]",
-      "whatsWrong": "Kanban page header has flex-direction: column instead of row, stacking the title cluster and the action buttons vertically",
-      "checks": [{ "type": "computed-style", "target": "flex-direction" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d4-swimlane-align-items",
-      "id": "d4",
-      "category": "layout",
-      "tier": "mid",
-      "selector": "[data-testid=\"swimlane-columns\"]",
-      "whatsWrong": "swimlane columns wrapper has align-items: flex-start, so columns hug their content height instead of stretching to match siblings (golden uses default stretch)",
-      "checks": [{ "type": "computed-style", "target": "align-items" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d5-card-title-clip",
-      "id": "d5",
-      "category": "overflow-clipping",
-      "tier": "mid",
-      // The clipping defect applies to every card title on the board; the check must pass on every match.
-      "selector": "[data-testid=\"card-title\"]",
-      "whatsWrong": "card title has whitespace: nowrap and overflow: hidden, so long titles get hard-clipped mid-word",
-      "checks": [
-        { "type": "computed-style", "target": "overflow" },
-        { "type": "computed-style", "target": "white-space" },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d6-nav-active-color",
-      "id": "d6",
-      "category": "color",
-      "tier": "high",
-      "selector": "[data-testid=\"nav-link\"][data-active=\"true\"]",
-      "whatsWrong": "active nav button uses hard-coded off-palette bg-[#e0e0ff] with text-[#1a1a4d] instead of the bg-brand / text-primary-50 tokens delivered by the orange Button variant",
-      "checks": [
-        { "type": "computed-style", "target": "background-color" },
-        { "type": "computed-style", "target": "color" },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
         {
           "screen": "daily-planner",
           "state": "default",
           "viewport": "desktop",
         },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
       ],
     },
     {
-      "branch": "defect/d7-nav-wrong-icons",
-      "id": "d7",
-      "category": "iconography",
-      "tier": "mid",
-      "selector": "[data-testid^=\"nav-icon-\"]",
-      "whatsWrong": "three of the four left-nav icons render the wrong lucide glyph: Kanban Boards shows lucide-calendar (should be lucide-layout-grid), Focus Timer shows lucide-hourglass (should be lucide-timer), Daily Planner shows lucide-layout-grid (should be lucide-calendar); Team Workload's lucide-users is correct",
-      // Lucide-react sets a semantic class on each rendered. On the broken branch the class names don't match the labels.
-      // Custom `attribute` check on the svg's `class` catches each wrong icon directly.
-      "checks": [{ "type": "attribute", "target": "class" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d8-focus-timer-presets-gap",
-      "id": "d8",
+      "branch": "defect/cluster-1",
+      "id": "c1-circle",
       "category": "spacing-alignment",
-      "tier": "high",
-      "selector": "[data-testid=\"focus-timer-presets\"]",
-      "whatsWrong": "the minute preset button row gap is 0",
-      "checks": [{ "type": "computed-style", "target": "gap" }],
-      "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d9-stats-grid-and-clip",
-      "id": "d9",
-      "category": "layout",
-      "tier": "high",
-      "selector": "[data-testid=\"today-stats-grid\"]",
-      "whatsWrong": "`Today's stats` grid is grid-template-columns: 1fr (one column) instead of two in a 2x2 grid; the bottom tiles also get clipped by the fixed-height sidebar with no scroll affordance",
-      "checks": [
-        { "type": "computed-style", "target": "grid-template-columns" },
-        {
-          "type": "bounding-box",
-          "target": "all four stat tiles must be visible inside the sidebar and must not be clipped by their container",
-        },
-      ],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/d10-avatar-oval",
-      "id": "d10",
-      "category": "iconography",
-      "tier": "high",
-      // Every assignee avatar carries this testid; the oval-stretch defect
-      // affects all of them, so the check must pass on every match.
-      "selector": "[data-testid=\"task-assignee-avatar\"]",
-      "whatsWrong": "assignee avatar width was widened from size-5 to w-9 (keeping h-5), so portraits stretch horizontally to fill an oval instead of fitting in a circle",
+      "tier": "low",
+      "selector": "[data-testid=\"planner-task-index\"]",
+      "whatsWrong": "Horizontal conservation: task number circle size-5->size-6 (20->24px) and row gap-3->gap-2 (12->8px), overlapping c1-card-pad's row padding so the inner text stays aligned and any partial fix shifts it. width reads 24px vs golden 20px.",
       "checks": [{ "type": "computed-style", "target": "width" }],
       "where": [
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d11-team-title-italic-light",
-      "id": "d11",
-      "category": "typography",
-      "tier": "mid",
-      "selector": "[data-testid=\"page-title\"]",
-      "whatsWrong": "Team Workload header title is italic and font-light instead of font-medium, mismatching the matching headers on the other three pages",
-      "checks": [
-        { "type": "computed-style", "target": "font-style" },
-        { "type": "computed-style", "target": "font-weight" },
-      ],
-      "where": [
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d12-primary-400-token",
-      "id": "d12",
-      "category": "color",
-      "tier": "low",
-      // The same `muted-text-sample` testid is placed on one stable
-      // text-primary-400 element on each of the four pages
-      // Checking color on all four confirms the token shift is uniform
-      // and the symptom shows everywhere expected.
-      "selector": "[data-testid=\"muted-text-sample\"]",
-      "whatsWrong": "the --color-primary-400 design token shifted from #8f938a to #a8aba2 (a few percent lighter), so every text-primary-400 element across the app looks slightly washed out",
-      "checks": [{ "type": "computed-style", "target": "color" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
         {
           "screen": "daily-planner",
           "state": "default",
           "viewport": "desktop",
         },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
       ],
     },
     {
-      "branch": "defect/d13-page-title-font-fallback",
-      "id": "d13",
+      "branch": "defect/cluster-1",
+      "id": "c1-font",
       "category": "typography",
-      "tier": "low",
-      // Daily Planner and Team h3s share the same page-title testid.
+      "tier": "mid",
       "selector": "[data-testid=\"page-title\"]",
-      "whatsWrong": "page header h3 has an inline style overriding font-family to Inter; the rest of the app uses Plus Jakarta Sans for headings",
+      "whatsWrong": "Font tokens drop the \"Variable\" suffix (\"Plus Jakarta Sans\"/\"Inter\"); no @font-face matches, so the app falls back to system sans. The computed font-family string itself differs (\"Plus Jakarta Sans\" vs golden \"Plus Jakarta Sans Variable\").",
       "checks": [{ "type": "computed-style", "target": "font-family" }],
       "where": [
         {
@@ -213,67 +98,274 @@
           "state": "default",
           "viewport": "desktop",
         },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
       ],
     },
     {
-      "branch": "defect/d14-uppercase-tracking",
-      "id": "d14",
+      "branch": "defect/cluster-1",
+      "id": "c1-autorank",
+      "category": "color",
+      "tier": "mid",
+      "selector": "[data-testid=\"auto-rank\"]",
+      "whatsWrong": "Relocate-and-corrupt: Auto-rank's bg-secondary-400 is removed from the call site and re-supplied (wrong, bg-secondary-300) via an added cva compoundVariant. Deleting the compoundVariant leaves the button with no bg. background-color is secondary-300 vs golden secondary-400.",
+      "checks": [{ "type": "computed-style", "target": "background-color" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+
+    // CLUSTER 2 — Focus Timer
+    {
+      "branch": "defect/cluster-2",
+      "id": "c2-tabnum",
       "category": "typography",
       "tier": "low",
-      // The same `eyebrow-label` testid is placed on one representative
-      // uppercase element on each of the four pages.
-      "selector": "[data-testid=\"eyebrow-label\"]",
-      "whatsWrong": "every .uppercase element has letter-spacing: -0.04em (negative tracking), making all uppercase eyebrows on every page look cramped",
-      "checks": [{ "type": "computed-style", "target": "letter-spacing" }],
+      "selector": "[data-testid=\"timer-countdown\"]",
+      "whatsWrong": "Countdown lost tabular-nums; pixel-identical at rest, but computed font-variant-numeric is normal (golden tabular-nums) and digits jitter while running.",
+      "checks": [
+        { "type": "computed-style", "target": "font-variant-numeric" },
+      ],
+      "where": [
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-2",
+      "id": "c2-transition",
+      "category": "interactive-states",
+      "tier": "low",
+      "selector": "[data-testid=\"timer-play\"]",
+      "whatsWrong": "Play button has transition-none added; no hover/press motion. Invisible at rest. transition-property is none vs golden all (Button base is transition-all).",
+      "checks": [{ "type": "computed-style", "target": "transition-property" }],
+      "where": [
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-2",
+      "id": "c2-blend",
+      "category": "color",
+      "tier": "mid",
+      "selector": "[data-testid=\"timer-preset-focus\"]",
+      "whatsWrong": "Preset cards have mix-blend-multiply; rendered color is a composite of card x background and maps to no token. mix-blend-mode is multiply vs golden normal.",
+      "checks": [{ "type": "computed-style", "target": "mix-blend-mode" }],
+      "where": [
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-2",
+      "id": "c2-pad",
+      "category": "typography",
+      "tier": "high",
+      "selector": "[data-testid=\"timer-countdown\"]",
+      "whatsWrong": "formatTime extracts a `pad` helper that uses padEnd not padStart; single-digit fields right-pad, so Short Break shows 50:00 instead of 05:00. Deleting `pad` breaks formatTime. textContent is \"50:00\" vs golden \"05:00\".",
+      "checks": [{ "type": "text-content" }],
+      "where": [
+        {
+          "screen": "focus-timer",
+          "state": "short-break",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster-2",
+      "id": "c2-dial",
+      "category": "iconography",
+      "tier": "mid",
+      "selector": "[data-testid=\"dial-tick-active\"]",
+      "whatsWrong": "activeTicks uses Math.ceil instead of round; one extra dial tick is lit. In the running state (Short Break ~15s, progress ~1.2 ticks) golden lights 1 tick, defect lights 2. dom-count is 2 vs golden 1.",
+      "checks": [{ "type": "dom-count" }],
+      "where": [
+        { "screen": "focus-timer", "state": "running", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-2",
+      "id": "c2-ticklen",
+      "category": "iconography",
+      "tier": "low",
+      "selector": "[data-testid=\"dial-tick-active\"]",
+      "whatsWrong": "Active dial-tick length relocated into ACTIVE_TICK_Y2 = 33 (golden 36); active ticks are 3px short. Deleting the constant throws. The active line's y2 attribute is 33 vs golden 36 (running state has lit ticks in both).",
+      "checks": [{ "type": "attribute", "target": "y2" }],
+      "where": [
+        { "screen": "focus-timer", "state": "running", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-2",
+      "id": "c2-pause",
+      "category": "interactive-states",
+      "tier": "high",
+      "selector": "[data-testid=\"timer-countdown\"]",
+      "whatsWrong": "setInterval is never cleared (cleanup dropped); pausing no longer stops the countdown. In the paused state golden freezes at the pause value (~24:58) while the defect keeps counting (~24:54). textContent differs.",
+      "checks": [{ "type": "text-content" }],
+      "where": [
+        { "screen": "focus-timer", "state": "paused", "viewport": "desktop" },
+      ],
+    },
+
+    // CLUSTER 3 — Kanban
+    {
+      "branch": "defect/cluster-3",
+      "id": "c3-badge-blend",
+      "category": "color",
+      "tier": "mid",
+      "selector": "[data-testid^=\"priority-badge\"]",
+      "whatsWrong": "Priority badges have mix-blend-multiply; the color is a composite and maps to no token. mix-blend-mode is multiply vs golden normal.",
+      "checks": [{ "type": "computed-style", "target": "mix-blend-mode" }],
       "where": [
         { "screen": "kanban", "state": "default", "viewport": "desktop" },
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
       ],
     },
     {
-      "branch": "defect/d15-team-default-tab",
-      "id": "d15",
-      "category": "layout",
-      "tier": "high",
-      // The defect is observable as: on page load, the list view is missing and
-      // the board placeholder is shown instead. The bounding-box check directly catches that user-visible symptom.
-      "selector": "[data-testid=\"team-list-view\"]",
-      "whatsWrong": "Team page initializes tab state to 'board' instead of 'list', so it lands on the 'Board view coming soon' placeholder by default instead of the actual task list",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "the [data-testid=\"team-list-view\"] element must be present and visible on page load",
-        },
-      ],
-      "where": [
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d16-daily-planner-header-padding",
-      "id": "d16",
-      "category": "spacing-alignment",
+      "branch": "defect/cluster-3",
+      "id": "c3-avatar-blend",
+      "category": "color",
       "tier": "low",
-      "selector": "[data-testid=\"page-header\"]",
-      "whatsWrong": "Daily Planner header uses pl-6 pr-1 instead of the px-3 used on every other page header, so the title sits noticeably further from the sidebar and the Auto-rank button hugs the right edge",
-      "checks": [
-        { "type": "computed-style", "target": "padding-left" },
-        { "type": "computed-style", "target": "padding-right" },
-      ],
+      "selector": "[data-testid=\"member-avatar\"]",
+      "whatsWrong": "Header member avatars have mix-blend-multiply; the photos composite with the background. Can't be color-sampled, no token to grep. mix-blend-mode is multiply vs golden normal.",
+      "checks": [{ "type": "computed-style", "target": "mix-blend-mode" }],
       "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-3",
+      "id": "c3-card-border",
+      "category": "color",
+      "tier": "mid",
+      "selector": "[data-testid=\"kanban-card\"]",
+      "whatsWrong": "Relocate-and-corrupt: the card's `border border-primary-100` is removed and re-created (wrong color, primary-200) in a `before:` pseudo-element. Deleting the pseudo removes the border entirely. The card's own border-top-width is 0px vs golden 1px.",
+      "checks": [{ "type": "computed-style", "target": "border-top-width" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-3",
+      "id": "c3-col-stripe",
+      "category": "color",
+      "tier": "low",
+      "selector": "[data-testid=\"kanban-column-1\"]",
+      "whatsWrong": "Columns have an `even:` (:nth-child) bg stripe; alternating columns are tinted with no per-element class. kanban-column-1 (2nd, even) background-color is primary-50 vs golden white.",
+      "checks": [{ "type": "computed-style", "target": "background-color" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-3",
+      "id": "c3-first-letter",
+      "category": "typography",
+      "tier": "low",
+      "selector": "[data-testid=\"eyebrow-label\"]",
+      "whatsWrong": "Swimlane title has `first-letter:text-primary-400`; the first letter is recolored via a ::first-letter pseudo. ::first-letter color is primary-400 vs golden primary-600.",
+      "checks": [
         {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
+          "type": "computed-style",
+          "target": "color",
+          "pseudo": "::first-letter",
         },
       ],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-3",
+      "id": "c3-hairline",
+      "category": "overflow-clipping",
+      "tier": "low",
+      "selector": "[data-testid=\"kanban-column-0\"]",
+      "whatsWrong": "Columns have an `after:` phantom 1px hairline at the bottom edge from a pseudo-element. ::after content is \"\" (generated box) vs golden none.",
+      "checks": [
+        { "type": "computed-style", "target": "content", "pseudo": "::after" },
+      ],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-3",
+      "id": "c3-first-line",
+      "category": "typography",
+      "tier": "low",
+      "selector": "[data-testid=\"card-title\"]",
+      "whatsWrong": "Card titles have `first-line:tracking-[0.06em]`; first-line letter-spacing is off via a ::first-line pseudo. ::first-line letter-spacing is ~0.84px vs golden normal.",
+      "checks": [
+        {
+          "type": "computed-style",
+          "target": "letter-spacing",
+          "pseudo": "::first-line",
+        },
+      ],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-3",
+      "id": "c3-add-card",
+      "category": "interactive-states",
+      "tier": "high",
+      "selector": "[data-testid=\"kanban-column-1\"] [data-testid=\"card-title\"]",
+      "whatsWrong": "Add-card always targets swimlane.columns[0] instead of the clicked column; new cards land in the first column. After the add-card-col2 state clicks column-1's Add card, golden's column-1 gains a card (count 3) while the defect's stays at 2 (the card went to column-0). dom-count differs.",
+      "checks": [{ "type": "dom-count" }],
+      "where": [
+        { "screen": "kanban", "state": "add-card-col2", "viewport": "desktop" },
+      ],
+    },
+  ],
+
+  // PINNED FAILING CLUSTERS
+  "clusters": [
+    {
+      "id": "daily-planner-entangled",
+      "branch": "defect/cluster-1",
+      "defects": [
+        "c1-btn-height",
+        "c1-card-pad",
+        "c1-stat",
+        "c1-separator",
+        "c1-circle",
+        "c1-font",
+        "c1-autorank",
+      ],
+      "note": "Daily Planner: conservation splits + sub-component bugs (Stat/Separator) + font-fallback + an Auto-rank relocate-and-corrupt. Mutations leave no greppable outlier; partial fixes regress.",
+    },
+    {
+      "id": "focus-timer-temporal",
+      "branch": "defect/cluster-2",
+      "defects": [
+        "c2-tabnum",
+        "c2-transition",
+        "c2-blend",
+        "c2-pad",
+        "c2-dial",
+        "c2-ticklen",
+        "c2-pause",
+      ],
+      "note": "Focus Timer: defects invisible to a static-frame diff (tabular-nums, transition, blend) plus running/paused-only logic bugs (padEnd, dial off-by-one + short ticks, broken pause).",
+    },
+    {
+      "id": "kanban-css-ghosts",
+      "branch": "defect/cluster-3",
+      "defects": [
+        "c3-badge-blend",
+        "c3-avatar-blend",
+        "c3-card-border",
+        "c3-col-stripe",
+        "c3-first-letter",
+        "c3-hairline",
+        "c3-first-line",
+        "c3-add-card",
+      ],
+      "note": "Kanban: causes hidden in machinery the model never greps - mix-blend, ::before/::after/::first-letter/::first-line, :nth-child - plus a relocate-and-corrupt card border and a wrong-column Add-card behavioral bug.",
     },
   ],
 }

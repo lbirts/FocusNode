@@ -155,7 +155,7 @@ export default function DailyPlannerPage() {
           >
             Daily Planner
           </h3>
-          <Separator orientation="vertical" />
+          <Separator orientation="vertical" data-testid="header-divider" />
           <p
             data-testid="muted-text-sample"
             className="text-primary-400 text-xs"
@@ -170,12 +170,17 @@ export default function DailyPlannerPage() {
           <p className="text-primary-400 text-xs">~7h 45m estimated</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline">
+          <Button
+            size="sm"
+            variant="outline"
+            data-testid="pull-from-boards"
+          >
             <LayoutGrid />
             Pull from boards
           </Button>
           <Button
             size="sm"
+            data-testid="auto-rank"
             className="bg-secondary-400 text-white hover:bg-secondary-400/90"
           >
             Auto-rank
@@ -248,9 +253,13 @@ export default function DailyPlannerPage() {
             {visibleTasks.map((task, idx) => (
               <div
                 key={task.id}
+                data-testid="planner-task"
                 className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[2px_4px_40px_10px_rgba(31,53,51,0.04)]"
               >
-                <div className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500">
+                <div
+                  data-testid="planner-task-index"
+                  className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
+                >
                   {idx + 1}
                 </div>
                 <div className="flex-1 min-w-0 rounded-lg border border-primary-100 bg-primary-50 p-3">
@@ -365,6 +374,7 @@ function Stat({
   return (
     <div className="flex flex-col gap-1 rounded-lg bg-primary-100 px-3 pt-2 pb-3">
       <p
+        data-testid="stat-value"
         className={cn(
           "text-3xl font-semibold",
           highlight ? "text-brand" : "text-secondary-400",

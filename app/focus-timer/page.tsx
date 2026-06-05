@@ -38,13 +38,19 @@ const TICK_COUNT = 24;
 function ClockDial({ progress }: { progress: number }) {
   const activeTicks = Math.round(progress * TICK_COUNT);
   return (
-    <svg viewBox="0 0 300 300" className="size-[300px]" aria-hidden>
+    <svg
+      viewBox="0 0 300 300"
+      className="size-[300px]"
+      data-testid="clock-dial"
+      aria-hidden
+    >
       {Array.from({ length: TICK_COUNT }).map((_, i) => {
         const isActive = i < activeTicks;
         const angle = (i / TICK_COUNT) * 360;
         return (
           <line
             key={i}
+            data-testid={`dial-tick-${isActive ? "active" : "inactive"}`}
             x1="150"
             y1="10"
             x2="150"
@@ -163,6 +169,7 @@ export default function FocusTimer() {
               return (
                 <Button
                   key={m}
+                  data-testid={`timer-preset-${m}`}
                   size="lg"
                   onClick={() => selectMode(m)}
                   className={cn(
@@ -183,7 +190,10 @@ export default function FocusTimer() {
             <ClockDial progress={progress} />
             <div className="absolute flex flex-col items-center gap-2">
               <p className="text-xs text-primary-500">{modeLabel}</p>
-              <p className="text-3xl font-semibold text-secondary-400 tabular-nums">
+              <p
+                data-testid="timer-countdown"
+                className="text-3xl font-semibold text-secondary-400 tabular-nums"
+              >
                 {formatTime(secondsLeft)}
               </p>
             </div>
@@ -202,6 +212,7 @@ export default function FocusTimer() {
             <Button
               variant="orange"
               size="icon-lg"
+              data-testid="timer-play"
               className="size-14 rounded-full"
               onClick={() => setIsRunning((r) => !r)}
               aria-label={isRunning ? "Pause" : "Play"}

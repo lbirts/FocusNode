@@ -177,6 +177,7 @@ function KanbanBoard() {
               (_, i) => (
                 <Avatar
                   key={i}
+                  data-testid="member-avatar"
                   className={cn(
                     "size-5 border-[3px] border-primary-50",
                     i < 2 && "-mr-1",
@@ -247,11 +248,12 @@ function KanbanBoard() {
 
               {expanded && swimlane.columns.length > 0 && (
                 <div data-testid="swimlane-columns" className="flex gap-2">
-                  {swimlane.columns.map((column) => (
+                  {swimlane.columns.map((column, colIdx) => (
                     <KanbanColumn
                       key={column.id}
                       column={column}
                       swimlaneId={swimlane.id}
+                      testId={`kanban-column-${colIdx}`}
                       onAddCard={() => addCard(swimlane.id, column.id)}
                       onDropCard={(payload) =>
                         moveCard(
@@ -283,11 +285,13 @@ type DropPayload = {
 function KanbanColumn({
   column,
   swimlaneId,
+  testId,
   onAddCard,
   onDropCard,
 }: {
   column: Column;
   swimlaneId: string;
+  testId: string;
   onAddCard: () => void;
   onDropCard: (payload: DropPayload) => void;
 }) {
@@ -306,6 +310,7 @@ function KanbanColumn({
 
   return (
     <div
+      data-testid={testId}
       onDragOver={(e) => {
         e.preventDefault();
         setIsOver(true);
@@ -345,6 +350,7 @@ function KanbanColumn({
         ))}
         <Button
           size="sm"
+          data-testid="add-card"
           onClick={onAddCard}
           className="w-full rounded-lg border-dashed border-primary-300 text-xs bg-transparent"
         >
@@ -368,6 +374,7 @@ function KanbanCard({
   return (
     <div
       draggable
+      data-testid="kanban-card"
       onDragStart={(e) => {
         const payload: DropPayload = {
           cardId: card.id,
