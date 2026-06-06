@@ -604,9 +604,9 @@
       "branch": "defect/cluster-3",
       "id": "c3-contrast",
       "category": "accessibility",
-      "tier": "mid",
-      "selector": "[data-testid=\"column-count\"]",
-      "whatsWrong": "Column card-count badge text dropped from text-primary-500 to text-primary-300; the number is a near-invisible light grey on the bg-primary-200 chip and fails WCAG AA contrast (golden ~5.3:1 passes, defect ~1.4:1 fails).",
+      "tier": "high",
+      "selector": "[data-testid=\"card-title\"]",
+      "whatsWrong": "Card titles fail WCAG AA contrast (~1.7:1 vs golden ~6.7:1) while card-title's class stays the golden text-primary-500. The card wrapper re-binds --color-primary-500 to primary-300 for its subtree via [--color-primary-500:var(--color-primary-300)], so text-primary-500 resolves to the low-contrast token. Fix is removing the wrapper re-bind, not editing card-title.",
       "checks": [{ "type": "axe-rule", "target": "color-contrast" }],
       "where": [
         { "screen": "kanban", "state": "default", "viewport": "desktop" },
@@ -657,7 +657,7 @@
         "c3-first-line",
         "c3-contrast",
       ],
-      "note": "Kanban: causes hidden in machinery the model never greps - mix-blend, ::before/::after/::first-letter/::first-line, :nth-child - plus a relocate-and-corrupt card border and a faint column-count badge that fails WCAG AA contrast.",
+      "note": "Kanban: causes hidden in machinery the model never greps - mix-blend, ::before/::after/::first-letter/::first-line, :nth-child - plus a relocate-and-corrupt card border and a WCAG AA contrast failure on the card titles whose cause is a subtree-scoped CSS custom-property re-bind on the card wrapper.",
     },
   ],
 }
