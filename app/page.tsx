@@ -325,7 +325,10 @@ function KanbanColumn({
       <div className="flex items-center justify-between border-b border-primary-200 bg-primary-50 px-3 py-2 rounded-t-2xl">
         <div className="flex items-center gap-2">
           <p className="text-xs text-primary-600">{column.title}</p>
-          <span className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500">
+          <span
+            data-testid="column-count"
+            className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
+          >
             {column.cards.length}
           </span>
         </div>

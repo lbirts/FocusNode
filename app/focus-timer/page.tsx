@@ -199,10 +199,14 @@ export default function FocusTimer() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-4">
+          <div
+            data-testid="timer-controls"
+            className="flex items-center justify-center gap-4"
+          >
             <Button
               variant="outline"
               size="icon"
+              data-testid="timer-restart"
               className="size-10 rounded-full border-primary-300"
               onClick={restart}
               aria-label="Restart"
@@ -226,6 +230,7 @@ export default function FocusTimer() {
             <Button
               variant="outline"
               size="icon"
+              data-testid="timer-skip"
               className="size-10 rounded-full border-primary-300"
               onClick={skip}
               aria-label="Skip"
