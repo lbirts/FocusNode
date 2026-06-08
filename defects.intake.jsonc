@@ -612,6 +612,239 @@
         { "screen": "kanban", "state": "default", "viewport": "desktop" },
       ],
     },
+
+    // CLUSTER 4
+    {
+      "branch": "defect/cluster-4",
+      "id": "c4-swimlane-grid",
+      "category": "layout",
+      "tier": "high",
+      "selector": "[data-testid=\"swimlane-columns\"]",
+      "whatsWrong": "The swimlane columns use a CSS grid instead of a flex row.",
+      "checks": [
+        { "type": "computed-style", "target": "display" },
+        { "type": "computed-style", "target": "grid-template-columns" },
+      ],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-4",
+      "id": "c4-task-grid",
+      "category": "layout",
+      "tier": "high",
+      "selector": "[data-testid=\"planner-task\"]",
+      "whatsWrong": "The task row uses a CSS grid instead of a flex row, putting the number circle on the right of the content.",
+      "checks": [
+        { "type": "computed-style", "target": "display" },
+        { "type": "computed-style", "target": "grid-template-columns" },
+      ],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster-4",
+      "id": "c4-controls-grid",
+      "category": "layout",
+      "tier": "high",
+      "selector": "[data-testid=\"timer-controls\"]",
+      "whatsWrong": "The timer control buttons use a CSS grid instead of a flex row, stretching the buttons to equal widths.",
+      "checks": [
+        { "type": "computed-style", "target": "display" },
+        { "type": "computed-style", "target": "grid-template-columns" },
+      ],
+      "where": [
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-4",
+      "id": "c4-card-grid",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"kanban-card\"]",
+      "whatsWrong": "The card uses a CSS grid instead of a vertical flex column.",
+      "checks": [
+        { "type": "computed-style", "target": "display" },
+        { "type": "computed-style", "target": "grid-template-columns" },
+      ],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-4",
+      "id": "c4-stats-flex",
+      "category": "layout",
+      "tier": "high",
+      "selector": "[data-testid=\"today-stats-grid\"]",
+      "whatsWrong": "The Today's stats tiles use flexbox instead of a CSS grid.",
+      "checks": [
+        { "type": "computed-style", "target": "display" },
+        { "type": "computed-style", "target": "grid-template-columns" },
+        {
+          "type": "computed-style",
+          "target": "grid-column-start",
+          "selector": "[data-testid=\"stat-completed\"]",
+        },
+      ],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster-4",
+      "id": "c4-kanban-header-order",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"page-header\"]",
+      "whatsWrong": "The kanban header's title cluster and action cluster are in reversed order.",
+      "checks": [{ "type": "computed-style", "target": "flex-direction" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-4",
+      "id": "c4-planner-header-order",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"page-header\"]",
+      "whatsWrong": "The daily planner header's title cluster and action cluster are in reversed order.",
+      "checks": [{ "type": "computed-style", "target": "flex-direction" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+
+    // CLUSTER 5
+    {
+      "branch": "defect/cluster-5",
+      "id": "c5-tasklist-gap",
+      "category": "spacing-alignment",
+      "tier": "mid",
+      "selector": "[data-testid=\"planner-task-list\"]",
+      "whatsWrong": "The task list spaces its rows with child margins (space-y) instead of a flex gap.",
+      "checks": [
+        { "type": "computed-style", "target": "row-gap" },
+        {
+          "type": "computed-style",
+          "target": "margin-top",
+          "selector": "[data-testid=\"planner-task\"]:nth-child(2)",
+        },
+      ],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster-5",
+      "id": "c5-boards-gap",
+      "category": "spacing-alignment",
+      "tier": "mid",
+      "selector": "[data-testid=\"connected-boards\"]",
+      "whatsWrong": "The connected-boards list spaces its rows with child margins (space-y) instead of a flex gap.",
+      "checks": [{ "type": "computed-style", "target": "row-gap" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster-5",
+      "id": "c5-controls-gap",
+      "category": "spacing-alignment",
+      "tier": "mid",
+      "selector": "[data-testid=\"timer-controls\"]",
+      "whatsWrong": "The timer controls space their buttons with child margins (space-x) instead of a flex gap.",
+      "checks": [
+        { "type": "computed-style", "target": "column-gap" },
+        {
+          "type": "computed-style",
+          "target": "margin-left",
+          "selector": "[data-testid=\"timer-play\"]",
+        },
+      ],
+      "where": [
+        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-5",
+      "id": "c5-team-justify",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"page-header\"]",
+      "whatsWrong": "The team header pushes its right cluster to the edge with an auto margin instead of justify-content space-between.",
+      "checks": [{ "type": "computed-style", "target": "justify-content" }],
+      "where": [
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-5",
+      "id": "c5-footer-justify",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"card-footer\"]",
+      "whatsWrong": "The card footer pushes the avatar to the edge with an auto margin instead of justify-content space-between.",
+      "checks": [{ "type": "computed-style", "target": "justify-content" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-5",
+      "id": "c5-colheader-justify",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"column-header\"]",
+      "whatsWrong": "The column header pushes its icon group to the edge with an auto margin instead of justify-content space-between.",
+      "checks": [{ "type": "computed-style", "target": "justify-content" }],
+      "where": [
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster-5",
+      "id": "c5-taskbody-fill",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"planner-task-body\"]",
+      "whatsWrong": "The task body uses flex-basis 50% instead of flex-1, so it only fills half the row.",
+      "checks": [
+        { "type": "computed-style", "target": "flex-basis" },
+        { "type": "computed-style", "target": "flex-grow" },
+      ],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "default",
+          "viewport": "desktop",
+        },
+      ],
+    },
   ],
 
   // PINNED FAILING CLUSTERS
@@ -658,6 +891,34 @@
         "c3-contrast",
       ],
       "note": "Kanban: causes hidden in machinery the model never greps - mix-blend, ::before/::after/::first-letter/::first-line, :nth-child - plus a relocate-and-corrupt card border and a WCAG AA contrast failure on the card titles whose cause is a subtree-scoped CSS custom-property re-bind on the card wrapper.",
+    },
+    {
+      "id": "layout-engine-ambiguity",
+      "branch": "defect/cluster-4",
+      "defects": [
+        "c4-swimlane-grid",
+        "c4-task-grid",
+        "c4-controls-grid",
+        "c4-card-grid",
+        "c4-stats-flex",
+        "c4-kanban-header-order",
+        "c4-planner-header-order",
+      ],
+      "note": "Mechanism ambiguity: every defect ships a BROKEN decoy layout engine (flex<->grid, or DOM-order vs flex-row-reverse). The pixel-fix that stays in the decoy renders identical to golden but computes a different display / grid-template-columns / flex-direction, so the computed-style pin (no accept = exact golden match) fails. Correct is the source mechanism, not the pixels - a model fixing from screenshots stays in the decoy engine and fails.",
+    },
+    {
+      "id": "spacing-mechanism-ambiguity",
+      "branch": "defect/cluster-5",
+      "defects": [
+        "c5-tasklist-gap",
+        "c5-boards-gap",
+        "c5-controls-gap",
+        "c5-team-justify",
+        "c5-footer-justify",
+        "c5-colheader-justify",
+        "c5-taskbody-fill",
+      ],
+      "note": "Mechanism ambiguity inside one flex layout: the gap is achieved by space-x/y child margins instead of gap; the edge-push by ml-auto instead of justify-between; the fill by basis-* instead of flex-1. Each renders pixel-identical but computes a different row/column-gap / justify-content / flex-basis, so the pin (no accept) fails. Correct is the source mechanism.",
     },
   ],
 }

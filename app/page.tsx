@@ -322,7 +322,10 @@ function KanbanColumn({
         isOver && "ring-2 ring-brand",
       )}
     >
-      <div className="flex items-center justify-between border-b border-primary-200 bg-primary-50 px-3 py-2 rounded-t-2xl">
+      <div
+        data-testid="column-header"
+        className="flex items-center justify-between border-b border-primary-200 bg-primary-50 px-3 py-2 rounded-t-2xl"
+      >
         <div className="flex items-center gap-2">
           <p className="text-xs text-primary-600">{column.title}</p>
           <span
@@ -409,7 +412,7 @@ function KanbanCard({
       <p data-testid="card-title" className="text-sm text-primary-500">
         {card.title}
       </p>
-      <div className="flex items-center justify-between">
+      <div data-testid="card-footer" className="flex items-center justify-between">
         <span className="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] text-primary-400">
           {card.tag}
         </span>

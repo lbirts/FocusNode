@@ -249,7 +249,7 @@ export default function DailyPlannerPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div data-testid="planner-task-list" className="flex flex-col gap-2">
             {visibleTasks.map((task, idx) => (
               <div
                 key={task.id}
@@ -262,7 +262,10 @@ export default function DailyPlannerPage() {
                 >
                   {idx + 1}
                 </div>
-                <div className="flex-1 min-w-0 rounded-lg border border-primary-100 bg-primary-50 p-3">
+                <div
+                  data-testid="planner-task-body"
+                  className="flex-1 min-w-0 rounded-lg border border-primary-100 bg-primary-50 p-3"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <span
@@ -316,7 +319,7 @@ export default function DailyPlannerPage() {
           <h3 className="text-base text-primary-600 font-medium">
             Connected Boards
           </h3>
-          <div className="flex flex-1 flex-col gap-1">
+          <div data-testid="connected-boards" className="flex flex-1 flex-col gap-1">
             {boards.map((board) => (
               <div
                 key={board.name}
@@ -350,10 +353,16 @@ export default function DailyPlannerPage() {
               data-testid="today-stats-grid"
               className="grid grid-cols-2 gap-2"
             >
-              <Stat value={completed} label="Completed" highlight />
-              <Stat value={remaining} label="Remaining" />
-              <Stat value="78%" label="Capacity" />
-              <Stat value="2:35" label="Focus time" />
+              <Stat
+                value={completed}
+                label="Completed"
+                highlight
+                className="col-start-1"
+                testId="stat-completed"
+              />
+              <Stat value={remaining} label="Remaining" className="col-start-2" />
+              <Stat value="78%" label="Capacity" className="col-start-1" />
+              <Stat value="2:35" label="Focus time" className="col-start-2" />
             </div>
           </div>
         </aside>
@@ -366,13 +375,23 @@ function Stat({
   value,
   label,
   highlight,
+  className,
+  testId,
 }: {
   value: number | string;
   label: string;
   highlight?: boolean;
+  className?: string;
+  testId?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-lg bg-primary-100 px-3 pt-2 pb-3">
+    <div
+      data-testid={testId}
+      className={cn(
+        "flex flex-col gap-1 rounded-lg bg-primary-100 px-3 pt-2 pb-3",
+        className,
+      )}
+    >
       <p
         data-testid="stat-value"
         className={cn(
