@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu";
 import {
+  BookUser,
+  Box,
   Calendar,
   ChevronDown,
   ChevronUp,
@@ -18,13 +20,29 @@ import {
   Share2,
   Users,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Avatar, AvatarImage } from "../components/ui/avatar";
+import { Separator } from "../components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../components/ui/tooltip";
 
 type Priority = "Urgent" | "Medium" | "Normal" | "Low";
 type Category = "Engineering" | "Design";
 type Status = "Approved" | "In Progress" | "Not Started";
 type Filter = "All" | "Design" | "Docs" | "Dev";
+
+type User = {
+  src: string;
+  name: string;
+  email: string;
+  status: "Online" | "Offline";
+  isAdmin: boolean;
+  role: string;
+  boardCount: number;
+};
 
 type Task = {
   id: number;
@@ -35,13 +53,37 @@ type Task = {
   due: string;
   dueDate: string; // ISO for sorting
   filter: Exclude<Filter, "All">;
-  assignees: string[];
+  assignees: User[];
 };
 
-const avatars = [
-  "/avatars/avatar-1.jpg",
-  "/avatars/avatar-2.jpg",
-  "/avatars/avatar-3.jpg",
+const users: User[] = [
+  {
+    src: "/avatars/avatar-1.jpg",
+    name: "Alex Morgan",
+    email: "alex@focusnode.io",
+    status: "Offline",
+    isAdmin: true,
+    role: "Engineer",
+    boardCount: 6,
+  },
+  {
+    src: "/avatars/avatar-2.jpg",
+    name: "Jessica Mitchell",
+    email: "jessica@focusnode.io",
+    status: "Offline",
+    isAdmin: false,
+    role: "Product Owner",
+    boardCount: 4,
+  },
+  {
+    src: "/avatars/avatar-3.jpg",
+    name: "Tiffany Brown",
+    email: "tiffany@focusnode.io",
+    status: "Online",
+    isAdmin: true,
+    role: "Designer",
+    boardCount: 3,
+  },
 ];
 
 const tasks: Task[] = [
@@ -54,7 +96,7 @@ const tasks: Task[] = [
     due: "3/27",
     dueDate: "2026-03-27",
     filter: "Dev",
-    assignees: [avatars[0], avatars[1]],
+    assignees: [users[0], users[1]],
   },
   {
     id: 2,
@@ -65,7 +107,7 @@ const tasks: Task[] = [
     due: "3/17",
     dueDate: "2026-03-17",
     filter: "Dev",
-    assignees: [avatars[2], avatars[1]],
+    assignees: [users[2], users[1]],
   },
   {
     id: 3,
@@ -76,7 +118,7 @@ const tasks: Task[] = [
     due: "3/22",
     dueDate: "2026-03-22",
     filter: "Dev",
-    assignees: [avatars[0], avatars[2]],
+    assignees: [users[0], users[2]],
   },
   {
     id: 4,
@@ -87,7 +129,7 @@ const tasks: Task[] = [
     due: "3/15",
     dueDate: "2026-03-15",
     filter: "Dev",
-    assignees: [avatars[1]],
+    assignees: [users[1]],
   },
   {
     id: 5,
@@ -98,7 +140,7 @@ const tasks: Task[] = [
     due: "3/20",
     dueDate: "2026-03-20",
     filter: "Docs",
-    assignees: [avatars[2]],
+    assignees: [users[2]],
   },
   {
     id: 6,
@@ -109,7 +151,7 @@ const tasks: Task[] = [
     due: "3/22",
     dueDate: "2026-03-22",
     filter: "Design",
-    assignees: [avatars[0]],
+    assignees: [users[0]],
   },
   {
     id: 7,
@@ -120,7 +162,7 @@ const tasks: Task[] = [
     due: "3/28",
     dueDate: "2026-03-28",
     filter: "Design",
-    assignees: [avatars[1]],
+    assignees: [users[1]],
   },
   {
     id: 8,
@@ -131,7 +173,7 @@ const tasks: Task[] = [
     due: "4/02",
     dueDate: "2026-04-02",
     filter: "Design",
-    assignees: [avatars[2]],
+    assignees: [users[2]],
   },
 ];
 
@@ -158,6 +200,9 @@ const tabs = [
   { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "list", label: "List", icon: List },
 ] as const;
+
+const STICKY_EDGE_SHADOW =
+  "shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]";
 
 export default function TeamWorkloadPage() {
   const [tab, setTab] = useState<(typeof tabs)[number]["id"]>("list");
@@ -199,7 +244,7 @@ export default function TeamWorkloadPage() {
         })}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-3 py-4">
+      <div className="flex flex-1 min-h-0 flex-col py-4">
         {tab === "list" ? (
           <ListView />
         ) : (
@@ -212,7 +257,7 @@ export default function TeamWorkloadPage() {
 
 function Placeholder({ label }: { label: string }) {
   return (
-    <div className="flex h-full min-h-[300px] items-center justify-center rounded-xl border border-dashed border-primary-200 text-sm text-primary-400">
+    <div className="flex h-full min-h-[300px] items-center justify-center rounded-xl border border-dashed border-primary-200 text-sm text-primary-400 px-3">
       <Users className="mr-2 size-4" />
       {label} view coming soon
     </div>
@@ -234,13 +279,41 @@ function ListView() {
     [filter],
   );
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [edgeShadow, setEdgeShadow] = useState({ top: false, bottom: false });
+
+  const updateEdgeShadow = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    setEdgeShadow({
+      top: scrollTop > 0,
+      bottom: scrollTop + clientHeight < scrollHeight - 1,
+    });
+  }, []);
+
+  const openCategoryCount =
+    Object.values(openCategories).filter(Boolean).length;
+
+  useLayoutEffect(() => {
+    updateEdgeShadow();
+    const el = scrollRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(updateEdgeShadow);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [filtered.length, openCategoryCount, updateEdgeShadow]);
+
   function toggleCategory(c: Category) {
     setOpenCategories((s) => ({ ...s, [c]: !s[c] }));
   }
 
   return (
-    <div data-testid="team-list-view" className="flex flex-col gap-3">
-      <div className="flex items-center justify-end gap-4">
+    <div
+      data-testid="team-list-view"
+      className="flex min-h-0 flex-1 flex-col gap-3"
+    >
+      <div className="flex shrink-0 items-center justify-end gap-4 px-3">
         <div className="flex items-center gap-2">
           <p
             data-testid="muted-text-sample"
@@ -296,52 +369,76 @@ function ListView() {
         </div>
       </div>
 
-      {(["Engineering", "Design"] as Category[]).map((category) => {
-        const inCategory = filtered.filter((t) => t.category === category);
-        const open = openCategories[category];
-        const groups: Status[] = ["Approved", "In Progress", "Not Started"];
-        return (
-          <div key={category} className="flex flex-col gap-3">
-            <Button
-              variant="ghost"
-              data-active={open}
-              onClick={() => toggleCategory(category)}
-              className="gap-3 self-start p-0 h-fit border-0 hover:bg-transparent"
-            >
-              <span className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-primary-500">
-                {open ? (
-                  <ChevronUp className="size-3" />
-                ) : (
-                  <ChevronDown className="size-3" />
-                )}
-              </span>
-              <span
-                data-testid="eyebrow-label"
-                className="text-xs font-medium uppercase text-primary-600"
-              >
-                {category}
-              </span>
-            </Button>
+      <div
+        ref={scrollRef}
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+        onScroll={updateEdgeShadow}
+      >
+        <div
+          aria-hidden
+          className={cn(
+            "sticky top-0 z-10 h-px shrink-0 bg-primary-50 transition-shadow",
+            edgeShadow.top && STICKY_EDGE_SHADOW,
+          )}
+        />
+        <div className="flex flex-col gap-3 px-3">
+          {(["Engineering", "Design"] as Category[]).map((category) => {
+            const inCategory = filtered.filter((t) => t.category === category);
+            const open = openCategories[category];
+            const groups: Status[] = ["Approved", "In Progress", "Not Started"];
+            return (
+              <div key={category} className="flex flex-col gap-3">
+                <Button
+                  variant="ghost"
+                  data-active={open}
+                  onClick={() => toggleCategory(category)}
+                  className="gap-3 self-start p-0 h-fit border-0 hover:bg-transparent"
+                >
+                  <span className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-primary-500">
+                    {open ? (
+                      <ChevronUp className="size-3" />
+                    ) : (
+                      <ChevronDown className="size-3" />
+                    )}
+                  </span>
+                  <span
+                    data-testid="eyebrow-label"
+                    className="text-xs font-medium uppercase text-primary-600"
+                  >
+                    {category}
+                  </span>
+                </Button>
 
-            {open && (
-              <div className="flex flex-col gap-3">
-                {groups.map((status) => {
-                  const rows = inCategory.filter((t) => t.status === status);
-                  return (
-                    <StatusGroup
-                      key={status}
-                      status={status}
-                      tasks={rows}
-                      rankBy={rankBy}
-                      defaultOpen={status === "Approved" && rows.length > 0}
-                    />
-                  );
-                })}
+                {open && (
+                  <div className="flex flex-col gap-3">
+                    {groups.map((status) => {
+                      const rows = inCategory.filter(
+                        (t) => t.status === status,
+                      );
+                      return (
+                        <StatusGroup
+                          key={status}
+                          status={status}
+                          tasks={rows}
+                          rankBy={rankBy}
+                          defaultOpen={status === "Approved" && rows.length > 0}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+        <div
+          aria-hidden
+          className={cn(
+            "sticky bottom-0 z-10 h-px shrink-0 bg-primary-50 transition-shadow",
+            edgeShadow.bottom && STICKY_EDGE_SHADOW,
+          )}
+        />
+      </div>
     </div>
   );
 }
@@ -406,17 +503,77 @@ function StatusGroup({
             >
               <p className="w-[300px] text-sm text-primary-500">{task.name}</p>
               <div className="flex w-[100px] items-center justify-center">
-                {task.assignees.map((src, i) => (
-                  <Avatar
-                    key={src}
-                    data-testid="task-assignee-avatar"
-                    className={cn(
-                      "size-5 border-[3px] border-primary-50",
-                      i < task.assignees.length - 1 && "-mr-1",
-                    )}
-                  >
-                    <AvatarImage src={src} alt="User profile pic" />
-                  </Avatar>
+                {task.assignees.map((assignee, i) => (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Avatar
+                        key={assignee.name}
+                        data-testid="task-assignee-avatar"
+                        className={cn(
+                          "size-5 border-[3px] border-primary-50",
+                          i < task.assignees.length - 1 && "-mr-1",
+                        )}
+                      >
+                        <AvatarImage
+                          src={assignee.src}
+                          alt="User profile pic"
+                        />
+                      </Avatar>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Avatar data-testid="member-avatar" size="sm">
+                            <AvatarImage
+                              src={assignee.src}
+                              alt="User profile pic"
+                            />
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold">
+                              {assignee.email}
+                              {assignee.isAdmin && (
+                                <span className="ml-2 text-primary-400/70 text-[9px] rounded-sm border border-primary-300 px-1 py-0.5">
+                                  Admin
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-primary-400/70 text-xs">
+                              {assignee.name}
+                            </p>
+                          </div>
+                        </div>
+                        <Separator
+                          orientation="horizontal"
+                          className="my-1 bg-primary-300/50"
+                        />
+                        <div className="flex items-center gap-1">
+                          <div
+                            className={cn(
+                              "size-1.5 rounded-full",
+                              assignee.status === "Online"
+                                ? "bg-green-500 animate-pulse"
+                                : "bg-primary-400/75",
+                            )}
+                          />
+                          <p>{assignee.status}</p>
+                        </div>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <BookUser className="size-3.5" />
+                          <p>{assignee.role}</p>
+                        </div>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <Box className="size-3.5" />
+                          <p>
+                            Product Launch Q2
+                            <span className="ml-1 text-primary-400/70">
+                              +{assignee.boardCount - 1}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
                 ))}
               </div>
               <div className="flex w-[100px] justify-center">

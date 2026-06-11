@@ -2,7 +2,7 @@
   "name": "focusnode",
   "framework": "nextjs",
 
-  "installCommand": "npm install",
+  "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "serveCommand": "npm run start",
 

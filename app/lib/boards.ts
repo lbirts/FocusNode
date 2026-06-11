@@ -1,12 +1,22 @@
 export type Priority = "Urgent" | "Medium" | "Normal" | "Low";
 
+export type User = {
+  src: string;
+  name: string;
+  email: string;
+  status: "Online" | "Offline";
+  isAdmin: boolean;
+  role: string;
+  boardCount: number;
+};
+
 export type Card = {
   id: number;
   title: string;
   priority: Priority;
   due?: string;
   tag: string;
-  assignee: string;
+  assignee: User;
 };
 
 export type Column = {
@@ -29,10 +39,34 @@ export type Board = {
   memberCount: number;
 };
 
-const avatars = [
-  "/avatars/avatar-1.jpg",
-  "/avatars/avatar-2.jpg",
-  "/avatars/avatar-3.jpg",
+export const users: User[] = [
+  {
+    src: "/avatars/avatar-1.jpg",
+    name: "Alex Morgan",
+    email: "alex@focusnode.io",
+    status: "Online",
+    isAdmin: true,
+    role: "Engineer",
+    boardCount: 6,
+  },
+  {
+    src: "/avatars/avatar-2.jpg",
+    name: "Jessica Mitchell",
+    email: "jessica@focusnode.io",
+    status: "Offline",
+    isAdmin: false,
+    role: "Product Owner",
+    boardCount: 4,
+  },
+  {
+    src: "/avatars/avatar-3.jpg",
+    name: "Tiffany Brown",
+    email: "tiffany@focusnode.io",
+    status: "Offline",
+    isAdmin: true,
+    role: "Designer",
+    boardCount: 3,
+  },
 ];
 
 export const boards: Board[] = [
@@ -49,9 +83,52 @@ export const boards: Board[] = [
             id: "backlog",
             title: "Backlog",
             cards: [
-              { id: 101, title: "Update API documentation v2.3", priority: "Urgent", due: "3/17", tag: "Docs", assignee: avatars[0] },
-              { id: 102, title: "Design onboarding flow revamp", priority: "Normal", due: "3/23", tag: "Design", assignee: avatars[2] },
-              { id: 103, title: "Research competitor pricing models", priority: "Low", tag: "Research", assignee: avatars[1] },
+              {
+                id: 101,
+                title: "Update API documentation v2.3",
+                priority: "Urgent",
+                due: "3/17",
+                tag: "Docs",
+                assignee: users[0],
+              },
+              {
+                id: 102,
+                title: "Design onboarding flow revamp",
+                priority: "Normal",
+                due: "3/23",
+                tag: "Design",
+                assignee: users[2],
+              },
+              {
+                id: 103,
+                title: "Research competitor pricing models",
+                priority: "Low",
+                tag: "Research",
+                assignee: users[1],
+              },
+              {
+                id: 104,
+                title: "Set up feature flag service",
+                priority: "Medium",
+                due: "3/25",
+                tag: "Engineering",
+                assignee: users[1],
+              },
+              {
+                id: 105,
+                title: "Define analytics event schema",
+                priority: "Normal",
+                tag: "Docs",
+                assignee: users[2],
+              },
+              {
+                id: 106,
+                title: "Spike: offline sync strategy",
+                priority: "Low",
+                due: "3/28",
+                tag: "Engineering",
+                assignee: users[0],
+              },
             ],
           },
           {
@@ -59,8 +136,37 @@ export const boards: Board[] = [
             title: "To Do",
             wip: 5,
             cards: [
-              { id: 201, title: "Implement auth token refresh logic", priority: "Normal", due: "3/19", tag: "Engineering", assignee: avatars[0] },
-              { id: 202, title: "Write unit tests for payment module", priority: "Normal", due: "3/18", tag: "Engineering", assignee: avatars[0] },
+              {
+                id: 201,
+                title: "Implement auth token refresh logic",
+                priority: "Normal",
+                due: "3/19",
+                tag: "Engineering",
+                assignee: users[0],
+              },
+              {
+                id: 202,
+                title: "Write unit tests for payment module",
+                priority: "Normal",
+                due: "3/18",
+                tag: "Engineering",
+                assignee: users[0],
+              },
+              {
+                id: 203,
+                title: "Add rate limiting to API gateway",
+                priority: "Medium",
+                due: "3/20",
+                tag: "Engineering",
+                assignee: users[1],
+              },
+              {
+                id: 204,
+                title: "Refactor settings page state",
+                priority: "Low",
+                tag: "Engineering",
+                assignee: users[2],
+              },
             ],
           },
           {
@@ -68,8 +174,30 @@ export const boards: Board[] = [
             title: "In Progress",
             wip: 3,
             cards: [
-              { id: 301, title: "Build notification preferences panel", priority: "Urgent", due: "3/16", tag: "Engineering", assignee: avatars[0] },
-              { id: 302, title: "Create dashboard analytics widgets", priority: "Medium", due: "3/17", tag: "Design", assignee: avatars[2] },
+              {
+                id: 301,
+                title: "Build notification preferences panel",
+                priority: "Urgent",
+                due: "3/16",
+                tag: "Engineering",
+                assignee: users[0],
+              },
+              {
+                id: 302,
+                title: "Create dashboard analytics widgets",
+                priority: "Medium",
+                due: "3/17",
+                tag: "Design",
+                assignee: users[2],
+              },
+              {
+                id: 303,
+                title: "Wire up onboarding checklist",
+                priority: "Normal",
+                due: "3/19",
+                tag: "Design",
+                assignee: users[1],
+              },
             ],
           },
           {
@@ -77,21 +205,212 @@ export const boards: Board[] = [
             title: "In Review",
             wip: 2,
             cards: [
-              { id: 401, title: "Migrate database to new schema", priority: "Normal", due: "3/18", tag: "Engineering", assignee: avatars[0] },
+              {
+                id: 401,
+                title: "Migrate database to new schema",
+                priority: "Normal",
+                due: "3/18",
+                tag: "Engineering",
+                assignee: users[0],
+              },
+              {
+                id: 402,
+                title: "Review PR #318 — caching layer",
+                priority: "Medium",
+                due: "3/18",
+                tag: "Engineering",
+                assignee: users[2],
+              },
             ],
           },
           {
             id: "done",
             title: "Done",
             cards: [
-              { id: 501, title: "Set up CI/CD pipeline for staging", priority: "Low", tag: "Engineering", assignee: avatars[0] },
-              { id: 502, title: "Logo & brand guideline finalization", priority: "Low", tag: "Design", assignee: avatars[2] },
+              {
+                id: 501,
+                title: "Set up CI/CD pipeline for staging",
+                priority: "Low",
+                tag: "Engineering",
+                assignee: users[0],
+              },
+              {
+                id: 502,
+                title: "Logo & brand guideline finalization",
+                priority: "Low",
+                tag: "Design",
+                assignee: users[2],
+              },
+            ],
+          },
+          {
+            id: "archived",
+            title: "Archived",
+            cards: [
+              {
+                id: 501,
+                title: "User research and feedback",
+                priority: "Low",
+                tag: "Research",
+                assignee: users[0],
+              },
+              {
+                id: 502,
+                title: "Branding",
+                priority: "Low",
+                tag: "Design",
+                assignee: users[2],
+              },
+            ],
+          },
+          {
+            id: "blocked",
+            title: "Blocked",
+            cards: [],
+          },
+        ],
+      },
+      {
+        id: "design",
+        title: "Design",
+        columns: [
+          {
+            id: "todo",
+            title: "To Do",
+            cards: [
+              {
+                id: 1001,
+                title: "Audit current marketing site IA",
+                priority: "Medium",
+                due: "3/21",
+                tag: "Research",
+                assignee: users[2],
+              },
+              {
+                id: 1002,
+                title: "Define new visual language tokens",
+                priority: "Normal",
+                due: "3/24",
+                tag: "Design",
+                assignee: users[2],
+              },
+              {
+                id: 1003,
+                title: "Homepage hero exploration",
+                priority: "Urgent",
+                due: "3/18",
+                tag: "Design",
+                assignee: users[1],
+              },
+            ],
+          },
+          {
+            id: "in-progress",
+            title: "In Progress",
+            wip: 2,
+            cards: [],
+          },
+          {
+            id: "done",
+            title: "Done",
+            cards: [
+              {
+                id: 1002,
+                title: "Define new visual language tokens",
+                priority: "Normal",
+                due: "3/24",
+                tag: "Design",
+                assignee: users[2],
+              },
             ],
           },
         ],
       },
-      { id: "design", title: "Design", columns: [] },
-      { id: "marketing", title: "Marketing", columns: [] },
+      {
+        id: "marketing",
+        title: "Marketing",
+        columns: [
+          {
+            id: "todo",
+            title: "To Do",
+            cards: [
+              {
+                id: 1001,
+                title: "Audit current marketing site IA",
+                priority: "Medium",
+                due: "3/21",
+                tag: "Research",
+                assignee: users[2],
+              },
+            ],
+          },
+          {
+            id: "in-progress",
+            title: "In Progress",
+            wip: 2,
+            cards: [
+              {
+                id: 1002,
+                title: "Marketing campaign launch",
+                priority: "Urgent",
+                due: "3/24",
+                tag: "Marketing",
+                assignee: users[2],
+              },
+              {
+                id: 1004,
+                title: "Market Research",
+                priority: "Low",
+                due: "3/26",
+                tag: "Research",
+                assignee: users[2],
+              },
+            ],
+          },
+          {
+            id: "done",
+            title: "Done",
+            cards: [
+              {
+                id: 1003,
+                title: "Product launch email campaign",
+                priority: "Normal",
+                due: "3/25",
+                tag: "Marketing",
+                assignee: users[2],
+              },
+            ],
+          },
+          {
+            id: "archived",
+            title: "Archived",
+            cards: [
+              {
+                id: 1004,
+                title: "Market Research",
+                priority: "Low",
+                due: "3/26",
+                tag: "Research",
+                assignee: users[2],
+              },
+            ],
+          },
+          {
+            id: "blocked",
+            title: "Blocked",
+            cards: [
+              {
+                id: 1005,
+                title: "Social media campaign launch",
+                priority: "Urgent",
+                due: "3/27",
+                tag: "Social Media",
+                assignee: users[2],
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -107,16 +426,37 @@ export const boards: Board[] = [
             id: "todo",
             title: "To Do",
             cards: [
-              { id: 1001, title: "Audit current marketing site IA", priority: "Medium", due: "3/21", tag: "Research", assignee: avatars[2] },
-              { id: 1002, title: "Define new visual language tokens", priority: "Normal", due: "3/24", tag: "Design", assignee: avatars[2] },
+              {
+                id: 1001,
+                title: "Audit current marketing site IA",
+                priority: "Medium",
+                due: "3/21",
+                tag: "Research",
+                assignee: users[2],
+              },
+              {
+                id: 1002,
+                title: "Define new visual language tokens",
+                priority: "Normal",
+                due: "3/24",
+                tag: "Design",
+                assignee: users[2],
+              },
             ],
           },
           {
             id: "in-progress",
             title: "In Progress",
-            wip: 2,
+            wip: 1,
             cards: [
-              { id: 1003, title: "Homepage hero exploration", priority: "Urgent", due: "3/18", tag: "Design", assignee: avatars[1] },
+              {
+                id: 1003,
+                title: "Homepage hero exploration",
+                priority: "Urgent",
+                due: "3/18",
+                tag: "Design",
+                assignee: users[1],
+              },
             ],
           },
           { id: "done", title: "Done", cards: [] },
@@ -138,16 +478,35 @@ export const boards: Board[] = [
             id: "backlog",
             title: "Backlog",
             cards: [
-              { id: 2001, title: "Upgrade React Native to 0.74", priority: "Medium", tag: "Engineering", assignee: avatars[0] },
-              { id: 2002, title: "Replace deprecated AsyncStorage usage", priority: "Low", tag: "Engineering", assignee: avatars[0] },
+              {
+                id: 2001,
+                title: "Upgrade React Native to 0.74",
+                priority: "Medium",
+                tag: "Engineering",
+                assignee: users[0],
+              },
+              {
+                id: 2002,
+                title: "Replace deprecated AsyncStorage usage",
+                priority: "Low",
+                tag: "Engineering",
+                assignee: users[0],
+              },
             ],
           },
           {
             id: "in-progress",
             title: "In Progress",
-            wip: 2,
+            wip: 1,
             cards: [
-              { id: 2003, title: "Biometric login flow", priority: "Urgent", due: "3/15", tag: "Engineering", assignee: avatars[1] },
+              {
+                id: 2003,
+                title: "Biometric login flow",
+                priority: "Urgent",
+                due: "3/15",
+                tag: "Engineering",
+                assignee: users[1],
+              },
             ],
           },
           { id: "done", title: "Done", cards: [] },
@@ -168,7 +527,14 @@ export const boards: Board[] = [
             id: "todo",
             title: "To Do",
             cards: [
-              { id: 3001, title: "Recruit 8 participants for usability study", priority: "Medium", due: "3/22", tag: "Research", assignee: avatars[2] },
+              {
+                id: 3001,
+                title: "Recruit 8 participants for usability study",
+                priority: "Medium",
+                due: "3/22",
+                tag: "Research",
+                assignee: users[2],
+              },
             ],
           },
           {
@@ -176,7 +542,14 @@ export const boards: Board[] = [
             title: "In Progress",
             wip: 1,
             cards: [
-              { id: 3002, title: "Heuristic review of checkout flow", priority: "Normal", due: "3/19", tag: "Research", assignee: avatars[1] },
+              {
+                id: 3002,
+                title: "Heuristic review of checkout flow",
+                priority: "Normal",
+                due: "3/19",
+                tag: "Research",
+                assignee: users[1],
+              },
             ],
           },
         ],

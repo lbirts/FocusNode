@@ -6,6 +6,7 @@ import { Card, CardAction, CardHeader } from "@/ui/card";
 import { Separator } from "@/ui/separator";
 import { Switch } from "@/ui/switch";
 import {
+  CheckCheck,
   CheckCircle2,
   ChevronRight,
   Pause,
@@ -54,13 +55,14 @@ function ClockDial({ progress }: { progress: number }) {
             x1="150"
             y1="10"
             x2="150"
-            y2={isActive ? 36 : 28}
+            y2={isActive ? 40 : 32}
             stroke={
               isActive ? "var(--color-brand)" : "var(--color-primary-300)"
             }
             strokeWidth={isActive ? 3 : 2}
             strokeLinecap="round"
             transform={`rotate(${angle} 150 150)`}
+            className="transition-all duration-200"
           />
         );
       })}
@@ -79,6 +81,7 @@ export default function FocusTimer() {
   const [secondsLeft, setSecondsLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [blockingEnabled, setBlockingEnabled] = useState(true);
+  const [isCompleted, setIsCompleted] = useState(false);
   const [blocked, setBlocked] =
     useState<Record<string, boolean>>(defaultBlocking);
 
@@ -252,10 +255,21 @@ export default function FocusTimer() {
                   >
                     Currently working on
                   </p>
-                  <div className="flex items-center gap-2 rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
-                    <CheckCircle2 className="size-4" />
-                    Mark As Completed
-                  </div>
+                  {isCompleted ? (
+                    <div className="flex items-center gap-2 rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-600">
+                      <CheckCircle2 className="size-4" />
+                      Complete
+                    </div>
+                  ) : (
+                    <Button
+                      size="xs"
+                      className="gap-2 rounded px-1.5 py-0.5"
+                      onClick={() => setIsCompleted(true)}
+                    >
+                      <CheckCheck className="size-4" />
+                      Mark As Completed
+                    </Button>
+                  )}
                 </div>
                 <p className="text-sm text-primary-500">
                   Build notification preferences panel
@@ -270,7 +284,11 @@ export default function FocusTimer() {
                 </div>
               </CardHeader>
             </Card>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(isCompleted && "animate-bounce")}
+            >
               Next task
               <ChevronRight />
             </Button>

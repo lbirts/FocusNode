@@ -7,22 +7,41 @@ import {
   type Priority,
   type Swimlane,
   getBoard,
+  users,
 } from "@/app/lib/boards";
 import { cn } from "@/app/lib/utils";
 import { Avatar, AvatarImage } from "@/ui/avatar";
 import { Button } from "@/ui/button";
 import { Separator } from "@/ui/separator";
 import {
+  BookUser,
+  Box,
   Calendar,
   ChevronDown,
   ChevronUp,
+  Lock,
   MoreHorizontal,
   Pencil,
   Plus,
   UserPlus,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import {
+  Fragment,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "./components/ui/tooltip";
 
 const priorityStyles: Record<Priority, string> = {
   Urgent: "bg-red-light text-red",
@@ -31,7 +50,36 @@ const priorityStyles: Record<Priority, string> = {
   Low: "bg-primary-100 text-primary-400",
 };
 
-const newCardAvatar = "/avatars/avatar-1.jpg";
+const newCardAvatar = users[0];
+
+const COLUMN_EXPANDED_WIDTH = 232;
+const COLUMN_NARROW_WIDTH = 140;
+const COLUMN_COLLAPSED_WIDTH = 52;
+const COLUMN_GAP = 8;
+const COLUMN_SHRINK_RANGE = COLUMN_EXPANDED_WIDTH - COLUMN_COLLAPSED_WIDTH;
+const COLUMN_HEADER_WIP_MIN_WIDTH = 210;
+const COLUMN_HEADER_PLUS_MIN_WIDTH = 170;
+const COLUMN_CARD_PRIORITY_MIN_WIDTH = 160;
+const COLUMN_HEADER_MORE_MIN_WIDTH = 150;
+const STICKY_EDGE_SHADOW =
+  "shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]";
+
+function columnWidthAtScroll(index: number, scrollLeft: number) {
+  const collapseStart = index * COLUMN_SHRINK_RANGE;
+  const shrink = Math.min(
+    Math.max(scrollLeft - collapseStart, 0),
+    COLUMN_SHRINK_RANGE,
+  );
+  return COLUMN_EXPANDED_WIDTH - shrink;
+}
+
+function stickyLeftAtScroll(columnIndex: number, scrollLeft: number) {
+  let left = 0;
+  for (let i = 0; i < columnIndex; i++) {
+    left += columnWidthAtScroll(i, scrollLeft) + COLUMN_GAP;
+  }
+  return left;
+}
 
 function totals(board: Board) {
   let tasks = 0;
@@ -66,6 +114,36 @@ function KanbanBoard() {
   const [open, setOpen] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(board.swimlanes.map((s, i) => [s.id, i === 0])),
   );
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const [dragOver, setDragOver] = useState<DragTarget | null>(null);
+
+  function liftCard(payload: DropPayload, height: number) {
+    setDrag({ ...payload, height });
+    setDragOver({
+      swimlaneId: payload.fromSwimlane,
+      columnId: payload.fromColumn,
+    });
+  }
+
+  function endDrag() {
+    setDrag(null);
+    setDragOver(null);
+  }
+
+  function handleColumnDragOver(
+    swimlaneId: string,
+    columnId: string,
+    over: boolean,
+  ) {
+    setDragOver((prev) => {
+      const matches =
+        prev != null &&
+        prev.swimlaneId === swimlaneId &&
+        prev.columnId === columnId;
+      if (over) return matches ? prev : { swimlaneId, columnId };
+      return matches ? null : prev;
+    });
+  }
 
   useEffect(() => {
     setSwimlanes(board.swimlanes);
@@ -175,19 +253,72 @@ function KanbanBoard() {
           <div className="flex items-center">
             {Array.from({ length: Math.min(board.memberCount, 3) }).map(
               (_, i) => (
-                <Avatar
-                  key={i}
-                  data-testid="member-avatar"
-                  className={cn(
-                    "size-5 border-[3px] border-primary-50",
-                    i < 2 && "-mr-1",
-                  )}
-                >
-                  <AvatarImage
-                    src={`/avatars/avatar-${i + 1}.jpg`}
-                    alt="User profile pic"
-                  />
-                </Avatar>
+                <Tooltip key={i}>
+                  <TooltipTrigger>
+                    <Avatar
+                      data-testid="member-avatar"
+                      className={cn(
+                        "size-5 border-[3px] border-primary-50",
+                        i < 2 && "-mr-1",
+                      )}
+                    >
+                      <AvatarImage src={users[i].src} alt="User profile pic" />
+                    </Avatar>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Avatar data-testid="member-avatar" size="sm">
+                          <AvatarImage
+                            src={users[i].src}
+                            alt="User profile pic"
+                          />
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold">
+                            {users[i].email}
+                            {users[i].isAdmin && (
+                              <span className="ml-2 text-primary-400/70 text-[9px] rounded-sm border border-primary-300 px-1 py-0.5">
+                                Admin
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-primary-400/70 text-xs">
+                            {users[i].name}
+                          </p>
+                        </div>
+                      </div>
+                      <Separator
+                        orientation="horizontal"
+                        className="my-1 bg-primary-300/50"
+                      />
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <div
+                          className={cn(
+                            "size-1.5 rounded-full",
+                            users[i].status === "Online"
+                              ? "bg-green-500 animate-pulse"
+                              : "bg-primary-400/75",
+                          )}
+                        />
+                        <p>{users[i].status}</p>
+                      </div>
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <BookUser className="size-3.5" />
+                        <p>{users[i].role}</p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Box className="size-3.5" />
+                        <p>
+                          {board.title}
+                          <span className="ml-1 text-primary-400/70">
+                            +{users[i].boardCount - 1}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               ),
             )}
           </div>
@@ -218,18 +349,22 @@ function KanbanBoard() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-none">
         {swimlanes.map((swimlane) => {
           const expanded = open[swimlane.id];
+          const hasColumns = swimlane.columns.length > 0;
           return (
             <div
               key={swimlane.id}
-              className="border-b border-primary-200 px-3 pt-4 pb-12 flex flex-col gap-4"
+              className={cn(
+                "border-b border-primary-200 pt-4 flex flex-col",
+                (!expanded || !hasColumns) && "pb-12",
+              )}
             >
               <Button
                 variant="ghost"
                 onClick={() => toggleSwimlane(swimlane.id)}
-                className="gap-3 self-start p-0 h-fit hover:bg-transparent border-0"
+                className="gap-3 self-start p-0 h-fit hover:bg-transparent border-0 px-3"
               >
                 <span className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-primary-500">
                   {expanded ? (
@@ -246,27 +381,30 @@ function KanbanBoard() {
                 </span>
               </Button>
 
-              {expanded && swimlane.columns.length > 0 && (
-                <div data-testid="swimlane-columns" className="flex gap-2">
-                  {swimlane.columns.map((column, colIdx) => (
-                    <KanbanColumn
-                      key={column.id}
-                      column={column}
-                      swimlaneId={swimlane.id}
-                      testId={`kanban-column-${colIdx}`}
-                      onAddCard={() => addCard(swimlane.id, column.id)}
-                      onDropCard={(payload) =>
-                        moveCard(
-                          payload.cardId,
-                          payload.fromSwimlane,
-                          payload.fromColumn,
-                          swimlane.id,
-                          column.id,
-                        )
-                      }
-                    />
-                  ))}
-                </div>
+              {expanded && hasColumns && (
+                <SwimlaneColumns
+                  board={board}
+                  columns={swimlane.columns}
+                  swimlaneId={swimlane.id}
+                  drag={drag}
+                  dragOver={dragOver}
+                  onCardLift={liftCard}
+                  onCardDragEnd={endDrag}
+                  onColumnDragOver={(columnId, over) =>
+                    handleColumnDragOver(swimlane.id, columnId, over)
+                  }
+                  onAddCard={(columnId) => addCard(swimlane.id, columnId)}
+                  onDropCard={(payload, columnId) => {
+                    endDrag();
+                    moveCard(
+                      payload.cardId,
+                      payload.fromSwimlane,
+                      payload.fromColumn,
+                      swimlane.id,
+                      columnId,
+                    );
+                  }}
+                />
               )}
             </div>
           );
@@ -282,24 +420,290 @@ type DropPayload = {
   fromColumn: string;
 };
 
-function KanbanColumn({
-  column,
+type DragState = DropPayload & { height: number };
+
+type DragTarget = { swimlaneId: string; columnId: string };
+
+function SwimlaneColumns({
+  board,
+  columns,
   swimlaneId,
-  testId,
+  drag,
+  dragOver,
+  onCardLift,
+  onCardDragEnd,
+  onColumnDragOver,
   onAddCard,
   onDropCard,
 }: {
-  column: Column;
+  board: Board;
+  columns: Column[];
   swimlaneId: string;
-  testId: string;
+  drag: DragState | null;
+  dragOver: DragTarget | null;
+  onCardLift: (payload: DropPayload, height: number) => void;
+  onCardDragEnd: () => void;
+  onColumnDragOver: (columnId: string, over: boolean) => void;
+  onAddCard: (columnId: string) => void;
+  onDropCard: (payload: DropPayload, columnId: string) => void;
+}) {
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [endDockedCol, setEndDockedCol] = useState<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const settleTimer = useRef<number | null>(null);
+  const lastScrollLeft = useRef(0);
+  const lastDirection = useRef(1);
+
+  const SCRUB_SPAN = COLUMN_EXPANDED_WIDTH - COLUMN_NARROW_WIDTH;
+
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const node = e.currentTarget;
+      const s = node.scrollLeft;
+      const prev = lastScrollLeft.current;
+      if (s !== prev) {
+        lastDirection.current = s > prev ? 1 : -1;
+        lastScrollLeft.current = s;
+      }
+      setScrollLeft(s);
+
+      const maxScroll = node.scrollWidth - node.clientWidth;
+      if (s < maxScroll - 2) setEndDockedCol(null);
+
+      const zoneIdx = Math.floor(s / COLUMN_SHRINK_RANGE);
+      const inZone = s % COLUMN_SHRINK_RANGE > SCRUB_SPAN;
+      const wasInSameZone =
+        prev % COLUMN_SHRINK_RANGE > SCRUB_SPAN &&
+        Math.floor(prev / COLUMN_SHRINK_RANGE) === zoneIdx;
+      if (inZone && !wasInSameZone) {
+        const target =
+          lastDirection.current > 0
+            ? Math.min((zoneIdx + 1) * COLUMN_SHRINK_RANGE, maxScroll)
+            : zoneIdx * COLUMN_SHRINK_RANGE + SCRUB_SPAN;
+        if (Math.abs(target - s) > 1) {
+          node.scrollTo({ left: target, behavior: "smooth" });
+        }
+      }
+
+      if (settleTimer.current != null) window.clearTimeout(settleTimer.current);
+      settleTimer.current = window.setTimeout(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const cur = el.scrollLeft;
+        const zone = cur % COLUMN_SHRINK_RANGE;
+        if (zone <= SCRUB_SPAN) return;
+        const idx = Math.floor(cur / COLUMN_SHRINK_RANGE);
+        const max = el.scrollWidth - el.clientWidth;
+        const target =
+          lastDirection.current > 0
+            ? Math.min((idx + 1) * COLUMN_SHRINK_RANGE, max)
+            : idx * COLUMN_SHRINK_RANGE + SCRUB_SPAN;
+        if (Math.abs(target - cur) > 1) {
+          el.scrollTo({ left: target, behavior: "smooth" });
+        } else if (lastDirection.current > 0 && target === max) {
+          setEndDockedCol(idx);
+        }
+      }, 100);
+    },
+    [SCRUB_SPAN],
+  );
+
+  useEffect(
+    () => () => {
+      if (settleTimer.current != null) window.clearTimeout(settleTimer.current);
+    },
+    [],
+  );
+
+  return (
+    <div
+      ref={scrollRef}
+      data-testid="swimlane-columns"
+      className="overflow-x-auto pb-12 px-3 pt-4"
+      onScroll={handleScroll}
+    >
+      <div
+        className="flex items-stretch gap-2"
+        style={{
+          width:
+            columns.length * COLUMN_EXPANDED_WIDTH +
+            (columns.length - 1) * COLUMN_GAP,
+        }}
+      >
+        {columns.map((column, colIdx) => (
+          <SwimlaneSlot
+            board={board}
+            key={column.id}
+            column={column}
+            colIdx={colIdx}
+            scrollLeft={scrollLeft}
+            endDocked={endDockedCol === colIdx}
+            swimlaneId={swimlaneId}
+            drag={drag}
+            isDragOver={
+              dragOver != null &&
+              dragOver.swimlaneId === swimlaneId &&
+              dragOver.columnId === column.id
+            }
+            onCardLift={onCardLift}
+            onCardDragEnd={onCardDragEnd}
+            onDragOverChange={(over) => onColumnDragOver(column.id, over)}
+            onAddCard={() => onAddCard(column.id)}
+            onDropCard={(payload) => onDropCard(payload, column.id)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SwimlaneSlot({
+  board,
+  column,
+  colIdx,
+  scrollLeft,
+  endDocked,
+  swimlaneId,
+  drag,
+  isDragOver,
+  onCardLift,
+  onCardDragEnd,
+  onDragOverChange,
+  onAddCard,
+  onDropCard,
+}: {
+  board: Board;
+  column: Column;
+  colIdx: number;
+  scrollLeft: number;
+  endDocked: boolean;
+  swimlaneId: string;
+  drag: DragState | null;
+  isDragOver: boolean;
+  onCardLift: (payload: DropPayload, height: number) => void;
+  onCardDragEnd: () => void;
+  onDragOverChange: (over: boolean) => void;
   onAddCard: () => void;
   onDropCard: (payload: DropPayload) => void;
 }) {
-  const [isOver, setIsOver] = useState(false);
+  const slotWidth = columnWidthAtScroll(colIdx, scrollLeft);
+  const collapsed = slotWidth < COLUMN_NARROW_WIDTH;
+  const dragExpand = collapsed && isDragOver && drag != null;
+  const width = dragExpand
+    ? COLUMN_EXPANDED_WIDTH
+    : endDocked
+      ? COLUMN_COLLAPSED_WIDTH
+      : slotWidth;
+  const widthMode = dragExpand ? "drag" : endDocked ? "end" : "slot";
+  const [widthTransition, setWidthTransition] = useState(false);
+  const prevWidthMode = useRef(widthMode);
+
+  useEffect(() => {
+    if (prevWidthMode.current === widthMode) return;
+    prevWidthMode.current = widthMode;
+    setWidthTransition(true);
+    const timer = window.setTimeout(() => setWidthTransition(false), 220);
+    return () => window.clearTimeout(timer);
+  }, [widthMode]);
+
+  return (
+    <div
+      className="sticky shrink-0 self-stretch pointer-events-none"
+      style={{
+        left: stickyLeftAtScroll(colIdx, scrollLeft),
+        width: slotWidth,
+        zIndex: dragExpand ? 99 : colIdx + 1,
+      }}
+    >
+      <div
+        className={cn(
+          "h-full pointer-events-auto",
+          widthTransition && "transition-[width] duration-150 ease-out",
+        )}
+        style={{
+          width,
+          maxWidth: dragExpand ? undefined : slotWidth,
+        }}
+      >
+        <KanbanColumn
+          board={board}
+          column={column}
+          swimlaneId={swimlaneId}
+          testId={`kanban-column-${colIdx}`}
+          width={dragExpand ? COLUMN_EXPANDED_WIDTH : width}
+          collapsed={collapsed && !dragExpand}
+          drag={drag}
+          isDragOver={isDragOver}
+          onCardLift={onCardLift}
+          onCardDragEnd={onCardDragEnd}
+          onDragOverChange={onDragOverChange}
+          onAddCard={onAddCard}
+          onDropCard={onDropCard}
+        />
+      </div>
+    </div>
+  );
+}
+
+function KanbanColumn({
+  board,
+  column,
+  swimlaneId,
+  testId,
+  width,
+  collapsed = false,
+  drag,
+  isDragOver,
+  onCardLift,
+  onCardDragEnd,
+  onDragOverChange,
+  onAddCard,
+  onDropCard,
+}: {
+  board: Board;
+  column: Column;
+  swimlaneId: string;
+  testId: string;
+  width: number;
+  collapsed?: boolean;
+  drag: DragState | null;
+  isDragOver: boolean;
+  onCardLift: (payload: DropPayload, height: number) => void;
+  onCardDragEnd: () => void;
+  onDragOverChange: (over: boolean) => void;
+  onAddCard: () => void;
+  onDropCard: (payload: DropPayload) => void;
+}) {
+  const showWip = column.wip != null && width > COLUMN_HEADER_WIP_MIN_WIDTH;
+  const showPlus = width > COLUMN_HEADER_PLUS_MIN_WIDTH;
+  const showMore = width > COLUMN_HEADER_MORE_MIN_WIDTH;
+  const showHeaderActions = showWip || showPlus || showMore;
+  const showDropzone = isDragOver && drag != null;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [edgeShadow, setEdgeShadow] = useState({ top: false, bottom: false });
+
+  const updateEdgeShadow = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    setEdgeShadow({
+      top: scrollTop > 0,
+      bottom: scrollTop + clientHeight < scrollHeight - 1,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (collapsed) return;
+    updateEdgeShadow();
+    const el = scrollRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(updateEdgeShadow);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [collapsed, column.cards.length, updateEdgeShadow]);
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
-    setIsOver(false);
     try {
       const data = JSON.parse(
         e.dataTransfer.getData("application/json"),
@@ -312,71 +716,243 @@ function KanbanColumn({
     <div
       data-testid={testId}
       onDragOver={(e) => {
+        if (!drag) return;
         e.preventDefault();
-        setIsOver(true);
+        if (!isDragOver) onDragOverChange(true);
       }}
-      onDragLeave={() => setIsOver(false)}
+      onDragLeave={(e) => {
+        if (!drag) return;
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          onDragOverChange(false);
+        }
+      }}
       onDrop={handleDrop}
       className={cn(
-        "flex-1 min-w-0 flex flex-col rounded-2xl bg-white shadow-[2px_4px_40px_10px_rgba(31,53,51,0.04)] transition-colors",
-        isOver && "ring-2 ring-brand",
+        "flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[2px_4px_40px_10px_rgba(31,53,51,0.04)] transition-[colors,shadow] h-111",
+        showDropzone &&
+          "shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]",
       )}
     >
-      <div
-        data-testid="column-header"
-        className="flex items-center justify-between border-b border-primary-200 bg-primary-50 px-3 py-2 rounded-t-2xl"
-      >
-        <div className="flex items-center gap-2">
-          <p className="text-xs text-primary-600">{column.title}</p>
-          <span
-            data-testid="column-count"
-            className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
+      <AnimatePresence mode="wait" initial={false}>
+        {collapsed ? (
+          <motion.div
+            key="rail"
+            className="flex min-h-0 flex-1 flex-col"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12 }}
           >
-            {column.cards.length}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          {column.wip != null && (
-            <span className="rounded border border-primary-200 px-1.5 py-0.5 text-[10px] text-primary-400">
-              WIP: {column.wip}
-            </span>
-          )}
-          <Plus className="size-4 text-primary-400" />
-          <MoreHorizontal className="size-4 text-primary-400" />
-        </div>
-      </div>
-      <div className="flex flex-col gap-2 p-2 flex-1">
-        {column.cards.map((card) => (
-          <KanbanCard
-            key={card.id}
-            card={card}
-            swimlaneId={swimlaneId}
-            columnId={column.id}
-          />
-        ))}
-        <Button
-          size="sm"
-          data-testid="add-card"
-          onClick={onAddCard}
-          className="w-full rounded-lg border-dashed border-primary-300 text-xs bg-transparent"
-        >
-          <Plus className="size-4" />
-          Add card
-        </Button>
-      </div>
+            <div
+              data-testid="column-header"
+              className="flex flex-col items-center gap-2 border-b border-primary-200 bg-primary-50 px-4 pt-3 pb-5 rounded-t-2xl"
+            >
+              <p className="text-[10px] font-medium text-primary-600 [writing-mode:vertical-rl]">
+                {column.title}
+              </p>
+              <span
+                data-testid="column-count"
+                className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
+              >
+                {column.cards.length}
+              </span>
+            </div>
+            <div className="flex flex-col gap-3 items-center justify-center py-2">
+              {column.cards.map((card) => (
+                <div
+                  key={card.id}
+                  className={cn(
+                    "rounded size-3",
+                    priorityStyles[card.priority],
+                  )}
+                ></div>
+              ))}
+            </div>
+            <Button
+              size="icon-sm"
+              data-testid="add-card"
+              onClick={onAddCard}
+              aria-label="Add card"
+              className="mt-auto mb-3 self-center rounded-lg border-dashed border-primary-300 bg-transparent text-primary-400"
+            >
+              <Plus className="size-4" />
+            </Button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="expanded"
+            className="flex min-h-0 flex-1 flex-col"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12 }}
+          >
+            <div
+              ref={scrollRef}
+              className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+              onScroll={updateEdgeShadow}
+            >
+              <div
+                data-testid="column-header"
+                className={cn(
+                  "sticky top-0 z-10 flex items-center justify-between border-b border-primary-200 bg-primary-50 px-3 py-2 rounded-t-2xl transition-shadow",
+                  edgeShadow.top && STICKY_EDGE_SHADOW,
+                )}
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <p className="truncate text-xs text-primary-600">
+                    {column.title}
+                  </p>
+                  <span
+                    data-testid="column-count"
+                    className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
+                  >
+                    {column.cards.length}
+                  </span>
+                </div>
+                {showHeaderActions && (
+                  <div className="flex shrink-0 items-center gap-2">
+                    {showWip && (
+                      <span className="rounded border border-primary-200 px-1.5 py-0.5 text-[10px] text-primary-400">
+                        WIP: {column.wip}
+                      </span>
+                    )}
+                    {showPlus && <Plus className="size-4 text-primary-400" />}
+                    {showMore && (
+                      <MoreHorizontal className="size-4 text-primary-400" />
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 pt-2 flex-1">
+                {column.cards.length > 0 ? (
+                  <div className="flex flex-col gap-2 mx-2">
+                    {column.cards.map((card) => {
+                      const isLifted = drag?.cardId === card.id;
+                      return (
+                        <Fragment key={card.id}>
+                          <KanbanCard
+                            board={board}
+                            card={card}
+                            swimlaneId={swimlaneId}
+                            columnId={column.id}
+                            width={width}
+                            lifted={isLifted}
+                            dragActive={drag != null}
+                            onLift={onCardLift}
+                            onDragEnd={onCardDragEnd}
+                          />
+                          {isLifted && showDropzone && drag && (
+                            <motion.div
+                              data-testid="card-dropzone"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.12 }}
+                              className="shrink-0 rounded-lg bg-primary-100"
+                              style={{ height: drag.height }}
+                            />
+                          )}
+                        </Fragment>
+                      );
+                    })}
+                    <AnimatePresence>
+                      {showDropzone &&
+                        drag &&
+                        !(
+                          drag.fromSwimlane === swimlaneId &&
+                          drag.fromColumn === column.id
+                        ) && (
+                          <motion.div
+                            key="dropzone"
+                            data-testid="card-dropzone"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.12 }}
+                            className="shrink-0 rounded-lg bg-primary-100"
+                            style={{ height: drag.height }}
+                          />
+                        )}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex gap-2 flex-col justify-center items-center mb-6 mt-21 max-w-40 mx-auto px-2">
+                      <div className="bg-primary-100 size-8 flex items-center justify-center rounded-full">
+                        <Lock className="text-primary-400 size-4" />
+                      </div>
+                      <p className="text-sm text-primary-500 text-center">
+                        No {column.title.toLowerCase()} tasks
+                      </p>
+                      <p className="text-xs text-primary-400 text-center">
+                        Tasks that are {column.title.toLowerCase()} will appear
+                        here
+                      </p>
+                    </div>
+                    <AnimatePresence>
+                      {showDropzone && drag && (
+                        <motion.div
+                          key="dropzone-empty"
+                          data-testid="card-dropzone"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.12 }}
+                          className="shrink-0 rounded-lg border border-dashed border-primary-300 bg-primary-100 mx-2"
+                          style={{ height: drag.height + 8 }}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </>
+                )}
+                <div
+                  className={cn(
+                    "sticky bottom-0 z-10 bg-white px-2 pb-2 transition-shadow",
+                    edgeShadow.bottom &&
+                      `${STICKY_EDGE_SHADOW} border-t border-primary-200 pt-2`,
+                  )}
+                >
+                  <Button
+                    size="sm"
+                    data-testid="add-card"
+                    onClick={onAddCard}
+                    className="w-full rounded-lg border-dashed border-primary-300 text-xs bg-transparent"
+                  >
+                    <Plus className="size-4" />
+                    Add card
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 function KanbanCard({
+  board,
   card,
   swimlaneId,
   columnId,
+  width,
+  lifted = false,
+  dragActive = false,
+  onLift,
+  onDragEnd,
 }: {
+  board: Board;
   card: Card;
   swimlaneId: string;
   columnId: string;
+  width: number;
+  lifted?: boolean;
+  dragActive?: boolean;
+  onLift: (payload: DropPayload, height: number) => void;
+  onDragEnd: () => void;
 }) {
+  const showPriority = width > COLUMN_CARD_PRIORITY_MIN_WIDTH;
   return (
     <div
       draggable
@@ -389,18 +965,27 @@ function KanbanCard({
         };
         e.dataTransfer.setData("application/json", JSON.stringify(payload));
         e.dataTransfer.effectAllowed = "move";
+        const height = e.currentTarget.getBoundingClientRect().height;
+        window.setTimeout(() => onLift(payload, height), 0);
       }}
-      className="flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-grab active:cursor-grabbing"
+      onDragEnd={onDragEnd}
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-grab active:cursor-grabbing transition-shadow duration-200",
+        !dragActive &&
+          "hover:shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]",
+        lifted && "hidden",
+      )}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-center justify-between">
         <span
           data-testid={`priority-badge-${card.priority.toLowerCase()}`}
           className={cn(
-            "rounded px-1.5 py-0.5 text-xs",
+            "rounded",
             priorityStyles[card.priority],
+            !showPriority ? "size-3" : "px-1.5 py-0.5 text-xs",
           )}
         >
-          {card.priority}
+          {showPriority && card.priority}
         </span>
         {card.due && (
           <span className="flex items-center gap-1.5 rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
@@ -412,13 +997,70 @@ function KanbanCard({
       <p data-testid="card-title" className="text-sm text-primary-500">
         {card.title}
       </p>
-      <div data-testid="card-footer" className="flex items-center justify-between">
+      <div
+        data-testid="card-footer"
+        className="flex items-center justify-between"
+      >
         <span className="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] text-primary-400">
           {card.tag}
         </span>
-        <Avatar size="sm" className="size-5!">
-          <AvatarImage src={card.assignee} alt="User profile pic" />
-        </Avatar>
+        <Tooltip>
+          <TooltipTrigger>
+            <Avatar size="sm" className="size-5!">
+              <AvatarImage src={card.assignee.src} alt="User profile pic" />
+            </Avatar>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div>
+              <div className="flex items-center gap-2">
+                <Avatar data-testid="member-avatar" size="sm">
+                  <AvatarImage src={card.assignee.src} alt="User profile pic" />
+                </Avatar>
+                <div>
+                  <p className="font-semibold">
+                    {card.assignee.email}
+                    {card.assignee.isAdmin && (
+                      <span className="ml-2 text-primary-400/70 text-[9px] rounded-sm border border-primary-300 px-1 py-0.5">
+                        Admin
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-primary-400/70 text-xs">
+                    {card.assignee.name}
+                  </p>
+                </div>
+              </div>
+              <Separator
+                orientation="horizontal"
+                className="my-1 bg-primary-300/50"
+              />
+              <div className="flex items-center gap-1">
+                <div
+                  className={cn(
+                    "size-1.5 rounded-full",
+                    card.assignee.status === "Online"
+                      ? "bg-green-500 animate-pulse"
+                      : "bg-primary-400/75",
+                  )}
+                />
+                <p>{card.assignee.status}</p>
+              </div>
+              <div className="flex items-center gap-1 mb-0.5">
+                <BookUser className="size-3.5" />
+                <p>{card.assignee.role}</p>
+              </div>
+              <div className="flex items-center gap-1 mb-0.5">
+                <Box className="size-3.5" />
+                <p>
+                  {board.title}
+                  <span className="ml-1 text-primary-400/70">
+                    +{card.assignee.boardCount - 1}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

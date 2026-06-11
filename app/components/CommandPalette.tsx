@@ -41,7 +41,7 @@ const actions: Item[] = [
     icon: Plus,
     iconTone: "brand",
     shortcut: ["C"],
-    onSelect: () => {},
+    onSelect: (router) => router.push("/"),
   },
   {
     id: "create-board",
@@ -50,7 +50,7 @@ const actions: Item[] = [
     icon: Plus,
     iconTone: "brand",
     shortcut: ["Shift", "C"],
-    onSelect: () => {},
+    onSelect: (router) => router.push("/"),
   },
   {
     id: "start-focus",
@@ -68,7 +68,7 @@ const actions: Item[] = [
     icon: Square,
     iconTone: "brand",
     shortcut: ["Shift", "F"],
-    onSelect: () => {},
+    onSelect: (router) => router.push("/focus-timer"),
   },
 ];
 

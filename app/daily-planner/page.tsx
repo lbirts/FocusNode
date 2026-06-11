@@ -10,8 +10,15 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu";
 import { Separator } from "@/ui/separator";
-import { ChevronDown, Clock, LayoutGrid, Plus, Timer } from "lucide-react";
-import { useMemo, useState } from "react";
+import {
+  ChevronDown,
+  Clock,
+  LayoutGrid,
+  Loader2,
+  Plus,
+  Timer,
+} from "lucide-react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 type Priority = "Urgent" | "Medium" | "Normal";
 type Category = "Design" | "Docs" | "Dev";
@@ -107,10 +114,34 @@ const priorityStyles: Record<Priority, string> = {
   Normal: "bg-secondary-50 text-secondary-400",
 };
 
+const STICKY_EDGE_SHADOW =
+  "shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]";
+
 export default function DailyPlannerPage() {
   const [filter, setFilter] = useState<(typeof filterOptions)[number]>("All");
   const [rankBy, setRankBy] = useState<RankBy>("Priority");
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [edgeShadow, setEdgeShadow] = useState({ top: false, bottom: false });
+
+  const updateEdgeShadow = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    setEdgeShadow({
+      top: scrollTop > 0,
+      bottom: scrollTop + clientHeight < scrollHeight - 1,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isLoading) {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+    }
+  }, [isLoading]);
 
   const visibleTasks = useMemo(() => {
     const filtered =
@@ -122,6 +153,15 @@ export default function DailyPlannerPage() {
     );
     return sorted;
   }, [tasks, filter, rankBy]);
+
+  useLayoutEffect(() => {
+    updateEdgeShadow();
+    const el = scrollRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(updateEdgeShadow);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleTasks.length, updateEdgeShadow]);
 
   const completed = tasks.filter((t) => t.status === "Completed").length;
   const remaining = tasks.length - completed;
@@ -174,8 +214,14 @@ export default function DailyPlannerPage() {
             size="sm"
             variant="outline"
             data-testid="pull-from-boards"
+            disabled={isLoading}
+            onClick={() => setIsLoading(!isLoading)}
           >
-            <LayoutGrid />
+            {isLoading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <LayoutGrid className="size-4" />
+            )}
             Pull from boards
           </Button>
           <Button
@@ -189,8 +235,8 @@ export default function DailyPlannerPage() {
       </div>
 
       <div className="flex flex-1 min-h-0">
-        <div className="flex-1 min-w-0 px-3 pt-4 pb-12 flex flex-col gap-4 overflow-y-auto">
-          <div className="flex items-center justify-between">
+        <div className="flex-1 min-w-0 min-h-0 pt-4 pb-12 flex flex-col gap-4">
+          <div className="flex items-center justify-between px-3">
             <p
               data-testid="eyebrow-label"
               className="text-xs font-medium uppercase text-primary-400"
@@ -249,69 +295,91 @@ export default function DailyPlannerPage() {
             </div>
           </div>
 
-          <div data-testid="planner-task-list" className="flex flex-col gap-2">
-            {visibleTasks.map((task, idx) => (
-              <div
-                key={task.id}
-                data-testid="planner-task"
-                className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[2px_4px_40px_10px_rgba(31,53,51,0.04)]"
-              >
+          <div
+            ref={scrollRef}
+            data-testid="planner-task-list"
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto"
+            onScroll={updateEdgeShadow}
+          >
+            <div
+              aria-hidden
+              className={cn(
+                "sticky top-0 z-10 h-px shrink-0 bg-primary-50 transition-shadow",
+                edgeShadow.top && STICKY_EDGE_SHADOW,
+              )}
+            />
+            <div className="flex flex-col gap-2 px-3">
+              {visibleTasks.map((task, idx) => (
                 <div
-                  data-testid="planner-task-index"
-                  className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
+                  key={task.id}
+                  data-testid="planner-task"
+                  className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[2px_4px_40px_10px_rgba(31,53,51,0.04)]"
                 >
-                  {idx + 1}
-                </div>
-                <div
-                  data-testid="planner-task-body"
-                  className="flex-1 min-w-0 rounded-lg border border-primary-100 bg-primary-50 p-3"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "rounded px-1.5 py-0.5 text-xs",
-                          priorityStyles[task.priority],
-                        )}
-                      >
-                        {task.priority}
-                      </span>
-                      <span className="rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
-                        {task.category}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center gap-1.5 text-xs text-primary-400">
-                        <Clock className="size-3" />
-                        {task.estimate}
-                      </span>
-                      {task.progress ? (
-                        <span className="flex items-center gap-1.5 rounded bg-secondary-50 px-1.5 py-0.5 text-xs text-secondary-400">
-                          <Timer className="size-3" />
-                          {task.progress}
+                  <div
+                    data-testid="planner-task-index"
+                    className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
+                  >
+                    {idx + 1}
+                  </div>
+                  <div
+                    data-testid="planner-task-body"
+                    className="flex-1 min-w-0 rounded-lg border border-primary-100 bg-primary-50 p-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={cn(
+                            "rounded px-1.5 py-0.5 text-xs",
+                            priorityStyles[task.priority],
+                          )}
+                        >
+                          {task.priority}
                         </span>
-                      ) : (
                         <span className="rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
-                          {task.status}
+                          {task.category}
                         </span>
-                      )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1.5 text-xs text-primary-400">
+                          <Clock className="size-3" />
+                          {task.estimate}
+                        </span>
+                        {task.progress ? (
+                          <span className="flex items-center gap-1.5 rounded bg-secondary-50 px-1.5 py-0.5 text-xs text-secondary-400">
+                            <Timer className="size-3" />
+                            {task.progress}
+                          </span>
+                        ) : (
+                          <span className="rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
+                            {task.status}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-col gap-2">
+                      <p className="text-sm text-primary-500">{task.title}</p>
+                      <p className="text-xs text-primary-400">{task.board}</p>
                     </div>
                   </div>
-                  <div className="mt-3 flex flex-col gap-2">
-                    <p className="text-sm text-primary-500">{task.title}</p>
-                    <p className="text-xs text-primary-400">{task.board}</p>
-                  </div>
                 </div>
-              </div>
-            ))}
-            <Button
-              size="sm"
-              onClick={addTask}
-              className="w-full rounded-lg border-dashed border-primary-300 text-xs bg-transparent"
+              ))}
+            </div>
+            <div
+              className={cn(
+                "sticky bottom-0 z-10 bg-primary-50 pt-2 transition-shadow px-3",
+                edgeShadow.bottom &&
+                  `${STICKY_EDGE_SHADOW} border-t border-primary-200`,
+              )}
             >
-              <Plus className="size-4" />
-              Add task to today
-            </Button>
+              <Button
+                size="sm"
+                onClick={addTask}
+                className="w-full rounded-lg border-dashed border-primary-300 text-xs bg-transparent"
+              >
+                <Plus className="size-4" />
+                Add task to today
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -319,7 +387,10 @@ export default function DailyPlannerPage() {
           <h3 className="text-base text-primary-600 font-medium">
             Connected Boards
           </h3>
-          <div data-testid="connected-boards" className="flex flex-1 flex-col gap-1">
+          <div
+            data-testid="connected-boards"
+            className="flex flex-1 flex-col gap-1"
+          >
             {boards.map((board) => (
               <div
                 key={board.name}
@@ -360,7 +431,11 @@ export default function DailyPlannerPage() {
                 className="col-start-1"
                 testId="stat-completed"
               />
-              <Stat value={remaining} label="Remaining" className="col-start-2" />
+              <Stat
+                value={remaining}
+                label="Remaining"
+                className="col-start-2"
+              />
               <Stat value="78%" label="Capacity" className="col-start-1" />
               <Stat value="2:35" label="Focus time" className="col-start-2" />
             </div>
