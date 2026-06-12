@@ -287,7 +287,7 @@ function ListView() {
     if (!el) return;
     const { scrollTop, scrollHeight, clientHeight } = el;
     setEdgeShadow({
-      top: scrollTop > 0,
+      top: scrollTop > scrollHeight,
       bottom: scrollTop + clientHeight < scrollHeight - 1,
     });
   }, []);
