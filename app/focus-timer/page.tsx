@@ -71,8 +71,10 @@ const defaultBlocking = {
 
 const TICK_COUNT = 24;
 
+const TICK_LEAD = 0.5;
+
 function ClockDial({ progress }: { progress: number }) {
-  const activeTicks = Math.round(progress * TICK_COUNT);
+  const activeTicks = Math.round(progress * TICK_COUNT + TICK_LEAD);
   return (
     <svg
       viewBox="0 0 300 300"
