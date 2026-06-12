@@ -6,6 +6,23 @@ import * as React from "react";
 import { cn } from "@/app/lib/utils";
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 
+function snapAnchorRect(ref: React.RefObject<HTMLElement | null>) {
+  return () => ({
+    getBoundingClientRect: () => {
+      const r = ref.current?.getBoundingClientRect();
+      const dpr =
+        typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+      const snap = (v: number) => Math.round(v * dpr - v * dpr) / dpr;
+      return new DOMRect(
+        snap(r?.left ?? 0),
+        snap(r?.top ?? 0),
+        snap(r?.width ?? 0),
+        snap(r?.height ?? 0),
+      );
+    },
+  });
+}
+
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
 }
@@ -30,10 +47,12 @@ function DropdownMenuContent({
     MenuPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
   >) {
+  const triggerRef = React.useRef<HTMLElement | null>(null);
   return (
     <MenuPrimitive.Portal>
       <MenuPrimitive.Positioner
         className="isolate z-50 outline-none"
+        anchor={snapAnchorRect(triggerRef)}
         align={align}
         alignOffset={alignOffset}
         side={side}
