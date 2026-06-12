@@ -173,3 +173,19 @@ body {
   }
 }
 
+/* Attention bounce — nudge in from the left as it settles. */
+@keyframes bounce-attention {
+  0%,
+  100% {
+    transform: translate(-32px, -25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translate(-32px, 0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+:root {
+  --animate-bounce: bounce-attention 1s infinite;
+}
+
