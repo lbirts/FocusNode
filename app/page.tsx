@@ -81,11 +81,13 @@ function columnWidthAtScroll(index: number, scrollLeft: number) {
 }
 
 function stickyLeftAtScroll(columnIndex: number, scrollLeft: number) {
-  let left = 0;
-  for (let i = 0; i < columnIndex; i++) {
-    left += columnWidthAtScroll(i, scrollLeft) + COLUMN_GAP;
-  }
-  return left;
+  const priorWidths = Array.from({ length: columnIndex }, (_, i) =>
+    columnWidthAtScroll(i, scrollLeft),
+  );
+  return priorWidths.reduce(
+    (offset, _width) => offset + COLUMN_EXPANDED_WIDTH + COLUMN_GAP,
+    0,
+  );
 }
 
 function totals(board: Board) {
