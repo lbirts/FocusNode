@@ -576,7 +576,7 @@ function KanbanBoard() {
                 className="flex min-h-0 flex-col overflow-hidden border-b border-primary-200"
                 initial={false}
                 animate={{ flexGrow: expanded ? 1 : 0 }}
-                transition={{ type: "tween", duration: 0.28, ease: "easeOut" }}
+                transition={{ type: "tween", duration: 0.28, ease: "easeIn" }}
                 style={{
                   flexBasis: LANE_HEADER_HEIGHT,
                   flexShrink: 0,
