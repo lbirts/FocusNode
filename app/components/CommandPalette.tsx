@@ -198,6 +198,7 @@ function PaletteItem({
       className="rounded-lg! gap-3 p-3 data-[selected=true]:bg-primary-100!  data-[selected=true]:[&>svg]:opacity-100 [&>svg]:opacity-0"
     >
       <span
+        data-testid={`palette-icon-${item.id}`}
         className={cn(
           "flex size-8 shrink-0 items-center justify-center rounded-lg",
           item.iconTone === "brand"

@@ -235,7 +235,7 @@ export default function DailyPlannerPage() {
             onClick={() => setIsLoading(!isLoading)}
           >
             {isLoading ? (
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 data-testid="pull-spinner" className="size-4 animate-spin" />
             ) : (
               <LayoutGrid className="size-4" />
             )}
@@ -375,7 +375,12 @@ export default function DailyPlannerPage() {
                       </div>
                     </div>
                     <div className="mt-3 flex flex-col gap-2">
-                      <p className="text-sm text-primary-500">{task.title}</p>
+                      <p
+                        data-testid="planner-task-title"
+                        className="text-sm text-primary-500"
+                      >
+                        {task.title}
+                      </p>
                       <p className="text-xs text-primary-400">{task.board}</p>
                     </div>
                   </div>

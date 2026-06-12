@@ -376,6 +376,7 @@ function ListView() {
       >
         <div
           aria-hidden
+          data-testid="list-edge-shadow-top"
           className={cn(
             "sticky top-0 z-10 h-px shrink-0 bg-primary-50 transition-shadow",
             edgeShadow.top && STICKY_EDGE_SHADOW,
@@ -433,6 +434,7 @@ function ListView() {
         </div>
         <div
           aria-hidden
+          data-testid="list-edge-shadow-bottom"
           className={cn(
             "sticky bottom-0 z-10 h-px shrink-0 bg-primary-50 transition-shadow",
             edgeShadow.bottom && STICKY_EDGE_SHADOW,
@@ -505,10 +507,9 @@ function StatusGroup({
               <p className="w-[300px] text-sm text-primary-500">{task.name}</p>
               <div className="flex w-[100px] items-center justify-center">
                 {task.assignees.map((assignee, i) => (
-                  <Tooltip>
+                  <Tooltip key={assignee.name}>
                     <TooltipTrigger>
                       <Avatar
-                        key={assignee.name}
                         data-testid="task-assignee-avatar"
                         className={cn(
                           "size-5 border-[3px] border-primary-50",
