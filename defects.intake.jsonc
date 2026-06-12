@@ -1,727 +1,243 @@
 {
   "defects": [
-    // Phase 1 Defects
+    // Fragile scroll/dock geometry (page.tsx helpers)
     {
-      "branch": "defect/d1-swimlane-gap",
-      "id": "d1",
-      "category": "spacing-alignment",
-      "tier": "high",
-      "selector": "[data-testid=\"swimlane-columns\"]",
-      "whatsWrong": "swimlane columns row has no gap",
-      "checks": [{ "type": "computed-style", "target": "gap" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d2-urgent-badge-color",
-      "id": "d2",
-      "category": "color",
-      "tier": "high",
-      // Every Urgent badge across all expanded swimlanes carries this testid.
-      // The defect affects all of them, so the check must pass on every match.
-      "selector": "[data-testid=\"priority-badge-urgent\"]",
-      "whatsWrong": "Urgent badge uses off-palette hard-coded #ffcc00 / #000 instead of the bg-red-light / text-red tokens",
-      "checks": [
-        { "type": "computed-style", "target": "background-color" },
-        { "type": "computed-style", "target": "color" },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d3-kanban-header-direction",
-      "id": "d3",
+      "branch": "defect/dock-static-left-accum",
+      "id": "dock-static-left-accum",
       "category": "layout",
       "tier": "high",
-      "selector": "[data-testid=\"page-header\"]",
-      "whatsWrong": "Kanban page header has flex-direction: column instead of row, stacking the title cluster and the action buttons vertically",
-      "checks": [{ "type": "computed-style", "target": "flex-direction" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d4-swimlane-align-items",
-      "id": "d4",
-      "category": "layout",
-      "tier": "mid",
-      "selector": "[data-testid=\"swimlane-columns\"]",
-      "whatsWrong": "swimlane columns wrapper has align-items: flex-start, so columns hug their content height instead of stretching to match siblings (golden uses default stretch)",
-      "checks": [{ "type": "computed-style", "target": "align-items" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d5-card-title-clip",
-      "id": "d5",
-      "category": "overflow-clipping",
-      "tier": "mid",
-      // The clipping defect applies to every card title on the board; the check must pass on every match.
-      "selector": "[data-testid=\"card-title\"]",
-      "whatsWrong": "card title has whitespace: nowrap and overflow: hidden, so long titles get hard-clipped mid-word",
+      "selector": "[data-testid=\"kanban-column-1\"]",
+      "whatsWrong": "once columns dock, each column's left position is accumulated from the static expanded width so the railed columns scatter rightward instead of stacking flush",
       "checks": [
-        { "type": "computed-style", "target": "overflow" },
-        { "type": "computed-style", "target": "white-space" },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d6-nav-active-color",
-      "id": "d6",
-      "category": "color",
-      "tier": "high",
-      "selector": "[data-testid=\"nav-link\"][data-active=\"true\"]",
-      "whatsWrong": "active nav button uses hard-coded off-palette bg-[#e0e0ff] with text-[#1a1a4d] instead of the bg-brand / text-primary-50 tokens delivered by the orange Button variant",
-      "checks": [
-        { "type": "computed-style", "target": "background-color" },
-        { "type": "computed-style", "target": "color" },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d7-nav-wrong-icons",
-      "id": "d7",
-      "category": "iconography",
-      "tier": "mid",
-      "selector": "[data-testid^=\"nav-icon-\"]",
-      "whatsWrong": "three of the four left-nav icons render the wrong lucide glyph: Kanban Boards shows lucide-calendar (should be lucide-layout-grid), Focus Timer shows lucide-hourglass (should be lucide-timer), Daily Planner shows lucide-layout-grid (should be lucide-calendar); Team Workload's lucide-users is correct",
-      // Lucide-react sets a semantic class on each rendered. On the broken branch the class names don't match the labels.
-      // Custom `attribute` check on the svg's `class` catches each wrong icon directly.
-      "checks": [{ "type": "attribute", "target": "class" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d8-focus-timer-presets-gap",
-      "id": "d8",
-      "category": "spacing-alignment",
-      "tier": "high",
-      "selector": "[data-testid=\"focus-timer-presets\"]",
-      "whatsWrong": "the minute preset button row gap is 0",
-      "checks": [{ "type": "computed-style", "target": "gap" }],
-      "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d9-stats-grid-and-clip",
-      "id": "d9",
-      "category": "layout",
-      "tier": "high",
-      "selector": "[data-testid=\"today-stats-grid\"]",
-      "whatsWrong": "`Today's stats` grid is grid-template-columns: 1fr (one column) instead of two in a 2x2 grid; the bottom tiles also get clipped by the fixed-height sidebar with no scroll affordance",
-      "checks": [
-        { "type": "computed-style", "target": "grid-template-columns" },
         {
           "type": "bounding-box",
-          "target": "all four stat tiles must be visible inside the sidebar and must not be clipped by their container",
+          "target": "the left edge of [data-testid=\"kanban-column-1\"] must sit immediately to the right of the right edge of [data-testid=\"kanban-column-0\"] (separated by no more than a single small column gap), not pushed nearly a full expanded-column width away",
         },
       ],
       "where": [
         {
-          "screen": "daily-planner",
-          "state": "default",
+          "screen": "kanban",
+          "state": "columns-docked",
           "viewport": "desktop",
         },
       ],
     },
     {
-      "branch": "defect/d10-avatar-oval",
-      "id": "d10",
-      "category": "iconography",
-      "tier": "high",
-      // Every assignee avatar carries this testid; the oval-stretch defect
-      // affects all of them, so the check must pass on every match.
-      "selector": "[data-testid=\"task-assignee-avatar\"]",
-      "whatsWrong": "assignee avatar width was widened from size-5 to w-9 (keeping h-5), so portraits stretch horizontally to fill an oval instead of fitting in a circle",
+      "branch": "defect/dock-clamp-ceiling",
+      "id": "dock-clamp-ceiling",
+      "category": "spacing-alignment",
+      "tier": "mid",
+      "selector": "[data-testid=\"kanban-column-0\"]",
+      "whatsWrong": "a fully-docked column rails out wider than the narrow rail because its shed budget is capped short of the full collapse range",
       "checks": [{ "type": "computed-style", "target": "width" }],
       "where": [
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d11-team-title-italic-light",
-      "id": "d11",
-      "category": "typography",
-      "tier": "mid",
-      "selector": "[data-testid=\"page-title\"]",
-      "whatsWrong": "Team Workload header title is italic and font-light instead of font-medium, mismatching the matching headers on the other three pages",
-      "checks": [
-        { "type": "computed-style", "target": "font-style" },
-        { "type": "computed-style", "target": "font-weight" },
-      ],
-      "where": [
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d12-primary-400-token",
-      "id": "d12",
-      "category": "color",
-      "tier": "low",
-      // The same `muted-text-sample` testid is placed on one stable
-      // text-primary-400 element on each of the four pages
-      // Checking color on all four confirms the token shift is uniform
-      // and the symptom shows everywhere expected.
-      "selector": "[data-testid=\"muted-text-sample\"]",
-      "whatsWrong": "the --color-primary-400 design token shifted from #8f938a to #a8aba2 (a few percent lighter), so every text-primary-400 element across the app looks slightly washed out",
-      "checks": [{ "type": "computed-style", "target": "color" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
         {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d13-page-title-font-fallback",
-      "id": "d13",
-      "category": "typography",
-      "tier": "low",
-      // Daily Planner and Team h3s share the same page-title testid.
-      "selector": "[data-testid=\"page-title\"]",
-      "whatsWrong": "page header h3 has an inline style overriding font-family to Inter; the rest of the app uses Plus Jakarta Sans for headings",
-      "checks": [{ "type": "computed-style", "target": "font-family" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d14-uppercase-tracking",
-      "id": "d14",
-      "category": "typography",
-      "tier": "low",
-      // The same `eyebrow-label` testid is placed on one representative
-      // uppercase element on each of the four pages.
-      "selector": "[data-testid=\"eyebrow-label\"]",
-      "whatsWrong": "every .uppercase element has letter-spacing: -0.04em (negative tracking), making all uppercase eyebrows on every page look cramped",
-      "checks": [{ "type": "computed-style", "target": "letter-spacing" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d15-team-default-tab",
-      "id": "d15",
-      "category": "layout",
-      "tier": "high",
-      // The defect is observable as: on page load, the list view is missing and
-      // the board placeholder is shown instead. The bounding-box check directly catches that user-visible symptom.
-      "selector": "[data-testid=\"team-list-view\"]",
-      "whatsWrong": "Team page initializes tab state to 'board' instead of 'list', so it lands on the 'Board view coming soon' placeholder by default instead of the actual task list",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "the [data-testid=\"team-list-view\"] element must be present and visible on page load",
-        },
-      ],
-      "where": [
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/d16-daily-planner-header-padding",
-      "id": "d16",
-      "category": "spacing-alignment",
-      "tier": "low",
-      "selector": "[data-testid=\"page-header\"]",
-      "whatsWrong": "Daily Planner header uses pl-6 pr-1 instead of the px-3 used on every other page header, so the title sits noticeably further from the sidebar and the Auto-rank button hugs the right edge",
-      "checks": [
-        { "type": "computed-style", "target": "padding-left" },
-        { "type": "computed-style", "target": "padding-right" },
-      ],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
+          "screen": "kanban",
+          "state": "columns-docked",
           "viewport": "desktop",
         },
       ],
     },
 
-    // Phase 2 Defects
-    // CLUSTER 1 — Daily Planner
+    // Swimlane accordion tween + collapsed geometry (page.tsx motion.div)
     {
-      "branch": "defect/cluster-1",
-      "id": "c1-btn-height",
-      "category": "spacing-alignment",
-      "tier": "mid",
-      "selector": "[data-testid=\"pull-from-boards\"]",
-      "whatsWrong": "Button cva `sm` size is h-9 (36px) instead of h-8 (32px); every small button is 4px too tall. Cause is in the primitive, not the call sites. Pull-from-boards is outline (no compoundVariant bg) so it isolates the height.",
-      "checks": [{ "type": "computed-style", "target": "height" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/cluster-1",
-      "id": "c1-card-pad",
-      "category": "spacing-alignment",
-      "tier": "low",
-      "selector": "[data-testid=\"planner-task\"]",
-      "whatsWrong": "Conservation split on the task row: outer p-3->p-2 (12->8px) and inner card p-3->p-4 (12->16px), sum constant. The title text stays put, only the inner bordered box shifts; fixing either alone moves the text. padding-left reads 8px vs golden 12px.",
-      "checks": [{ "type": "computed-style", "target": "padding-left" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/cluster-1",
-      "id": "c1-stat",
-      "category": "typography",
-      "tier": "low",
-      "selector": "[data-testid=\"stat-value\"]",
-      "whatsWrong": "Stat sub-component: number text-3xl->text-2xl (30->24px) plus a tile pad-swap pt-2 pb-3->pt-3 pb-2 (vertical sum constant, graded by the diff). All four tiles change; call sites are correct, fix is in the Stat primitive. font-size reads 24px vs golden 30px.",
-      "checks": [{ "type": "computed-style", "target": "font-size" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/cluster-1",
-      "id": "c1-separator",
-      "category": "color",
-      "tier": "low",
-      "selector": "[data-testid=\"header-divider\"]",
-      "whatsWrong": "Separator primitive: bg-border->bg-primary-300 and (vertical) w-px->w-0.5; header dividers are darker + thicker. Symptom in the page, fix in ui/separator.tsx. Width reads 2px vs golden 1px.",
-      "checks": [
-        { "type": "computed-style", "target": "background-color" },
-        { "type": "computed-style", "target": "width" },
-      ],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/cluster-1",
-      "id": "c1-circle",
-      "category": "spacing-alignment",
-      "tier": "low",
-      "selector": "[data-testid=\"planner-task-index\"]",
-      "whatsWrong": "Horizontal conservation: task number circle size-5->size-6 (20->24px) and row gap-3->gap-2 (12->8px), overlapping c1-card-pad's row padding so the inner text stays aligned and any partial fix shifts it. width reads 24px vs golden 20px.",
-      "checks": [{ "type": "computed-style", "target": "width" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/cluster-1",
-      "id": "c1-font",
-      "category": "typography",
-      "tier": "mid",
-      "selector": "[data-testid=\"page-title\"]",
-      "whatsWrong": "Font tokens drop the \"Variable\" suffix (\"Plus Jakarta Sans\"/\"Inter\"); no @font-face matches, so the app falls back to system sans. The computed font-family string itself differs (\"Plus Jakarta Sans\" vs golden \"Plus Jakarta Sans Variable\").",
-      "checks": [{ "type": "computed-style", "target": "font-family" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/cluster-1",
-      "id": "c1-autorank",
-      "category": "color",
-      "tier": "mid",
-      "selector": "[data-testid=\"auto-rank\"]",
-      "whatsWrong": "Relocate-and-corrupt: Auto-rank's bg-secondary-400 is removed from the call site and re-supplied (wrong, bg-secondary-300) via an added cva compoundVariant. Deleting the compoundVariant leaves the button with no bg. background-color is secondary-300 vs golden secondary-400.",
-      "checks": [{ "type": "computed-style", "target": "background-color" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-
-    // CLUSTER 2 — Focus Timer
-    {
-      "branch": "defect/cluster-2",
-      "id": "c2-tabnum",
-      "category": "typography",
-      "tier": "low",
-      "selector": "[data-testid=\"timer-countdown\"]",
-      "whatsWrong": "Countdown lost tabular-nums; pixel-identical at rest, but computed font-variant-numeric is normal (golden tabular-nums) and digits jitter while running.",
-      "checks": [
-        { "type": "computed-style", "target": "font-variant-numeric" },
-      ],
-      "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-2",
-      "id": "c2-transition",
+      "branch": "defect/swimlane-slow-tween",
+      "id": "swimlane-slow-tween",
       "category": "interactive-states",
-      "tier": "low",
-      "selector": "[data-testid=\"timer-play\"]",
-      "whatsWrong": "Play button has transition-none added; no hover/press motion. Invisible at rest. transition-property is none vs golden all (Button base is transition-all).",
-      "checks": [{ "type": "computed-style", "target": "transition-property" }],
+      "tier": "high",
+      "selector": "[data-testid=\"swimlane-lane\"][data-active=\"true\"]",
+      "whatsWrong": "the lane expand/collapse tween runs longer than spec, so mid-flight the active lane has grown less than it should",
+      "checks": [{ "type": "computed-style", "target": "flex-grow" }],
       "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+        {
+          "screen": "kanban",
+          "state": "lane-switch-anim",
+          "viewport": "desktop",
+          "at": 140,
+        },
       ],
     },
     {
-      "branch": "defect/cluster-2",
-      "id": "c2-blend",
-      "category": "color",
+      "branch": "defect/swimlane-ease-mirror",
+      "id": "swimlane-ease-mirror",
+      "category": "interactive-states",
+      "tier": "high",
+      "selector": "[data-testid=\"swimlane-lane\"][data-active=\"true\"]",
+      "whatsWrong": "the lane expand tween uses an inverted easing curve, so mid-flight the active lane's growth is mirrored",
+      "checks": [{ "type": "computed-style", "target": "flex-grow" }],
+      "where": [
+        {
+          "screen": "kanban",
+          "state": "lane-switch-anim",
+          "viewport": "desktop",
+          "at": 140,
+        },
+      ],
+    },
+    {
+      "branch": "defect/swimlane-flexbasis",
+      "id": "swimlane-flexbasis",
+      "category": "spacing-alignment",
       "tier": "mid",
-      "selector": "[data-testid=\"timer-preset-focus\"]",
-      "whatsWrong": "Preset cards have mix-blend-multiply; rendered color is a composite of card x background and maps to no token. mix-blend-mode is multiply vs golden normal.",
-      "checks": [{ "type": "computed-style", "target": "mix-blend-mode" }],
+      "selector": "[data-testid=\"swimlane-lane\"][data-active=\"false\"]",
+      "whatsWrong": "collapsed swimlane header bands are shorter than the header height, so the eyebrow labels sit cramped in a too-short band",
+      "checks": [{ "type": "computed-style", "target": "flex-basis" }],
       "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+        { "screen": "kanban", "state": "default", "viewport": "desktop" },
       ],
     },
+
+    // Drag-and-drop carry geometry (page.tsx)
     {
-      "branch": "defect/cluster-2",
+      "branch": "defect/dnd-placeholder-height",
+      "id": "dnd-placeholder-height",
+      "category": "spacing-alignment",
+      "tier": "mid",
+      "selector": "[data-testid=\"card-dropzone\"]",
+      "whatsWrong": "the in-place placeholder left by a lifted card is shorter than the card, so the column collapses upward while the card is carried",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "[data-testid=\"card-dropzone\"] must be the same height as a sibling [data-testid=\"kanban-card\"] in the same column",
+        },
+      ],
+      "where": [
+        { "screen": "kanban", "state": "card-lifted", "viewport": "desktop" },
+      ],
+    },
+
+    // Detached dropdown anchor (ui/dropdown-menu.tsx primitive)
+    {
+      "branch": "defect/dropdown-anchor-detach",
+      "id": "dropdown-anchor-detach",
+      "category": "layout",
+      "tier": "high",
+      "selector": "[data-testid=\"team-menu\"]",
+      "whatsWrong": "the chip dropdown is anchored to the viewport instead of its trigger, so it floats at the top-left corner rather than opening beneath the chip",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "[data-testid=\"team-menu\"] must open directly below [data-testid=\"chip-team\"] (its top edge near the chip's bottom edge), not detached at the top-left of the viewport",
+        },
+      ],
+      "where": [
+        {
+          "screen": "kanban-redesign",
+          "state": "add-task-team-menu",
+          "viewport": "desktop",
+        },
+      ],
+    },
+
+    // Focus-timer dial geometry (focus-timer/page.tsx ClockDial)
+    {
+      "branch": "defect/c2-dial",
       "id": "c2-dial",
       "category": "iconography",
       "tier": "mid",
       "selector": "[data-testid=\"dial-tick-active\"]",
-      "whatsWrong": "activeTicks uses Math.ceil instead of round; one extra dial tick is lit. In the running state (Short Break ~15s, progress ~1.2 ticks) golden lights 1 tick, defect lights 2, so the lit-tick region is wider: its bounding box differs from golden.",
+      "whatsWrong": "the progress dial lights one extra tick because the active-tick count carries a half-tick lead bias that rounds up across the boundary",
       "checks": [
         {
           "type": "bounding-box",
-          "target": "the bounding box of [data-testid='dial-tick-active'] (the lit ticks) must match golden; an extra lit tick widens the active region",
+          "target": "the lit (active) dial ticks must span the same arc as golden — an extra lit tick widens the active region past where progress reaches",
         },
       ],
       "where": [
-        { "screen": "focus-timer", "state": "running", "viewport": "desktop" },
+        {
+          "screen": "focus-timer",
+          "state": "mid-session",
+          "viewport": "desktop",
+        },
       ],
     },
     {
-      "branch": "defect/cluster-2",
+      "branch": "defect/c2-ticklen",
       "id": "c2-ticklen",
       "category": "iconography",
-      "tier": "low",
-      "selector": "[data-testid=\"dial-tick-active\"]",
-      "whatsWrong": "Active dial-tick length relocated into ACTIVE_TICK_Y2 = 33 (golden 36); active ticks are 3px short (the line stops at y2 33 vs 36). Deleting the constant throws. The shorter tick yields a smaller bounding box than golden (running state has lit ticks in both).",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "the bounding box of [data-testid='dial-tick-active'] (the lit ticks) must match golden; active ticks ending at y2=33 instead of 36 shorten the region",
-        },
-      ],
-      "where": [
-        { "screen": "focus-timer", "state": "running", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-2",
-      "id": "c2-grid",
-      "category": "layout",
-      "tier": "high",
-      "selector": "[data-testid=\"focus-timer-presets\"]",
-      "whatsWrong": "Preset row is a grid grid-cols-1 instead of a horizontal flex row, so the three preset cards (Focus / Short Break / Long Break) stack vertically and stretch full-width instead of sitting side by side. computed display is grid vs golden flex, and grid-template-columns is a single column vs golden none.",
-      "checks": [
-        { "type": "computed-style", "target": "display" },
-        { "type": "computed-style", "target": "grid-template-columns" },
-      ],
-      "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-2",
-      "id": "c2-controls",
-      "category": "spacing-alignment",
       "tier": "mid",
-      "selector": "[data-testid=\"timer-controls\"]",
-      "whatsWrong": "The Restart and Skip buttons are transposed in the JSX itself (DOM order is Skip, Play, Restart) - there is no flex-row-reverse or order class, just a relocated element like a real reorder bug, so there is no CSS token to grep or delete. Restart renders on the far right and Skip on the far left while Play stays centered; the fix is to move the elements back to Restart, Play, Skip.",
+      "selector": "[data-testid=\"dial-tick-active\"]",
+      "whatsWrong": "the lit dial ticks reach short of full length because the active branch of the tick-reach lookup is under-set, while a thicker active stroke masks the missing length",
       "checks": [
         {
           "type": "bounding-box",
-          "target": "[data-testid='timer-restart'] must be to the left of [data-testid='timer-skip']",
+          "target": "the lit (active) dial ticks must reach the same inner length as golden — their inner end must extend as deep toward the dial center as golden's; a thicker stroke does not restore the missing length",
         },
       ],
       "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
+        {
+          "screen": "focus-timer",
+          "state": "mid-session",
+          "viewport": "desktop",
+        },
       ],
     },
 
-    // CLUSTER 3 — Kanban
+    // Card-created flash highlight reverts too soon (page.tsx createTask)
     {
-      "branch": "defect/cluster-3",
-      "id": "c3-badge-blend",
-      "category": "color",
+      "branch": "defect/cardflash-revert",
+      "id": "cardflash-revert",
+      "category": "interactive-states",
       "tier": "mid",
-      "selector": "[data-testid^=\"priority-badge\"]",
-      "whatsWrong": "Priority badges have mix-blend-multiply; the color is a composite and maps to no token. mix-blend-mode is multiply vs golden normal.",
-      "checks": [{ "type": "computed-style", "target": "mix-blend-mode" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-3",
-      "id": "c3-avatar-blend",
-      "category": "color",
-      "tier": "low",
-      "selector": "[data-testid=\"member-avatar\"]",
-      "whatsWrong": "Header member avatars have mix-blend-multiply; the photos composite with the background. Can't be color-sampled, no token to grep. mix-blend-mode is multiply vs golden normal.",
-      "checks": [{ "type": "computed-style", "target": "mix-blend-mode" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-3",
-      "id": "c3-card-border",
-      "category": "color",
-      "tier": "mid",
-      "selector": "[data-testid=\"kanban-card\"]",
-      "whatsWrong": "Relocate-and-corrupt: the card's `border border-primary-100` is removed and re-created (wrong color, primary-200) in a `before:` pseudo-element. Deleting the pseudo removes the border entirely. The card's own border-top-width is 0px vs golden 1px.",
-      "checks": [{ "type": "computed-style", "target": "border-top-width" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-3",
-      "id": "c3-col-stripe",
-      "category": "color",
-      "tier": "low",
-      "selector": "[data-testid=\"kanban-column-1\"]",
-      "whatsWrong": "Columns have an `even:` (:nth-child) bg stripe; alternating columns are tinted with no per-element class. kanban-column-1 (2nd, even) background-color is primary-50 vs golden white.",
+      "selector": "[data-testid=\"kanban-card\"][data-highlighted]",
+      "whatsWrong": "the freshly-created card's flash highlight clears almost immediately, so it is no longer highlighted while the create animation is still being shown",
       "checks": [{ "type": "computed-style", "target": "background-color" }],
       "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-3",
-      "id": "c3-first-letter",
-      "category": "typography",
-      "tier": "low",
-      "selector": "[data-testid=\"eyebrow-label\"]",
-      "whatsWrong": "Swimlane title has `first-letter:text-primary-400`; the first letter is recolored via a ::first-letter pseudo. ::first-letter color is primary-400 vs golden primary-600.",
-      "checks": [
         {
-          "type": "computed-style",
-          "target": "color",
-          "pseudo": "::first-letter",
+          "screen": "kanban-redesign",
+          "state": "card-created-anim",
+          "viewport": "desktop",
+          "at": 600,
         },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-3",
-      "id": "c3-hairline",
-      "category": "overflow-clipping",
-      "tier": "low",
-      "selector": "[data-testid=\"kanban-column-0\"]",
-      "whatsWrong": "Columns have an `after:` phantom 1px hairline at the bottom edge from a pseudo-element. ::after content is \"\" (generated box) vs golden none.",
-      "checks": [
-        { "type": "computed-style", "target": "content", "pseudo": "::after" },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-3",
-      "id": "c3-first-line",
-      "category": "typography",
-      "tier": "low",
-      "selector": "[data-testid=\"card-title\"]",
-      "whatsWrong": "Card titles have `first-line:tracking-[0.06em]`; first-line letter-spacing is off via a ::first-line pseudo. ::first-line letter-spacing is ~0.84px vs golden normal.",
-      "checks": [
-        {
-          "type": "computed-style",
-          "target": "letter-spacing",
-          "pseudo": "::first-line",
-        },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-3",
-      "id": "c3-contrast",
-      "category": "accessibility",
-      "tier": "high",
-      "selector": "[data-testid=\"card-title\"]",
-      "whatsWrong": "Card titles fail WCAG AA contrast (~1.7:1 vs golden ~6.7:1) while card-title's class stays the golden text-primary-500. The card wrapper re-binds --color-primary-500 to primary-300 for its subtree via [--color-primary-500:var(--color-primary-300)], so text-primary-500 resolves to the low-contrast token. Fix is removing the wrapper re-bind, not editing card-title.",
-      "checks": [{ "type": "axe-rule", "target": "color-contrast" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
       ],
     },
 
-    // CLUSTER 4
+    // Hover: assignee tooltip mis-sided (page.tsx KanbanCard)
     {
-      "branch": "defect/cluster-4",
-      "id": "c4-swimlane-grid",
-      "category": "layout",
-      "tier": "high",
-      "selector": "[data-testid=\"swimlane-columns\"]",
-      "whatsWrong": "The swimlane columns use a CSS grid instead of a flex row.",
+      "branch": "defect/hover-avatar-tooltip",
+      "id": "hover-avatar-tooltip",
+      "category": "interactive-states",
+      "tier": "mid",
+      "selector": "[data-testid=\"assignee-tooltip\"]",
+      "whatsWrong": "the assignee hover tooltip opens below its avatar instead of above it, dropping it over the card content",
       "checks": [
-        { "type": "computed-style", "target": "display" },
-        { "type": "computed-style", "target": "grid-template-columns" },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-4",
-      "id": "c4-task-grid",
-      "category": "layout",
-      "tier": "high",
-      "selector": "[data-testid=\"planner-task\"]",
-      "whatsWrong": "The task row uses a CSS grid instead of a flex row, putting the number circle on the right of the content.",
-      "checks": [
-        { "type": "computed-style", "target": "display" },
-        { "type": "computed-style", "target": "grid-template-columns" },
+        {
+          "type": "bounding-box",
+          "target": "[data-testid=\"assignee-tooltip\"] must sit above [data-testid=\"card-assignee\"] (its bottom edge above the avatar's top edge)",
+        },
       ],
       "where": [
         {
-          "screen": "daily-planner",
-          "state": "default",
+          "screen": "kanban",
+          "state": "card-assignee-tooltip",
           "viewport": "desktop",
         },
       ],
     },
+
+    // Relocate-and-corrupt via scoped CSS var
     {
-      "branch": "defect/cluster-4",
-      "id": "c4-controls-grid",
-      "category": "layout",
-      "tier": "high",
-      "selector": "[data-testid=\"timer-controls\"]",
-      "whatsWrong": "The timer control buttons use a CSS grid instead of a flex row, stretching the buttons to equal widths.",
-      "checks": [
-        { "type": "computed-style", "target": "display" },
-        { "type": "computed-style", "target": "grid-template-columns" },
-      ],
-      "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-4",
-      "id": "c4-card-grid",
-      "category": "layout",
+      "branch": "defect/scoped-var-relocate",
+      "id": "scoped-var-relocate",
+      "category": "color",
       "tier": "mid",
       "selector": "[data-testid=\"kanban-card\"]",
-      "whatsWrong": "The card uses a CSS grid instead of a vertical flex column.",
-      "checks": [
-        { "type": "computed-style", "target": "display" },
-        { "type": "computed-style", "target": "grid-template-columns" },
-      ],
+      "whatsWrong": "card borders render a dark grey outline instead of the near-white card edge because the board surface re-binds the card-edge custom property their border color resolves through",
+      "checks": [{ "type": "computed-style", "target": "border-top-color" }],
       "where": [
         { "screen": "kanban", "state": "default", "viewport": "desktop" },
       ],
     },
+
+    // Globals.css token rebind gated on a data attribute
     {
-      "branch": "defect/cluster-4",
-      "id": "c4-stats-flex",
-      "category": "layout",
-      "tier": "high",
-      "selector": "[data-testid=\"today-stats-grid\"]",
-      "whatsWrong": "The Today's stats tiles use flexbox instead of a CSS grid.",
-      "checks": [
-        { "type": "computed-style", "target": "display" },
-        { "type": "computed-style", "target": "grid-template-columns" },
-        {
-          "type": "computed-style",
-          "target": "grid-column-start",
-          "selector": "[data-testid=\"stat-completed\"]",
-        },
-      ],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/cluster-4",
-      "id": "c4-kanban-header-order",
-      "category": "layout",
+      "branch": "defect/globals-density-contrast",
+      "id": "globals-density-contrast",
+      "category": "color",
       "tier": "mid",
-      "selector": "[data-testid=\"page-header\"]",
-      "whatsWrong": "The kanban header's title cluster and action cluster are in reversed order.",
-      "checks": [{ "type": "computed-style", "target": "flex-direction" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-4",
-      "id": "c4-planner-header-order",
-      "category": "layout",
-      "tier": "mid",
-      "selector": "[data-testid=\"page-header\"]",
-      "whatsWrong": "The daily planner header's title cluster and action cluster are in reversed order.",
-      "checks": [{ "type": "computed-style", "target": "flex-direction" }],
+      "selector": "[data-testid=\"planner-task-title\"]",
+      "whatsWrong": "planner task titles render washed out in a pale grey instead of the dark body text because a density attribute on the list re-binds the primary-500 text token in globals.css",
+      "checks": [{ "type": "computed-style", "target": "color" }],
       "where": [
         {
           "screen": "daily-planner",
@@ -731,194 +247,119 @@
       ],
     },
 
-    // CLUSTER 5
+    // Revived dock geometry: collapse stride (page.tsx columnWidthAtScroll)
     {
-      "branch": "defect/cluster-5",
-      "id": "c5-tasklist-gap",
+      "branch": "defect/dock-collapse-stride",
+      "id": "dock-collapse-stride",
       "category": "spacing-alignment",
       "tier": "mid",
-      "selector": "[data-testid=\"planner-task-list\"]",
-      "whatsWrong": "The task list spaces its rows with child margins (space-y) instead of a flex gap.",
-      "checks": [
-        { "type": "computed-style", "target": "row-gap" },
-        {
-          "type": "computed-style",
-          "target": "margin-top",
-          "selector": "[data-testid=\"planner-task\"]:nth-child(2)",
-        },
-      ],
+      "selector": "[data-testid=\"kanban-column-1\"]",
+      "whatsWrong": "columns begin shedding at the wrong scroll offset because the per-column dock stride is mis-derived, so a column stays expanded past the point it should have railed",
+      "checks": [{ "type": "computed-style", "target": "width" }],
       "where": [
         {
-          "screen": "daily-planner",
-          "state": "default",
+          "screen": "kanban",
+          "state": "columns-docked",
           "viewport": "desktop",
         },
       ],
     },
-    {
-      "branch": "defect/cluster-5",
-      "id": "c5-boards-gap",
-      "category": "spacing-alignment",
-      "tier": "mid",
-      "selector": "[data-testid=\"connected-boards\"]",
-      "whatsWrong": "The connected-boards list spaces its rows with child margins (space-y) instead of a flex gap.",
-      "checks": [{ "type": "computed-style", "target": "row-gap" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/cluster-5",
-      "id": "c5-controls-gap",
-      "category": "spacing-alignment",
-      "tier": "mid",
-      "selector": "[data-testid=\"timer-controls\"]",
-      "whatsWrong": "The timer controls space their buttons with child margins (space-x) instead of a flex gap.",
-      "checks": [
-        { "type": "computed-style", "target": "column-gap" },
-        {
-          "type": "computed-style",
-          "target": "margin-left",
-          "selector": "[data-testid=\"timer-play\"]",
-        },
-      ],
-      "where": [
-        { "screen": "focus-timer", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-5",
-      "id": "c5-team-justify",
-      "category": "layout",
-      "tier": "mid",
-      "selector": "[data-testid=\"page-header\"]",
-      "whatsWrong": "The team header pushes its right cluster to the edge with an auto margin instead of justify-content space-between.",
-      "checks": [{ "type": "computed-style", "target": "justify-content" }],
-      "where": [
-        { "screen": "team", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-5",
-      "id": "c5-footer-justify",
-      "category": "layout",
-      "tier": "mid",
-      "selector": "[data-testid=\"card-footer\"]",
-      "whatsWrong": "The card footer pushes the avatar to the edge with an auto margin instead of justify-content space-between.",
-      "checks": [{ "type": "computed-style", "target": "justify-content" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-5",
-      "id": "c5-colheader-justify",
-      "category": "layout",
-      "tier": "mid",
-      "selector": "[data-testid=\"column-header\"]",
-      "whatsWrong": "The column header pushes its icon group to the edge with an auto margin instead of justify-content space-between.",
-      "checks": [{ "type": "computed-style", "target": "justify-content" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-    {
-      "branch": "defect/cluster-5",
-      "id": "c5-taskbody-fill",
-      "category": "layout",
-      "tier": "mid",
-      "selector": "[data-testid=\"planner-task-body\"]",
-      "whatsWrong": "The task body uses flex-basis 50% instead of flex-1, so it only fills half the row.",
-      "checks": [
-        { "type": "computed-style", "target": "flex-basis" },
-        { "type": "computed-style", "target": "flex-grow" },
-      ],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-  ],
 
-  // PINNED FAILING CLUSTERS
-  "clusters": [
+    // Drag ghost offset (page.tsx GHOST_CARRY_TRANSFORM)
     {
-      "id": "daily-planner-entangled",
-      "branch": "defect/cluster-1",
-      "defects": [
-        "c1-btn-height",
-        "c1-card-pad",
-        "c1-stat",
-        "c1-separator",
-        "c1-circle",
-        "c1-font",
-        "c1-autorank",
+      "branch": "defect/dnd-ghost-offset",
+      "id": "dnd-ghost-offset",
+      "category": "layout",
+      "tier": "mid",
+      "selector": "[data-testid=\"drag-ghost\"]",
+      "whatsWrong": "the carried drag ghost is no longer centered on the pointer because its centering transform is dropped, so it sits offset from the cursor",
+      "checks": [{ "type": "computed-style", "target": "transform" }],
+      "where": [
+        {
+          "screen": "kanban",
+          "state": "card-over-column",
+          "viewport": "desktop",
+        },
       ],
-      "note": "Daily Planner: conservation splits + sub-component bugs (Stat/Separator) + font-fallback + an Auto-rank relocate-and-corrupt. Mutations leave no greppable outlier; partial fixes regress.",
     },
+
+    // Command palette neutral icon-tile token corruption
     {
-      "id": "focus-timer-temporal",
-      "branch": "defect/cluster-2",
-      "defects": [
-        "c2-tabnum",
-        "c2-transition",
-        "c2-blend",
-        "c2-dial",
-        "c2-ticklen",
-        "c2-grid",
-        "c2-controls",
+      "branch": "defect/palette-tile-token",
+      "id": "palette-tile-token",
+      "category": "color",
+      "tier": "mid",
+      "selector": "[data-testid=\"palette-icon-go-kanban\"]",
+      "whatsWrong": "the command palette's neutral navigation icon tiles render the wrong fill because the single-use secondary-300 token is re-pointed at a muted grey in globals.css",
+      "checks": [{ "type": "computed-style", "target": "background-color" }],
+      "where": [
+        {
+          "screen": "kanban-redesign",
+          "state": "command-palette",
+          "viewport": "desktop",
+        },
       ],
-      "note": "Focus Timer: an obvious broken preset layout (grid-cols-1 stack vs flex row) dominates the pixel diff while subtler defects survive - invisible-at-rest computed styles (tabular-nums, transition-none, mix-blend), two dial geometry bugs graded by bounding box (extra lit tick + ticks 3px short), and a reversed control row that only transposes Restart/Skip.",
     },
+
+    // Team workload scroll-edge shadow never paints when scrolled
     {
-      "id": "kanban-css-ghosts",
-      "branch": "defect/cluster-3",
-      "defects": [
-        "c3-badge-blend",
-        "c3-avatar-blend",
-        "c3-card-border",
-        "c3-col-stripe",
-        "c3-first-letter",
-        "c3-hairline",
-        "c3-first-line",
-        "c3-contrast",
+      "branch": "defect/team-scroll-shadow",
+      "id": "team-scroll-shadow",
+      "category": "overflow-clipping",
+      "tier": "mid",
+      "selector": "[data-testid=\"list-edge-shadow-top\"]",
+      "whatsWrong": "the workload list's top scroll-edge shadow never appears once the list is scrolled, because the edge-detection threshold can never be true",
+      "checks": [{ "type": "computed-style", "target": "box-shadow" }],
+      "where": [
+        {
+          "screen": "team",
+          "state": "list-scrolled-bottom",
+          "viewport": "desktop",
+        },
       ],
-      "note": "Kanban: causes hidden in machinery the model never greps - mix-blend, ::before/::after/::first-letter/::first-line, :nth-child - plus a relocate-and-corrupt card border and a WCAG AA contrast failure on the card titles whose cause is a subtree-scoped CSS custom-property re-bind on the card wrapper.",
     },
+
+    // Pull-from-boards loading spinner frozen (globals.css override)
     {
-      "id": "layout-engine-ambiguity",
-      "branch": "defect/cluster-4",
-      "defects": [
-        "c4-swimlane-grid",
-        "c4-task-grid",
-        "c4-controls-grid",
-        "c4-card-grid",
-        "c4-stats-flex",
-        "c4-kanban-header-order",
-        "c4-planner-header-order",
+      "branch": "defect/pull-spinner-frozen",
+      "id": "pull-spinner-frozen",
+      "category": "interactive-states",
+      "tier": "mid",
+      "selector": "[data-testid=\"pull-spinner\"]",
+      "whatsWrong": "the pull-from-boards loading spinner is frozen because a global rule cancels its animation, so the loading affordance does not spin",
+      "checks": [{ "type": "computed-style", "target": "animation-name" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "planner-loading",
+          "viewport": "desktop",
+          "at": 500,
+        },
       ],
-      "note": "Mechanism ambiguity: every defect ships a BROKEN decoy layout engine (flex<->grid, or DOM-order vs flex-row-reverse). The pixel-fix that stays in the decoy renders identical to golden but computes a different display / grid-template-columns / flex-direction, so the computed-style pin (no accept = exact golden match) fails. Correct is the source mechanism, not the pixels - a model fixing from screenshots stays in the decoy engine and fails.",
     },
+
+    // Next-task bounce drifts sideways (globals.css @keyframes)
     {
-      "id": "spacing-mechanism-ambiguity",
-      "branch": "defect/cluster-5",
-      "defects": [
-        "c5-tasklist-gap",
-        "c5-boards-gap",
-        "c5-controls-gap",
-        "c5-team-justify",
-        "c5-footer-justify",
-        "c5-colheader-justify",
-        "c5-taskbody-fill",
+      "branch": "defect/next-task-bounce-drift",
+      "id": "next-task-bounce-drift",
+      "category": "interactive-states",
+      "tier": "mid",
+      "selector": "[data-testid=\"next-task\"]",
+      "whatsWrong": "the Next task attention bounce carries a constant sideways shift, so the button drifts left and overlaps the task card instead of bouncing in place",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "[data-testid=\"next-task\"] must not overlap the 'Currently working on' task card to its left; it must sit at its centered position with a clear gap to the card's right edge",
+        },
       ],
-      "note": "Mechanism ambiguity inside one flex layout: the gap is achieved by space-x/y child margins instead of gap; the edge-push by ml-auto instead of justify-between; the fill by basis-* instead of flex-1. Each renders pixel-identical but computes a different row/column-gap / justify-content / flex-basis, so the pin (no accept) fails. Correct is the source mechanism.",
+      "where": [
+        {
+          "screen": "focus-timer",
+          "state": "task-completed",
+          "viewport": "desktop",
+          "at": 250,
+        },
+      ],
     },
   ],
 }

@@ -197,10 +197,16 @@
           "setup": [{ "click": "[data-testid='timer-preset-short']" }],
         },
 
-        // Current task marked completed (green chip + bouncing next-task).
+        // Current task marked completed: the Next task button gains a looping
+        // attention bounce. Sampled at two phases (the bounce is a 1s loop) so
+        // its position is deterministic.
         {
           "name": "task-completed",
-          "setup": [{ "click": "[data-testid='mark-completed']" }],
+          "setup": [],
+          "animation": {
+            "trigger": [{ "click": "[data-testid='mark-completed']" }],
+            "at": [250, 750],
+          },
         },
 
         // End-session confirm card (replaces the task row; frown under dial).
@@ -271,6 +277,16 @@
           "name": "add-task-dialog",
           "setup": [{ "click": "[data-testid='add-task']" }],
         },
+
+        // Pull-from-boards loading affordance. Clicking the button starts the spinner; sampled at 500ms — mounted and spinning, well before the 2s auto-clear fires under the frozen clock.
+        {
+          "name": "planner-loading",
+          "setup": [],
+          "animation": {
+            "trigger": [{ "click": "[data-testid='pull-from-boards']" }],
+            "at": [500],
+          },
+        },
       ],
       "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
     },
@@ -301,6 +317,19 @@
         {
           "name": "group-collapsed",
           "setup": [{ "click": "[data-testid='status-group-toggle']" }],
+        },
+
+        // Workload list scrolled to the bottom: the golden shows the TOP edge
+        // scroll shadow (scrolled away from the top) and no bottom shadow.
+        {
+          "name": "list-scrolled-bottom",
+          "setup": [
+            {
+              "scrollTo": {
+                "selector": "[data-testid='list-edge-shadow-bottom']",
+              },
+            },
+          ],
         },
       ],
       "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
