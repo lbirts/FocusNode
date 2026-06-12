@@ -14,6 +14,7 @@
   --color-primary-400: #8f938a;
   --color-primary-500: #585b55;
   --color-primary-600: #282a25;
+  --card-edge: var(--color-primary-100);
   --color-secondary-50: #bfdad8;
   --color-secondary-300: #678986;
   --color-secondary-400: #1f3533;
@@ -125,6 +126,10 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-plus-jakarta-sans), var(--font-inter), sans-serif;
+}
+
+[data-testid="swimlane-stack"] {
+  --card-edge: var(--color-primary-400);
 }
 
 .dark {

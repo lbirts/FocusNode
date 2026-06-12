@@ -1383,7 +1383,7 @@ function KanbanCard({
       }}
       data-highlighted={highlighted || undefined}
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-grab active:cursor-grabbing transition-[box-shadow,background-color] duration-200",
+        "flex flex-col gap-3 rounded-lg border border-(--card-edge) bg-primary-50 p-3 cursor-grab active:cursor-grabbing transition-[box-shadow,background-color] duration-200",
         !dragActive &&
           "hover:shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]",
         lifted && "hidden",
