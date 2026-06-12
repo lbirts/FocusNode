@@ -361,10 +361,7 @@ function KanbanBoard() {
     );
     setHighlightId(id);
     if (highlightTimer.current) window.clearTimeout(highlightTimer.current);
-    highlightTimer.current = window.setTimeout(
-      () => setHighlightId(null),
-      3000,
-    );
+    highlightTimer.current = window.setTimeout(() => setHighlightId(null), 450);
   }
 
   const stats = totals({ ...board, swimlanes });
