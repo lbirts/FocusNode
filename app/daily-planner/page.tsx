@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  AddTaskDialog,
+  type AddTaskTeam,
+  type AddTaskValues,
+} from "@/app/components/AddTaskDialog";
 import { cn } from "@/app/lib/utils";
 import { Button } from "@/ui/button";
 import {
@@ -101,6 +106,16 @@ const priorityOrder: Record<Priority, number> = {
   Normal: 2,
 };
 
+const plannerStatuses = ["Not started", "In progress", "Completed"] as const;
+
+const plannerTeams: AddTaskTeam[] = (["Design", "Docs", "Dev"] as const).map(
+  (category) => ({
+    id: category,
+    label: category,
+    statuses: plannerStatuses.map((s) => ({ id: s, label: s })),
+  }),
+);
+
 function estimateMinutes(estimate: string) {
   const match = estimate.match(/^([\d.]+)([hm])$/);
   if (!match) return 0;
@@ -166,18 +181,20 @@ export default function DailyPlannerPage() {
   const completed = tasks.filter((t) => t.status === "Completed").length;
   const remaining = tasks.length - completed;
 
-  function addTask() {
-    const id = tasks.length + 1;
+  const [composerOpen, setComposerOpen] = useState(false);
+
+  function createTask(values: AddTaskValues) {
     setTasks((prev) => [
       ...prev,
       {
-        id,
-        title: `New task ${id}`,
+        id: prev.length + 1,
+        title: values.title,
         board: "Product Launch Q2",
-        priority: "Normal",
-        category: "Docs",
+        // The planner has no "Low" lane in its priority order; fold it in.
+        priority: values.priority === "Low" ? "Normal" : values.priority,
+        category: values.teamId as Category,
         estimate: "30m",
-        status: "Not started",
+        status: values.statusId as Task["status"],
       },
     ]);
   }
@@ -249,7 +266,7 @@ export default function DailyPlannerPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" data-testid="rank-by">
                         {rankBy}
                         <ChevronDown />
                       </Button>
@@ -280,6 +297,7 @@ export default function DailyPlannerPage() {
                     <Button
                       key={opt}
                       size="sm"
+                      data-testid={`planner-filter-${opt.toLowerCase()}`}
                       variant={active ? "default" : "outline"}
                       onClick={() => setFilter(opt)}
                       className={cn(
@@ -373,12 +391,19 @@ export default function DailyPlannerPage() {
             >
               <Button
                 size="sm"
-                onClick={addTask}
+                data-testid="add-task"
+                onClick={() => setComposerOpen(true)}
                 className="w-full rounded-lg border-dashed border-primary-300 text-xs bg-transparent"
               >
                 <Plus className="size-4" />
                 Add task to today
               </Button>
+              <AddTaskDialog
+                open={composerOpen}
+                onOpenChange={setComposerOpen}
+                teams={plannerTeams}
+                onCreate={createTask}
+              />
             </div>
           </div>
         </div>

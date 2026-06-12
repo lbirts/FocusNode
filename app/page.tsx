@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  AddTaskDialog,
+  type AddTaskTeam,
+  type AddTaskValues,
+} from "@/app/components/AddTaskDialog";
+import {
   type Board,
   type Card,
   type Column,
@@ -26,7 +31,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Fragment,
   Suspense,
@@ -50,8 +55,6 @@ const priorityStyles: Record<Priority, string> = {
   Low: "bg-primary-100 text-primary-400",
 };
 
-const newCardAvatar = users[0];
-
 const COLUMN_EXPANDED_WIDTH = 232;
 const COLUMN_NARROW_WIDTH = 140;
 const COLUMN_COLLAPSED_WIDTH = 52;
@@ -63,6 +66,10 @@ const COLUMN_CARD_PRIORITY_MIN_WIDTH = 160;
 const COLUMN_HEADER_MORE_MIN_WIDTH = 150;
 const STICKY_EDGE_SHADOW =
   "shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]";
+const SWIMLANE_PAGE = 360;
+const LANE_HEADER_HEIGHT = 60;
+const LANE_SWITCH_SPAN = 160;
+const LANE_EXPANDED_MIN = LANE_HEADER_HEIGHT + 16 + 444 + 48;
 
 function columnWidthAtScroll(index: number, scrollLeft: number) {
   const collapseStart = index * COLUMN_SHRINK_RANGE;
@@ -107,15 +114,114 @@ function KanbanPageFallback() {
 
 function KanbanBoard() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const boardId = searchParams.get("board");
   const board = useMemo(() => getBoard(boardId), [boardId]);
 
   const [swimlanes, setSwimlanes] = useState<Swimlane[]>(board.swimlanes);
-  const [open, setOpen] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(board.swimlanes.map((s, i) => [s.id, i === 0])),
-  );
+  const [activeLane, setActiveLane] = useState(0);
+  const laneScrollRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [viewportHeight, setViewportHeight] = useState(0);
   const [drag, setDrag] = useState<DragState | null>(null);
   const [dragOver, setDragOver] = useState<DragTarget | null>(null);
+  const [clickDrag, setClickDrag] = useState(false);
+  const [pointer, setPointer] = useState({ x: 0, y: 0 });
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [composerDefaults, setComposerDefaults] = useState<{
+    teamId?: string;
+    statusId?: string;
+  }>({});
+  const [highlightId, setHighlightId] = useState<number | null>(null);
+  const highlightTimer = useRef<number | null>(null);
+
+  const teams = useMemo<AddTaskTeam[]>(
+    () =>
+      swimlanes.map((s) => ({
+        id: s.id,
+        label: s.title,
+        statuses: s.columns.map((c) => ({ id: c.id, label: c.title })),
+      })),
+    [swimlanes],
+  );
+
+  const openComposer = useCallback((teamId?: string, statusId?: string) => {
+    setComposerDefaults({ teamId, statusId });
+    setComposerOpen(true);
+  }, []);
+
+  // Command palette routes here with ?new-task=1 to launch the composer.
+  const wantsNewTask = searchParams.get("new-task");
+  useEffect(() => {
+    if (!wantsNewTask) return;
+    openComposer();
+    router.replace("/", { scroll: false });
+  }, [wantsNewTask, openComposer, router]);
+
+  const stageMinHeight = swimlanes.reduce(
+    (sum, lane, i) =>
+      sum +
+      (i === activeLane && lane.columns.length > 0
+        ? LANE_EXPANDED_MIN
+        : LANE_HEADER_HEIGHT),
+    0,
+  );
+  const stageOverflow = Math.max(0, stageMinHeight - viewportHeight);
+  const laneSegment = Math.max(SWIMLANE_PAGE, stageOverflow + LANE_SWITCH_SPAN);
+
+  const laneRunway = (swimlanes.length - 1) * laneSegment;
+
+  const applyLaneScroll = useCallback(
+    (scrollTop: number) => {
+      const next = Math.min(
+        swimlanes.length - 1,
+        Math.max(0, Math.floor(scrollTop / laneSegment)),
+      );
+      setActiveLane(next);
+      const stage = stageRef.current;
+      if (stage) {
+        // Past the runway the sticky budget is exhausted and the stage
+        // scrolls naturally, which already provides the scroll-through.
+        const natural = Math.max(0, scrollTop - laneRunway);
+        const within = Math.max(
+          0,
+          Math.min(Math.max(scrollTop - next * laneSegment, 0), stageOverflow) -
+            natural,
+        );
+        stage.style.transform = `translateY(-${within}px)`;
+      }
+    },
+    [swimlanes.length, laneSegment, stageOverflow],
+  );
+
+  const handleLaneScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      applyLaneScroll(e.currentTarget.scrollTop);
+    },
+    [applyLaneScroll],
+  );
+
+  // Jumps the (visually inert) runway scroller; the accordion tween itself
+  // is the visible motion, so an instant jump keeps the expand animation's
+  // start deterministic relative to the click.
+  function scrollToLane(index: number) {
+    laneScrollRef.current?.scrollTo({ top: index * laneSegment });
+  }
+
+  useEffect(() => {
+    const el = laneScrollRef.current;
+    if (!el) return;
+    const measure = () => setViewportHeight(el.clientHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const el = laneScrollRef.current;
+    if (el) applyLaneScroll(el.scrollTop);
+  }, [applyLaneScroll]);
 
   function liftCard(payload: DropPayload, height: number) {
     setDrag({ ...payload, height });
@@ -125,10 +231,42 @@ function KanbanBoard() {
     });
   }
 
+  function clickLiftCard(
+    payload: DropPayload,
+    height: number,
+    x: number,
+    y: number,
+  ) {
+    liftCard(payload, height);
+    setClickDrag(true);
+    setPointer({ x, y });
+  }
+
   function endDrag() {
     setDrag(null);
     setDragOver(null);
+    setClickDrag(false);
   }
+
+  const carriedCard = useMemo(() => {
+    if (!drag) return null;
+    for (const lane of swimlanes) {
+      for (const col of lane.columns) {
+        const found = col.cards.find((c) => c.id === drag.cardId);
+        if (found) return found;
+      }
+    }
+    return null;
+  }, [drag, swimlanes]);
+
+  useEffect(() => {
+    if (!clickDrag) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") endDrag();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [clickDrag]);
 
   function handleColumnDragOver(
     swimlaneId: string,
@@ -147,12 +285,9 @@ function KanbanBoard() {
 
   useEffect(() => {
     setSwimlanes(board.swimlanes);
-    setOpen(Object.fromEntries(board.swimlanes.map((s, i) => [s.id, i === 0])));
+    setActiveLane(0);
+    laneScrollRef.current?.scrollTo({ top: 0 });
   }, [board]);
-
-  function toggleSwimlane(id: string) {
-    setOpen((s) => ({ ...s, [id]: !s[id] }));
-  }
 
   function moveCard(
     cardId: number,
@@ -195,39 +330,97 @@ function KanbanBoard() {
     });
   }
 
-  function addCard(swimlaneId: string, columnId: string) {
+  function createTask(values: AddTaskValues) {
+    const id = Date.now();
     setSwimlanes((prev) =>
       prev.map((s) =>
-        s.id !== swimlaneId
+        s.id !== values.teamId
           ? s
           : {
               ...s,
               columns: s.columns.map((c) =>
-                c.id !== columnId
+                c.id !== values.statusId
                   ? c
                   : {
                       ...c,
                       cards: [
-                        ...c.cards,
                         {
-                          id: Date.now(),
-                          title: "New card",
-                          priority: "Normal",
+                          id,
+                          title: values.title,
+                          priority: values.priority,
+                          due: values.due,
                           tag: s.title,
-                          assignee: newCardAvatar,
+                          assignee: values.assignee,
                         },
+                        ...c.cards,
                       ],
                     },
               ),
             },
       ),
     );
+    setHighlightId(id);
+    if (highlightTimer.current) window.clearTimeout(highlightTimer.current);
+    highlightTimer.current = window.setTimeout(
+      () => setHighlightId(null),
+      3000,
+    );
   }
 
   const stats = totals({ ...board, swimlanes });
 
   return (
-    <div className="h-full w-full flex flex-col bg-primary-50">
+    <div
+      className="h-full w-full flex flex-col bg-primary-50"
+      onMouseMove={
+        clickDrag
+          ? (e) => setPointer({ x: e.clientX, y: e.clientY })
+          : undefined
+      }
+      onClick={clickDrag ? () => endDrag() : undefined}
+    >
+      {clickDrag && drag && carriedCard && (
+        <div
+          data-testid="drag-ghost"
+          aria-hidden
+          className="pointer-events-none fixed z-200 w-[216px] -translate-x-1/2 -translate-y-1/2 rotate-2 rounded-lg border border-primary-100 bg-white p-3 shadow-[0px_8px_24px_rgba(31,53,51,0.18)]"
+          style={{ left: pointer.x, top: pointer.y }}
+        >
+          <div className="flex items-center justify-between">
+            <span
+              className={cn(
+                "rounded px-1.5 py-0.5 text-xs",
+                priorityStyles[carriedCard.priority],
+              )}
+            >
+              {carriedCard.priority}
+            </span>
+            {carriedCard.due && (
+              <span className="flex items-center gap-1.5 rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
+                <Calendar className="size-3" />
+                {carriedCard.due}
+              </span>
+            )}
+          </div>
+          <p className="mt-3 line-clamp-2 text-sm text-primary-500">
+            {carriedCard.title}
+          </p>
+          <div
+            data-testid="card-footer"
+            className="flex items-center justify-between"
+          >
+            <span className="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] text-primary-400">
+              {carriedCard.tag}
+            </span>
+            <Avatar size="sm" data-testid="card-assignee" className="size-5!">
+              <AvatarImage
+                src={carriedCard.assignee.src}
+                alt="User profile pic"
+              />
+            </Avatar>
+          </div>
+        </div>
+      )}
       <div
         data-testid="page-header"
         className="border-b border-primary-200 px-3 h-[58px] flex items-center justify-between gap-2"
@@ -341,6 +534,8 @@ function KanbanBoard() {
           </Button>
           <Button
             size="sm"
+            data-testid="add-task"
+            onClick={() => openComposer()}
             className="bg-secondary-400 text-white hover:bg-secondary-400/90"
           >
             <Plus />
@@ -349,66 +544,105 @@ function KanbanBoard() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-none">
-        {swimlanes.map((swimlane) => {
-          const expanded = open[swimlane.id];
-          const hasColumns = swimlane.columns.length > 0;
-          return (
-            <div
-              key={swimlane.id}
-              className={cn(
-                "border-b border-primary-200 pt-4 flex flex-col",
-                (!expanded || !hasColumns) && "pb-12",
-              )}
-            >
-              <Button
-                variant="ghost"
-                onClick={() => toggleSwimlane(swimlane.id)}
-                className="gap-3 self-start p-0 h-fit hover:bg-transparent border-0 px-3"
-              >
-                <span className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-primary-500">
-                  {expanded ? (
-                    <ChevronUp className="size-3" />
-                  ) : (
-                    <ChevronDown className="size-3" />
-                  )}
-                </span>
-                <span
-                  data-testid="eyebrow-label"
-                  className="text-xs font-medium uppercase text-primary-600"
-                >
-                  {swimlane.title}
-                </span>
-              </Button>
+      <AddTaskDialog
+        open={composerOpen}
+        onOpenChange={setComposerOpen}
+        teams={teams}
+        defaultTeamId={composerDefaults.teamId ?? null}
+        defaultStatusId={composerDefaults.statusId ?? null}
+        onCreate={createTask}
+      />
 
-              {expanded && hasColumns && (
-                <SwimlaneColumns
-                  board={board}
-                  columns={swimlane.columns}
-                  swimlaneId={swimlane.id}
-                  drag={drag}
-                  dragOver={dragOver}
-                  onCardLift={liftCard}
-                  onCardDragEnd={endDrag}
-                  onColumnDragOver={(columnId, over) =>
-                    handleColumnDragOver(swimlane.id, columnId, over)
-                  }
-                  onAddCard={(columnId) => addCard(swimlane.id, columnId)}
-                  onDropCard={(payload, columnId) => {
-                    endDrag();
-                    moveCard(
-                      payload.cardId,
-                      payload.fromSwimlane,
-                      payload.fromColumn,
-                      swimlane.id,
-                      columnId,
-                    );
-                  }}
-                />
-              )}
-            </div>
-          );
-        })}
+      <div
+        ref={laneScrollRef}
+        data-testid="swimlane-stack"
+        className="flex-1 min-h-0 overflow-y-auto overscroll-y-none"
+        onScroll={handleLaneScroll}
+      >
+        <div
+          ref={stageRef}
+          className="sticky top-0 h-full flex flex-col"
+          style={{ minHeight: stageMinHeight }}
+        >
+          {swimlanes.map((swimlane, laneIdx) => {
+            const hasColumns = swimlane.columns.length > 0;
+            const isActive = laneIdx === activeLane;
+            const expanded = isActive && hasColumns;
+            return (
+              <motion.div
+                key={swimlane.id}
+                data-testid="swimlane-lane"
+                data-active={isActive}
+                className="flex min-h-0 flex-col overflow-hidden border-b border-primary-200"
+                initial={false}
+                animate={{ flexGrow: expanded ? 1 : 0 }}
+                transition={{ type: "tween", duration: 0.28, ease: "easeOut" }}
+                style={{
+                  flexBasis: LANE_HEADER_HEIGHT,
+                  flexShrink: 0,
+                }}
+              >
+                <Button
+                  data-testid={`lane-header-${swimlane.id}`}
+                  variant="ghost"
+                  onClick={() => scrollToLane(laneIdx)}
+                  className="gap-3 self-start p-0 h-fit hover:bg-transparent border-0 px-3 pt-4"
+                >
+                  <span className="flex size-5 items-center justify-center rounded-full bg-primary-200 text-primary-500">
+                    {expanded ? (
+                      <ChevronUp className="size-3" />
+                    ) : (
+                      <ChevronDown className="size-3" />
+                    )}
+                  </span>
+                  <span
+                    data-testid="eyebrow-label"
+                    className="text-xs font-medium uppercase text-primary-600"
+                  >
+                    {swimlane.title}
+                  </span>
+                </Button>
+                {hasColumns && (
+                  <div
+                    className={cn(
+                      "flex-1 min-h-0 overflow-hidden",
+                      !expanded && "pointer-events-none",
+                    )}
+                  >
+                    <SwimlaneColumns
+                      board={board}
+                      columns={swimlane.columns}
+                      swimlaneId={swimlane.id}
+                      drag={drag}
+                      dragOver={dragOver}
+                      onCardLift={liftCard}
+                      onCardClickLift={clickLiftCard}
+                      onCardDragEnd={endDrag}
+                      onColumnDragOver={(columnId, over) =>
+                        handleColumnDragOver(swimlane.id, columnId, over)
+                      }
+                      highlightId={highlightId}
+                      onAddCard={(columnId) =>
+                        openComposer(swimlane.id, columnId)
+                      }
+                      onDropCard={(payload, columnId) => {
+                        endDrag();
+                        moveCard(
+                          payload.cardId,
+                          payload.fromSwimlane,
+                          payload.fromColumn,
+                          swimlane.id,
+                          columnId,
+                        );
+                      }}
+                    />
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+        <div aria-hidden style={{ height: laneRunway }} />
       </div>
     </div>
   );
@@ -430,7 +664,9 @@ function SwimlaneColumns({
   swimlaneId,
   drag,
   dragOver,
+  highlightId,
   onCardLift,
+  onCardClickLift,
   onCardDragEnd,
   onColumnDragOver,
   onAddCard,
@@ -441,7 +677,14 @@ function SwimlaneColumns({
   swimlaneId: string;
   drag: DragState | null;
   dragOver: DragTarget | null;
+  highlightId: number | null;
   onCardLift: (payload: DropPayload, height: number) => void;
+  onCardClickLift: (
+    payload: DropPayload,
+    height: number,
+    x: number,
+    y: number,
+  ) => void;
   onCardDragEnd: () => void;
   onColumnDragOver: (columnId: string, over: boolean) => void;
   onAddCard: (columnId: string) => void;
@@ -503,7 +746,7 @@ function SwimlaneColumns({
         } else if (lastDirection.current > 0 && target === max) {
           setEndDockedCol(idx);
         }
-      }, 100);
+      }, 0);
     },
     [SCRUB_SPAN],
   );
@@ -515,15 +758,65 @@ function SwimlaneColumns({
     [],
   );
 
+  const dragScrollDir = useRef(0);
+  const dragScrollRaf = useRef<number | null>(null);
+
+  const stopDragScroll = useCallback(() => {
+    dragScrollDir.current = 0;
+    if (dragScrollRaf.current != null) {
+      cancelAnimationFrame(dragScrollRaf.current);
+      dragScrollRaf.current = null;
+    }
+  }, []);
+
+  // Native drags don't auto-scroll the column track; nudge scrollLeft while
+  // a lifted card hovers near the container's left or right edge so every
+  // column stays reachable mid-drag. Scrolling feeds the normal scrub/dock
+  // machinery, so columns dock out of the way as the drag pushes across.
+  const handleDragAutoScroll = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      if (!drag) return;
+      const node = scrollRef.current;
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      const zone = 80;
+      dragScrollDir.current =
+        e.clientX < rect.left + zone
+          ? -1
+          : e.clientX > rect.right - zone
+            ? 1
+            : 0;
+      if (dragScrollDir.current !== 0 && dragScrollRaf.current == null) {
+        const step = () => {
+          const el = scrollRef.current;
+          if (!el || dragScrollDir.current === 0) {
+            dragScrollRaf.current = null;
+            return;
+          }
+          el.scrollLeft += dragScrollDir.current * 14;
+          dragScrollRaf.current = requestAnimationFrame(step);
+        };
+        dragScrollRaf.current = requestAnimationFrame(step);
+      }
+    },
+    [drag],
+  );
+
+  useEffect(() => {
+    if (!drag) stopDragScroll();
+    return stopDragScroll;
+  }, [drag, stopDragScroll]);
+
   return (
     <div
       ref={scrollRef}
       data-testid="swimlane-columns"
-      className="overflow-x-auto pb-12 px-3 pt-4"
+      className="h-full overflow-x-auto px-3 py-8"
       onScroll={handleScroll}
+      onDragOver={handleDragAutoScroll}
     >
       <div
-        className="flex items-stretch gap-2"
+        className="flex h-full items-stretch gap-2"
         style={{
           width:
             columns.length * COLUMN_EXPANDED_WIDTH +
@@ -545,7 +838,9 @@ function SwimlaneColumns({
               dragOver.swimlaneId === swimlaneId &&
               dragOver.columnId === column.id
             }
+            highlightId={highlightId}
             onCardLift={onCardLift}
+            onCardClickLift={onCardClickLift}
             onCardDragEnd={onCardDragEnd}
             onDragOverChange={(over) => onColumnDragOver(column.id, over)}
             onAddCard={() => onAddCard(column.id)}
@@ -566,7 +861,9 @@ function SwimlaneSlot({
   swimlaneId,
   drag,
   isDragOver,
+  highlightId,
   onCardLift,
+  onCardClickLift,
   onCardDragEnd,
   onDragOverChange,
   onAddCard,
@@ -580,7 +877,14 @@ function SwimlaneSlot({
   swimlaneId: string;
   drag: DragState | null;
   isDragOver: boolean;
+  highlightId: number | null;
   onCardLift: (payload: DropPayload, height: number) => void;
+  onCardClickLift: (
+    payload: DropPayload,
+    height: number,
+    x: number,
+    y: number,
+  ) => void;
   onCardDragEnd: () => void;
   onDragOverChange: (over: boolean) => void;
   onAddCard: () => void;
@@ -634,7 +938,9 @@ function SwimlaneSlot({
           collapsed={collapsed && !dragExpand}
           drag={drag}
           isDragOver={isDragOver}
+          highlightId={highlightId}
           onCardLift={onCardLift}
+          onCardClickLift={onCardClickLift}
           onCardDragEnd={onCardDragEnd}
           onDragOverChange={onDragOverChange}
           onAddCard={onAddCard}
@@ -654,7 +960,9 @@ function KanbanColumn({
   collapsed = false,
   drag,
   isDragOver,
+  highlightId,
   onCardLift,
+  onCardClickLift,
   onCardDragEnd,
   onDragOverChange,
   onAddCard,
@@ -668,7 +976,14 @@ function KanbanColumn({
   collapsed?: boolean;
   drag: DragState | null;
   isDragOver: boolean;
+  highlightId: number | null;
   onCardLift: (payload: DropPayload, height: number) => void;
+  onCardClickLift: (
+    payload: DropPayload,
+    height: number,
+    x: number,
+    y: number,
+  ) => void;
   onCardDragEnd: () => void;
   onDragOverChange: (over: boolean) => void;
   onAddCard: () => void;
@@ -702,6 +1017,31 @@ function KanbanColumn({
     return () => observer.disconnect();
   }, [collapsed, column.cards.length, updateEdgeShadow]);
 
+  const headerInner = (
+    <>
+      <div className="flex min-w-0 items-center gap-2">
+        <p className="truncate text-xs text-primary-600">{column.title}</p>
+        <span
+          data-testid="column-count"
+          className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
+        >
+          {column.cards.length}
+        </span>
+      </div>
+      {showHeaderActions && (
+        <div className="flex shrink-0 items-center gap-2">
+          {showWip && (
+            <span className="rounded border border-primary-200 px-1.5 py-0.5 text-[10px] text-primary-400">
+              WIP: {column.wip}
+            </span>
+          )}
+          {showPlus && <Plus className="size-4 text-primary-400" />}
+          {showMore && <MoreHorizontal className="size-4 text-primary-400" />}
+        </div>
+      )}
+    </>
+  );
+
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     try {
@@ -727,8 +1067,17 @@ function KanbanColumn({
         }
       }}
       onDrop={handleDrop}
+      onMouseEnter={() => {
+        if (drag) onDragOverChange(true);
+      }}
+      onClick={(e) => {
+        if (!drag) return;
+        e.stopPropagation();
+        onDropCard(drag);
+      }}
       className={cn(
-        "flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[2px_4px_40px_10px_rgba(31,53,51,0.04)] transition-[colors,shadow] h-111",
+        "flex w-full flex-col overflow-hidden bg-white shadow-[2px_4px_40px_10px_rgba(31,53,51,0.04)] transition-[colors,shadow]",
+        "h-111 rounded-2xl",
         showDropzone &&
           "shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]",
       )}
@@ -799,30 +1148,7 @@ function KanbanColumn({
                   edgeShadow.top && STICKY_EDGE_SHADOW,
                 )}
               >
-                <div className="flex min-w-0 items-center gap-2">
-                  <p className="truncate text-xs text-primary-600">
-                    {column.title}
-                  </p>
-                  <span
-                    data-testid="column-count"
-                    className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-200 text-[10px] text-primary-500"
-                  >
-                    {column.cards.length}
-                  </span>
-                </div>
-                {showHeaderActions && (
-                  <div className="flex shrink-0 items-center gap-2">
-                    {showWip && (
-                      <span className="rounded border border-primary-200 px-1.5 py-0.5 text-[10px] text-primary-400">
-                        WIP: {column.wip}
-                      </span>
-                    )}
-                    {showPlus && <Plus className="size-4 text-primary-400" />}
-                    {showMore && (
-                      <MoreHorizontal className="size-4 text-primary-400" />
-                    )}
-                  </div>
-                )}
+                {headerInner}
               </div>
               <div className="flex flex-col gap-2 pt-2 flex-1">
                 {column.cards.length > 0 ? (
@@ -839,7 +1165,9 @@ function KanbanColumn({
                             width={width}
                             lifted={isLifted}
                             dragActive={drag != null}
+                            highlighted={card.id === highlightId}
                             onLift={onCardLift}
+                            onClickLift={onCardClickLift}
                             onDragEnd={onCardDragEnd}
                           />
                           {isLifted && showDropzone && drag && (
@@ -931,6 +1259,62 @@ function KanbanColumn({
   );
 }
 
+function CardTitle({ title }: { title: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [truncated, setTruncated] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () =>
+      setTruncated(
+        el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth,
+      );
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [title]);
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        disabled={!truncated}
+        delay={300}
+        closeOnClick={false}
+        render={(props) => (
+          <span
+            {...props}
+            ref={(node) => {
+              ref.current = node;
+              if (typeof props.ref === "function") {
+                props.ref(node);
+              } else if (props.ref) {
+                props.ref.current = node;
+              }
+            }}
+            data-testid="card-title"
+            className={cn(
+              "min-w-0 line-clamp-2 text-sm text-primary-500",
+              props.className,
+            )}
+            draggable={false}
+            onDragStart={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          >
+            {title}
+          </span>
+        )}
+      />
+      <TooltipContent side="top">
+        <p>{title}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function KanbanCard({
   board,
   card,
@@ -939,7 +1323,9 @@ function KanbanCard({
   width,
   lifted = false,
   dragActive = false,
+  highlighted = false,
   onLift,
+  onClickLift,
   onDragEnd,
 }: {
   board: Board;
@@ -949,15 +1335,24 @@ function KanbanCard({
   width: number;
   lifted?: boolean;
   dragActive?: boolean;
+  highlighted?: boolean;
   onLift: (payload: DropPayload, height: number) => void;
+  onClickLift: (
+    payload: DropPayload,
+    height: number,
+    x: number,
+    y: number,
+  ) => void;
   onDragEnd: () => void;
 }) {
   const showPriority = width > COLUMN_CARD_PRIORITY_MIN_WIDTH;
+  const nativeDragRef = useRef(false);
   return (
     <div
       draggable
       data-testid="kanban-card"
       onDragStart={(e) => {
+        nativeDragRef.current = true;
         const payload: DropPayload = {
           cardId: card.id,
           fromSwimlane: swimlaneId,
@@ -968,12 +1363,31 @@ function KanbanCard({
         const height = e.currentTarget.getBoundingClientRect().height;
         window.setTimeout(() => onLift(payload, height), 0);
       }}
-      onDragEnd={onDragEnd}
+      onDragEnd={() => {
+        onDragEnd();
+        window.setTimeout(() => {
+          nativeDragRef.current = false;
+        }, 0);
+      }}
+      onClick={(e) => {
+        if (nativeDragRef.current) return;
+        if (dragActive) return;
+        e.stopPropagation();
+        const payload: DropPayload = {
+          cardId: card.id,
+          fromSwimlane: swimlaneId,
+          fromColumn: columnId,
+        };
+        const height = e.currentTarget.getBoundingClientRect().height;
+        onClickLift(payload, height, e.clientX, e.clientY);
+      }}
+      data-highlighted={highlighted || undefined}
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-grab active:cursor-grabbing transition-shadow duration-200",
+        "flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-grab active:cursor-grabbing transition-[box-shadow,background-color] duration-200",
         !dragActive &&
           "hover:shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]",
         lifted && "hidden",
+        highlighted && "bg-primary-100",
       )}
     >
       <div className="flex items-center justify-between">
@@ -994,9 +1408,7 @@ function KanbanCard({
           </span>
         )}
       </div>
-      <p data-testid="card-title" className="text-sm text-primary-500">
-        {card.title}
-      </p>
+      <CardTitle title={card.title} />
       <div
         data-testid="card-footer"
         className="flex items-center justify-between"
@@ -1006,11 +1418,11 @@ function KanbanCard({
         </span>
         <Tooltip>
           <TooltipTrigger>
-            <Avatar size="sm" className="size-5!">
+            <Avatar size="sm" data-testid="card-assignee" className="size-5!">
               <AvatarImage src={card.assignee.src} alt="User profile pic" />
             </Avatar>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent data-testid="assignee-tooltip">
             <div>
               <div className="flex items-center gap-2">
                 <Avatar data-testid="member-avatar" size="sm">

@@ -14,6 +14,7 @@ export default function Header() {
         className="text-primary-400"
         size="icon-sm"
         variant="outline"
+        data-testid="command-palette-trigger"
         onClick={() => setPaletteOpen(true)}
         aria-label="Open command palette"
       >

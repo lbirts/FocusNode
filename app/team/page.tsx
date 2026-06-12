@@ -68,8 +68,8 @@ const users: User[] = [
   },
   {
     src: "/avatars/avatar-2.jpg",
-    name: "Jessica Mitchell",
-    email: "jessica@focusnode.io",
+    name: "Pamela Smith",
+    email: "pamela@focusnode.io",
     status: "Offline",
     isAdmin: false,
     role: "Product Owner",
@@ -77,8 +77,8 @@ const users: User[] = [
   },
   {
     src: "/avatars/avatar-3.jpg",
-    name: "Tiffany Brown",
-    email: "tiffany@focusnode.io",
+    name: "Anna Williams",
+    email: "anna@focusnode.io",
     status: "Online",
     isAdmin: true,
     role: "Designer",
@@ -324,7 +324,7 @@ function ListView() {
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" data-testid="rank-by">
                   {rankBy}
                   <ChevronDown />
                 </Button>
@@ -469,6 +469,7 @@ function StatusGroup({
         variant="ghost"
         onClick={() => setOpen((o) => !o)}
         data-active={open}
+        data-testid="status-group-toggle"
         className={cn(
           "gap-2 self-start rounded-full px-2 py-1 h-fit border-0",
           open &&

@@ -51,8 +51,8 @@ export const users: User[] = [
   },
   {
     src: "/avatars/avatar-2.jpg",
-    name: "Jessica Mitchell",
-    email: "jessica@focusnode.io",
+    name: "Pamela Smith",
+    email: "pamela@focusnode.io",
     status: "Offline",
     isAdmin: false,
     role: "Product Owner",
@@ -60,8 +60,8 @@ export const users: User[] = [
   },
   {
     src: "/avatars/avatar-3.jpg",
-    name: "Tiffany Brown",
-    email: "tiffany@focusnode.io",
+    name: "Anna Williams",
+    email: "anna@focusnode.io",
     status: "Offline",
     isAdmin: true,
     role: "Designer",

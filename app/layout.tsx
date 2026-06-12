@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import SideNav from "@/components/SideNav";
+import { Providers } from "@/app/providers";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import "@fontsource-variable/inter";
@@ -32,7 +33,7 @@ export default function RootLayout({
               <SideNav />
             </Suspense>
             <main className="min-h-0 min-w-0 flex-1 overflow-hidden">
-              {children}
+              <Providers>{children}</Providers>
             </main>
           </div>
         </div>

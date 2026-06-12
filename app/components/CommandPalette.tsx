@@ -41,7 +41,7 @@ const actions: Item[] = [
     icon: Plus,
     iconTone: "brand",
     shortcut: ["C"],
-    onSelect: (router) => router.push("/"),
+    onSelect: (router) => router.push("/?new-task=1"),
   },
   {
     id: "create-board",
@@ -133,7 +133,7 @@ export function CommandPalette({
       onOpenChange={onOpenChange}
       className="top-1/2! -translate-y-1/2! w-[600px]! max-w-[calc(100%-2rem)]! rounded-2xl! p-0"
     >
-      <Command className="rounded-2xl p-0!">
+      <Command data-testid="command-palette" className="rounded-2xl p-0!">
         <div className="flex items-center gap-2 border-b border-primary-200 px-5 py-4">
           <Search className="size-5 text-primary-400" />
           <CommandPrimitive.Input

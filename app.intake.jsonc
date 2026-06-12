@@ -16,38 +16,298 @@
     {
       "name": "kanban",
       "url": "/",
-      "states": [{ "name": "default", "setup": [] }],
-      "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
+      "states": [
+        // The default board is the Product Launch Q2 board (3 lanes, 7 Engineering columns)
+        { "name": "default", "setup": [] },
+
+        // Card hover shadow
+        {
+          "name": "card-hover",
+          "setup": [{ "hover": "[data-testid='kanban-card']" }],
+        },
+
+        // Assignee tooltip on the first card (opens after the hover delay).
+        {
+          "name": "card-assignee-tooltip",
+          "setup": [
+            { "hover": "[data-testid='card-assignee']" },
+            { "waitForSelector": "[data-testid='assignee-tooltip']" },
+          ],
+        },
+
+        // Horizontal column dock: scrolling a far column into view drags the
+        // column track right, collapsing the leading columns into 52px rails
+        // (first column docked, second mid-scrub, rest expanded).
+        {
+          "name": "columns-docked",
+          "setup": [
+            { "scrollTo": { "selector": "[data-testid='kanban-column-5']" } },
+          ],
+        },
+
+        // The accordion transition itself: clicking the Design header starts
+        // the 280ms expand/collapse tween; 140ms = mid-flight (both lanes
+        // mid-resize), 420ms = settled past the end.
+        {
+          "name": "lane-switch-anim",
+          "setup": [],
+          "animation": {
+            "trigger": [{ "click": "[data-testid='lane-header-design']" }],
+            "at": [140, 420],
+          },
+        },
+
+        // Drag-and-drop — card picked up. Clicking a card lifts it: a
+        // cursor-following ghost ([data-testid='drag-ghost']) appears at the
+        // pointer, the source card is hidden, and its slot holds an in-place
+        // placeholder ([data-testid='card-dropzone']) the height of the card.
+        {
+          "name": "card-lifted",
+          "setup": [{ "click": "[data-testid='kanban-card']" }],
+        },
+
+        // Drag-and-drop — carrying over another column. After lifting the
+        // first Backlog card, hovering To Do highlights it as the drop target
+        // and reveals its dropzone; the ghost sits over that column.
+        {
+          "name": "card-over-column",
+          "setup": [
+            { "click": "[data-testid='kanban-card']" },
+            { "hover": "[data-testid='kanban-column-1']" },
+          ],
+        },
+      ],
+      "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
     },
+
+    // The sparser Website Redesign board as its own screen. Same "/" path —
+    // the board is keyed by the ?board= param
+    {
+      "name": "kanban-redesign",
+      "url": "/",
+      "states": [
+        {
+          "name": "default",
+          "setup": [{ "queryParam": "board", "value": "website-redesign" }],
+        },
+
+        // Add Task composer — empty state.
+        {
+          "name": "add-task-dialog",
+          "setup": [{ "click": "[data-testid='add-task']" }],
+        },
+
+        // Composer with the Team menu open.
+        {
+          "name": "add-task-team-menu",
+          "setup": [
+            { "click": "[data-testid='add-task']" },
+            { "click": "[data-testid='chip-team']" },
+            { "waitForSelector": "[data-testid='team-menu']" },
+          ],
+        },
+
+        // Composer with the due-date calendar open (March 2026 under fixedClock).
+        {
+          "name": "add-task-calendar",
+          "setup": [
+            { "click": "[data-testid='add-task']" },
+            { "click": "[data-testid='chip-due']" },
+            { "waitForSelector": "[data-testid='due-calendar']" },
+          ],
+        },
+
+        // Composer fully filled: all five chips selected, submit enabled.
+        {
+          "name": "add-task-filled",
+          "setup": [
+            { "queryParam": "board", "value": "website-redesign" },
+            { "click": "[data-testid='add-task']" },
+            {
+              "fill": {
+                "selector": "[data-testid='task-title-input']",
+                "value": "Refine the kanban column collapse interaction",
+              },
+            },
+            { "click": "[data-testid='chip-team']" },
+            { "click": "[data-testid='team-option-design']" },
+            { "click": "[data-testid='chip-status']" },
+            { "click": "[data-testid='status-option-todo']" },
+            { "click": "[data-testid='chip-due']" },
+            { "click": "[data-testid='calendar-day-18']" },
+            { "click": "[data-testid='chip-priority']" },
+            { "click": "[data-testid='priority-option-urgent']" },
+            { "click": "[data-testid='chip-assignee']" },
+            { "click": "[data-testid='assignee-option-0']" },
+          ],
+        },
+
+        // Submitting the filled composer prepends the card and flash-highlights
+        // it for 3s; sampled mid-highlight (600ms) before the revert.
+        {
+          "name": "card-created-anim",
+          "setup": [
+            { "queryParam": "board", "value": "website-redesign" },
+            { "click": "[data-testid='add-task']" },
+            {
+              "fill": {
+                "selector": "[data-testid='task-title-input']",
+                "value": "Refine the progressive Kanban column collapse interaction and document expected drag-and-drop behavior for hidden columns",
+              },
+            },
+            { "click": "[data-testid='chip-team']" },
+            { "click": "[data-testid='team-option-design']" },
+            { "click": "[data-testid='chip-status']" },
+            { "click": "[data-testid='status-option-todo']" },
+            { "click": "[data-testid='chip-due']" },
+            { "click": "[data-testid='calendar-day-18']" },
+            { "click": "[data-testid='chip-priority']" },
+            { "click": "[data-testid='priority-option-urgent']" },
+            { "click": "[data-testid='chip-assignee']" },
+            { "click": "[data-testid='assignee-option-0']" },
+          ],
+          "animation": {
+            "trigger": [{ "click": "[data-testid='add-task-submit']" }],
+            "at": [600],
+          },
+        },
+
+        // Global command palette (lives in the header on every route;
+        // declared once here).
+        {
+          "name": "command-palette",
+          "setup": [
+            { "click": "[data-testid='command-palette-trigger']" },
+            { "waitForSelector": "[data-testid='command-palette']" },
+          ],
+        },
+      ],
+      "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
+    },
+
     {
       "name": "focus-timer",
       "url": "/focus-timer",
       "states": [
         { "name": "default", "setup": [] },
+
+        // Short-break preset selected (5:00, stopped).
         {
-          "name": "running",
-          "setup": [
-            { "click": "[data-testid=\"timer-preset-short\"]" },
-            { "click": "[data-testid=\"timer-play\"]" },
-            { "waitMs": 15000 },
-          ],
+          "name": "short-break",
+          "setup": [{ "click": "[data-testid='timer-preset-short']" }],
+        },
+
+        // Current task marked completed (green chip + bouncing next-task).
+        {
+          "name": "task-completed",
+          "setup": [{ "click": "[data-testid='mark-completed']" }],
+        },
+
+        // End-session confirm card (replaces the task row; frown under dial).
+        {
+          "name": "confirm-card",
+          "setup": [{ "click": "[data-testid='next-task']" }],
+        },
+
+        // Distraction blocker disabled — site list fades to 50%.
+        {
+          "name": "blocking-off",
+          "setup": [{ "click": "[data-testid='blocking-switch']" }],
+        },
+
+        // Mid-session dial: seed 731s of a 25:00 focus block remaining
+        // (stopped) so the progress ring is ~49% complete and the dial shows
+        // a partial arc of lit ticks. Chosen so progress*24 ≈ 12.3 — a
+        // non-integer tick boundary, where round() lights 12 and ceil() lights
+        // 13, and the lit ticks render at their full length. This is the
+        // in-scope state the dial-geometry defects are graded in.
+        {
+          "name": "mid-session",
+          "setup": [{ "queryParam": "seconds", "value": "731" }],
+        },
+
+        // Near-end pulse: seed 10s remaining (stopped), then start the timer
+        // and sample the pulsating rings mid-loop. Countdown reads 0:10 at
+        // 800ms and 0:09 at 1600ms.
+        {
+          "name": "pulse-anim",
+          "setup": [{ "queryParam": "seconds", "value": "10" }],
+          "animation": {
+            "trigger": [{ "click": "[data-testid='timer-play']" }],
+            "at": [800, 1600],
+          },
+        },
+
+        // Session-complete takeover (stats + next-task card). The ?finished=1
+        // seam pre-arms the confetti guard so the random burst never renders.
+        {
+          "name": "finished",
+          "setup": [{ "queryParam": "finished", "value": "1" }],
         },
       ],
-      "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
+      "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
     },
+
     {
       "name": "daily-planner",
       "url": "/daily-planner",
-      "states": [{ "name": "default", "setup": [] }],
-      "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
+      "states": [
+        { "name": "default", "setup": [] },
+
+        // Rank-by dropdown open.
+        {
+          "name": "rank-menu-open",
+          "setup": [{ "click": "[data-testid='rank-by']" }],
+        },
+
+        // Docs category filter active (chip inverts, list filtered).
+        {
+          "name": "filter-docs",
+          "setup": [{ "click": "[data-testid='planner-filter-docs']" }],
+        },
+
+        // Shared Add Task composer, planner flavor (Design/Docs/Dev teams).
+        {
+          "name": "add-task-dialog",
+          "setup": [{ "click": "[data-testid='add-task']" }],
+        },
+      ],
+      "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
     },
+
     {
       "name": "team",
       "url": "/team",
-      "states": [{ "name": "default", "setup": [] }],
-      "viewports": [{ "name": "desktop", "width": 1280, "height": 720 }],
+      "states": [
+        { "name": "default", "setup": [] },
+
+        // Placeholder tabs (dashed empty views).
+        {
+          "name": "tab-board",
+          "setup": [{ "click": "[data-testid='team-tab-board']" }],
+        },
+        {
+          "name": "tab-calendar",
+          "setup": [{ "click": "[data-testid='team-tab-calendar']" }],
+        },
+
+        // Rank-by dropdown open.
+        {
+          "name": "rank-menu-open",
+          "setup": [{ "click": "[data-testid='rank-by']" }],
+        },
+
+        // First status group collapsed (pill toggles, rows hidden).
+        {
+          "name": "group-collapsed",
+          "setup": [{ "click": "[data-testid='status-group-toggle']" }],
+        },
+      ],
+      "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
     },
   ],
 
+  // The planner header shows "Saturday, March 14, 2026" and the Add Task
+  // calendar renders the current month — pin the clock to match.
   "fixedClock": "2026-03-14T12:00:00Z",
 }
