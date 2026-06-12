@@ -67,7 +67,7 @@ const COLUMN_HEADER_MORE_MIN_WIDTH = 150;
 const STICKY_EDGE_SHADOW =
   "shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]";
 const SWIMLANE_PAGE = 360;
-const LANE_HEADER_HEIGHT = 60;
+const LANE_HEADER_HEIGHT = 42;
 const LANE_SWITCH_SPAN = 160;
 const LANE_EXPANDED_MIN = LANE_HEADER_HEIGHT + 16 + 444 + 48;
 
@@ -578,7 +578,7 @@ function KanbanBoard() {
                 animate={{ flexGrow: expanded ? 1 : 0 }}
                 transition={{ type: "tween", duration: 0.28, ease: "easeOut" }}
                 style={{
-                  flexBasis: LANE_HEADER_HEIGHT,
+                  flexBasis: LANE_HEADER_HEIGHT - 12,
                   flexShrink: 0,
                 }}
               >
