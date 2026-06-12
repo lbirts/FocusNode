@@ -88,6 +88,10 @@ function stickyLeftAtScroll(columnIndex: number, scrollLeft: number) {
   return left;
 }
 
+function liftedSlotHeight(cardHeight: number) {
+  return cardHeight - 32;
+}
+
 function totals(board: Board) {
   let tasks = 0;
   let swimlanes = 0;
@@ -1177,7 +1181,7 @@ function KanbanColumn({
                               animate={{ opacity: 1 }}
                               transition={{ duration: 0.12 }}
                               className="shrink-0 rounded-lg bg-primary-100"
-                              style={{ height: drag.height }}
+                              style={{ height: liftedSlotHeight(drag.height) }}
                             />
                           )}
                         </Fragment>
