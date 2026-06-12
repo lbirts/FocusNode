@@ -72,12 +72,11 @@ const LANE_SWITCH_SPAN = 160;
 const LANE_EXPANDED_MIN = LANE_HEADER_HEIGHT + 16 + 444 + 48;
 
 function columnWidthAtScroll(index: number, scrollLeft: number) {
+  const railFloor = COLUMN_COLLAPSED_WIDTH + 40;
+  const shedBudget = COLUMN_EXPANDED_WIDTH - railFloor;
   const collapseStart = index * COLUMN_SHRINK_RANGE;
-  const shrink = Math.min(
-    Math.max(scrollLeft - collapseStart, 0),
-    COLUMN_SHRINK_RANGE,
-  );
-  return COLUMN_EXPANDED_WIDTH - shrink;
+  const shed = Math.min(Math.max(scrollLeft - collapseStart, 0), shedBudget);
+  return COLUMN_EXPANDED_WIDTH - shed;
 }
 
 function stickyLeftAtScroll(columnIndex: number, scrollLeft: number) {
