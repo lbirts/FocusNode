@@ -73,7 +73,7 @@
           "name": "card-over-column",
           "setup": [
             { "click": "[data-testid='kanban-card']" },
-            { "hover": "[data-testid='kanban-column-1']" },
+            { "hover": "[data-testid='kanban-column-3']" },
           ],
         },
       ],
