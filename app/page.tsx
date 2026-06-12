@@ -60,6 +60,9 @@ const COLUMN_NARROW_WIDTH = 140;
 const COLUMN_COLLAPSED_WIDTH = 52;
 const COLUMN_GAP = 8;
 const COLUMN_SHRINK_RANGE = COLUMN_EXPANDED_WIDTH - COLUMN_COLLAPSED_WIDTH;
+// Scroll distance between each column's collapse start — one full column width,
+// so a column begins shedding as the scroll passes the previous one.
+const COLUMN_DOCK_STRIDE = COLUMN_EXPANDED_WIDTH;
 const COLUMN_HEADER_WIP_MIN_WIDTH = 210;
 const COLUMN_HEADER_PLUS_MIN_WIDTH = 170;
 const COLUMN_CARD_PRIORITY_MIN_WIDTH = 160;
@@ -72,9 +75,9 @@ const LANE_SWITCH_SPAN = 160;
 const LANE_EXPANDED_MIN = LANE_HEADER_HEIGHT + 16 + 444 + 48;
 
 function columnWidthAtScroll(index: number, scrollLeft: number) {
-  const collapseStart = index * COLUMN_SHRINK_RANGE;
+  const startOffset = index * COLUMN_DOCK_STRIDE;
   const shrink = Math.min(
-    Math.max(scrollLeft - collapseStart, 0),
+    Math.max(scrollLeft - startOffset, 0),
     COLUMN_SHRINK_RANGE,
   );
   return COLUMN_EXPANDED_WIDTH - shrink;
