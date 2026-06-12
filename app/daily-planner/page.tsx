@@ -316,6 +316,7 @@ export default function DailyPlannerPage() {
           <div
             ref={scrollRef}
             data-testid="planner-task-list"
+            data-density="compact"
             className="flex min-h-0 flex-1 flex-col overflow-y-auto"
             onScroll={updateEdgeShadow}
           >
