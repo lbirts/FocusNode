@@ -71,6 +71,12 @@ const defaultBlocking = {
 
 const TICK_COUNT = 24;
 
+const TICK_OUTER = 10;
+const TICK_REACH = { active: 24, inactive: 22 } as const;
+function tickInnerY(active: boolean) {
+  return TICK_OUTER + TICK_REACH[active ? "active" : "inactive"];
+}
+
 function ClockDial({ progress }: { progress: number }) {
   const activeTicks = Math.round(progress * TICK_COUNT);
   return (
@@ -90,11 +96,11 @@ function ClockDial({ progress }: { progress: number }) {
             x1="150"
             y1="10"
             x2="150"
-            y2={isActive ? 40 : 32}
+            y2={tickInnerY(isActive)}
             stroke={
               isActive ? "var(--color-brand)" : "var(--color-primary-300)"
             }
-            strokeWidth={isActive ? 3 : 2}
+            strokeWidth={isActive ? 4 : 2}
             strokeLinecap="round"
             transform={`rotate(${angle} 150 150)`}
             className="transition-all duration-200"
