@@ -60,6 +60,7 @@ const COLUMN_NARROW_WIDTH = 140;
 const COLUMN_COLLAPSED_WIDTH = 52;
 const COLUMN_GAP = 8;
 const COLUMN_SHRINK_RANGE = COLUMN_EXPANDED_WIDTH - COLUMN_COLLAPSED_WIDTH;
+const GHOST_CARRY_TRANSFORM = "translate-x-0 -translate-y-1/2 rotate-2";
 const COLUMN_HEADER_WIP_MIN_WIDTH = 210;
 const COLUMN_HEADER_PLUS_MIN_WIDTH = 170;
 const COLUMN_CARD_PRIORITY_MIN_WIDTH = 160;
@@ -383,7 +384,10 @@ function KanbanBoard() {
         <div
           data-testid="drag-ghost"
           aria-hidden
-          className="pointer-events-none fixed z-200 w-[216px] -translate-x-1/2 -translate-y-1/2 rotate-2 rounded-lg border border-primary-100 bg-white p-3 shadow-[0px_8px_24px_rgba(31,53,51,0.18)]"
+          className={cn(
+            "pointer-events-none fixed z-200 w-[216px] rounded-lg border border-primary-100 bg-white p-3 shadow-[0px_8px_24px_rgba(31,53,51,0.18)]",
+            GHOST_CARRY_TRANSFORM,
+          )}
           style={{ left: pointer.x, top: pointer.y }}
         >
           <div className="flex items-center justify-between">
