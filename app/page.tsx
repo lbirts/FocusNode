@@ -1422,7 +1422,7 @@ function KanbanCard({
               <AvatarImage src={card.assignee.src} alt="User profile pic" />
             </Avatar>
           </TooltipTrigger>
-          <TooltipContent data-testid="assignee-tooltip">
+          <TooltipContent data-testid="assignee-tooltip" side="inline-start">
             <div>
               <div className="flex items-center gap-2">
                 <Avatar data-testid="member-avatar" size="sm">
