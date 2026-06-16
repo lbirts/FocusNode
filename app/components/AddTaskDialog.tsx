@@ -273,7 +273,7 @@ export function AddTaskDialog({
                     formatDay: (d) => d.getDate().toString().padStart(2, "0"),
                   }}
                   className={cn(
-                    "w-full bg-transparent p-2.5 [--cell-size:30px]",
+                    "w-full bg-transparent p-2.5 [--cell-size:calc(var(--cell-step)*7.5)]",
                     "[&_button[data-day]]:rounded-full [&_button[data-day]]:text-[10px] [&_button[data-day]]:text-primary-600 [&_button[data-day]:hover]:bg-primary-100",
                     "[&_button[data-day][data-selected-single=true]]:bg-[#2d4644] [&_button[data-day][data-selected-single=true]]:text-white",
                     "[&_.rdp-outside_button[data-day]]:text-primary-300",
@@ -310,7 +310,10 @@ export function AddTaskDialog({
                     className={menuItemClasses}
                     onClick={() => setPriority(p.id)}
                   >
-                    <span className={cn("size-3 rounded-[4px]", p.swatch)} />
+                    <span
+                      data-testid={`priority-swatch-${p.id.toLowerCase()}`}
+                      className={cn("size-3 rounded-[4px]", p.swatch)}
+                    />
                     {p.id}
                   </DropdownMenuItem>
                 ))}

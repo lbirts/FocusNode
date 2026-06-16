@@ -39,41 +39,7 @@
       ],
     },
 
-    // Swimlane accordion tween + collapsed geometry (page.tsx motion.div)
-    {
-      "branch": "defect/swimlane-slow-tween",
-      "id": "swimlane-slow-tween",
-      "category": "interactive-states",
-      "tier": "high",
-      "selector": "[data-testid=\"swimlane-lane\"][data-active=\"true\"]",
-      "whatsWrong": "the lane expand/collapse tween runs longer than spec, so mid-flight the active lane has grown less than it should",
-      "checks": [{ "type": "computed-style", "target": "flex-grow" }],
-      "where": [
-        {
-          "screen": "kanban",
-          "state": "lane-switch-anim",
-          "viewport": "desktop",
-          "at": 140,
-        },
-      ],
-    },
-    {
-      "branch": "defect/swimlane-ease-mirror",
-      "id": "swimlane-ease-mirror",
-      "category": "interactive-states",
-      "tier": "high",
-      "selector": "[data-testid=\"swimlane-lane\"][data-active=\"true\"]",
-      "whatsWrong": "the lane expand tween uses an inverted easing curve, so mid-flight the active lane's growth is mirrored",
-      "checks": [{ "type": "computed-style", "target": "flex-grow" }],
-      "where": [
-        {
-          "screen": "kanban",
-          "state": "lane-switch-anim",
-          "viewport": "desktop",
-          "at": 140,
-        },
-      ],
-    },
+    // Swimlane collapsed geometry (page.tsx motion.div)
     {
       "branch": "defect/swimlane-flexbasis",
       "id": "swimlane-flexbasis",
@@ -358,6 +324,47 @@
           "state": "task-completed",
           "viewport": "desktop",
           "at": 250,
+        },
+      ],
+    },
+
+    // Priority menu swatch — lookup-table row corruption (AddTaskDialog priorities)
+    {
+      "branch": "defect/priority-swatch-lookup-row-corrupt",
+      "id": "priority-swatch-lookup-row-corrupt",
+      "category": "color",
+      "tier": "mid",
+      "selector": "[data-testid=\"priority-swatch-medium\"]",
+      "whatsWrong": "the Medium priority swatch renders the wrong fill and matches the Normal swatch directly beneath it instead of its own color",
+      "checks": [{ "type": "computed-style", "target": "background-color" }],
+      "where": [
+        {
+          "screen": "kanban-redesign",
+          "state": "priority-menu-open",
+          "viewport": "desktop",
+        },
+      ],
+    },
+
+    // Due-date calendar day cells blow out (relocate-and-corrupt --cell-step in ui/calendar.tsx)
+    {
+      "branch": "defect/calendar-cell-step-blowout",
+      "id": "calendar-cell-step-blowout",
+      "category": "spacing-alignment",
+      "tier": "high",
+      "selector": "[data-testid=\"calendar-day-7\"]",
+      "whatsWrong": "the due-date calendar's day cells are sized far too large, so the rightmost day column overflows past the right edge of the calendar popover",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "the right edge of [data-testid=\"calendar-day-7\"] must sit at or inside the right edge of [data-testid=\"due-calendar\"], not extend past it",
+        },
+      ],
+      "where": [
+        {
+          "screen": "kanban-redesign",
+          "state": "add-task-calendar",
+          "viewport": "desktop",
         },
       ],
     },

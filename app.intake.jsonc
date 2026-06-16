@@ -45,18 +45,6 @@
           ],
         },
 
-        // The accordion transition itself: clicking the Design header starts
-        // the 280ms expand/collapse tween; 140ms = mid-flight (both lanes
-        // mid-resize), 420ms = settled past the end.
-        {
-          "name": "lane-switch-anim",
-          "setup": [],
-          "animation": {
-            "trigger": [{ "click": "[data-testid='lane-header-design']" }],
-            "at": [140, 420],
-          },
-        },
-
         // Drag-and-drop — card picked up. Clicking a card lifts it: a
         // cursor-following ghost ([data-testid='drag-ghost']) appears at the
         // pointer, the source card is hidden, and its slot holds an in-place
@@ -114,6 +102,17 @@
             { "click": "[data-testid='add-task']" },
             { "click": "[data-testid='chip-due']" },
             { "waitForSelector": "[data-testid='due-calendar']" },
+          ],
+        },
+
+        // Composer with the Priority menu open (all four rows + swatches).
+        {
+          "name": "priority-menu-open",
+          "setup": [
+            { "click": "[data-testid='add-task']" },
+            { "click": "[data-testid='chip-priority']" },
+            { "waitForSelector": "[data-testid='priority-menu']" },
+            { "waitForSelector": "[data-testid='priority-swatch-medium']" },
           ],
         },
 
