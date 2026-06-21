@@ -1,5 +1,6 @@
 "use client";
 
+import { magazineSpacerStyle } from "@/app/lib/magazine-wrap";
 import { cn } from "@/app/lib/utils";
 import { Button } from "@/ui/button";
 import { Card, CardAction, CardHeader } from "@/ui/card";
@@ -48,6 +49,10 @@ const taskChipStyles: Record<string, string> = {
   Normal: "bg-secondary-50 text-secondary-400",
   Medium: "bg-brand-light text-brand",
 };
+
+// Editorial "session brief" copy that wraps around the round priority puck.
+const SESSION_BRIEF =
+  "Wrap the notification preferences panel and push the dashboard analytics widgets into review. Keep the onboarding checklist scoped for the next focus block, and flag the auth-refresh edge cases for the team sync before the launch cut. Continue to work on the onboarding checklist as a follow-up to the previous focus session. Schedule a team sync with the product team to review the auth-refresh edge cases. Help the team sync with the product team to review the auth-refresh edge cases.";
 
 // Share of the session after which the dial starts pulsating.
 const PULSE_THRESHOLD = 0.95;
@@ -306,6 +311,25 @@ function FocusTimer() {
                 className="w-[560px] rounded-xl border border-primary-200 bg-white"
               >
                 <CardHeader className="gap-y-2">
+                  <p className="text-xs font-medium uppercase mb-0.5">
+                    Session brief
+                  </p>
+                  <div data-testid="session-brief" className="relative mb-1">
+                    <span
+                      data-testid="priority-ring"
+                      aria-hidden
+                      className="pointer-events-none absolute left-0 top-0 flex size-[84px] items-center justify-center rounded-full border-[6px] border-brand text-sm font-semibold text-brand"
+                    >
+                      P1
+                    </span>
+                    <p
+                      data-testid="session-brief-text"
+                      className="text-sm leading-relaxed text-primary-500"
+                    >
+                      <span aria-hidden style={magazineSpacerStyle()} />
+                      {SESSION_BRIEF}
+                    </p>
+                  </div>
                   <p className="text-xs font-medium uppercase text-brand">
                     Next task
                   </p>

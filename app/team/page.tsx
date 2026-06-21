@@ -1,6 +1,8 @@
 "use client";
 
+import { WORKLOAD_TABLE_LAYOUT } from "@/app/lib/tableLayout";
 import { cn } from "@/app/lib/utils";
+import { Avatar, AvatarImage } from "@/ui/avatar";
 import { Button } from "@/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +11,16 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu";
+import { Separator } from "@/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/ui/tooltip";
 import {
   BookUser,
   Box,
@@ -21,13 +33,6 @@ import {
   Users,
 } from "lucide-react";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Avatar, AvatarImage } from "../components/ui/avatar";
-import { Separator } from "../components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../components/ui/tooltip";
 
 type Priority = "Urgent" | "Medium" | "Normal" | "Low";
 type Category = "Engineering" | "Design";
@@ -89,7 +94,7 @@ const users: User[] = [
 const tasks: Task[] = [
   {
     id: 1,
-    name: "Implement auth token refresh logic",
+    name: "Implement auth token refresh and rotation across the API gateway, edge workers, and the background reconciliation queue",
     category: "Engineering",
     status: "Approved",
     priority: "Medium",
@@ -555,114 +560,140 @@ function StatusGroup({
       </Button>
 
       {open && tasks.length > 0 && (
-        <div className="mt-2 flex flex-col">
-          <div className="flex items-center justify-between border-b border-primary-100 py-3 text-[10px] text-primary-400">
-            <span className="w-[300px]">Name</span>
-            <span className="w-[100px] text-center">Assignee</span>
-            <span className="w-[100px] text-center">Due date</span>
-            <span className="w-[100px] text-center">Priority</span>
-          </div>
-          {sorted.map((task, idx) => (
-            <div
-              key={task.id}
-              className={cn(
-                "flex items-center justify-between py-3",
-                idx < sorted.length - 1 && "border-b border-primary-100",
-              )}
-            >
-              <p className="w-[300px] text-sm text-primary-500">{task.name}</p>
-              <div className="flex w-[100px] items-center justify-center">
-                {task.assignees.map((assignee, i) => (
-                  <Tooltip key={assignee.name}>
-                    <TooltipTrigger>
-                      <Avatar
-                        data-testid="task-assignee-avatar"
-                        className={cn(
-                          "size-5 border-[3px] border-primary-50",
-                          i < task.assignees.length - 1 && "-mr-1",
-                        )}
-                      >
-                        <AvatarImage
-                          src={assignee.src}
-                          alt="User profile pic"
-                        />
-                      </Avatar>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <Avatar data-testid="member-avatar" size="sm">
+        <Table
+          data-testid="workload-table"
+          className="mt-2 w-full"
+          style={{ tableLayout: WORKLOAD_TABLE_LAYOUT }}
+        >
+          <TableHeader>
+            <TableRow className="border-b border-primary-100 text-[10px]">
+              <TableHead className="py-3 text-left font-normal w-75 text-primary-400">
+                Name
+              </TableHead>
+              <TableHead className="py-3 text-center font-normal w-25 text-primary-400">
+                Assignee
+              </TableHead>
+              <TableHead className="py-3 text-center font-normal w-25 text-primary-400">
+                Due date
+              </TableHead>
+              <TableHead className="py-3 text-center font-normal w-25 text-primary-400">
+                Priority
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sorted.map((task, idx) => (
+              <TableRow
+                key={task.id}
+                className={cn(
+                  idx < sorted.length - 1 && "border-b border-primary-100",
+                )}
+              >
+                <TableCell
+                  data-testid="workload-name-cell"
+                  className="truncate py-3 text-sm text-primary-500"
+                >
+                  {task.name}
+                </TableCell>
+                <TableCell className="py-3">
+                  <div className="flex items-center justify-center">
+                    {task.assignees.map((assignee, i) => (
+                      <Tooltip key={assignee.name}>
+                        <TooltipTrigger>
+                          <Avatar
+                            data-testid="task-assignee-avatar"
+                            className={cn(
+                              "size-5 border-[3px] border-primary-50",
+                              i < task.assignees.length - 1 && "-mr-1",
+                            )}
+                          >
                             <AvatarImage
                               src={assignee.src}
                               alt="User profile pic"
                             />
                           </Avatar>
+                        </TooltipTrigger>
+                        <TooltipContent>
                           <div>
-                            <p className="font-semibold">
-                              {assignee.email}
-                              {assignee.isAdmin && (
-                                <span className="ml-2 text-primary-400/70 text-[9px] rounded-sm border border-primary-300 px-1 py-0.5">
-                                  Admin
+                            <div className="flex items-center gap-2">
+                              <Avatar data-testid="member-avatar" size="sm">
+                                <AvatarImage
+                                  src={assignee.src}
+                                  alt="User profile pic"
+                                />
+                              </Avatar>
+                              <div>
+                                <p className="font-semibold">
+                                  {assignee.email}
+                                  {assignee.isAdmin && (
+                                    <span className="ml-2 text-primary-400/70 text-[9px] rounded-sm border border-primary-300 px-1 py-0.5">
+                                      Admin
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="text-primary-400/70 text-xs">
+                                  {assignee.name}
+                                </p>
+                              </div>
+                            </div>
+                            <Separator
+                              orientation="horizontal"
+                              className="my-1 bg-primary-300/50"
+                            />
+                            <div className="flex items-center gap-1">
+                              <div
+                                className={cn(
+                                  "size-1.5 rounded-full",
+                                  assignee.status === "Online"
+                                    ? "bg-green-500 animate-pulse"
+                                    : "bg-primary-400/75",
+                                )}
+                              />
+                              <p>{assignee.status}</p>
+                            </div>
+                            <div className="flex items-center gap-1 mb-0.5">
+                              <BookUser className="size-3.5" />
+                              <p>{assignee.role}</p>
+                            </div>
+                            <div className="flex items-center gap-1 mb-0.5">
+                              <Box className="size-3.5" />
+                              <p>
+                                Product Launch Q2
+                                <span className="ml-1 text-primary-400/70">
+                                  +{assignee.boardCount - 1}
                                 </span>
-                              )}
-                            </p>
-                            <p className="text-primary-400/70 text-xs">
-                              {assignee.name}
-                            </p>
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <Separator
-                          orientation="horizontal"
-                          className="my-1 bg-primary-300/50"
-                        />
-                        <div className="flex items-center gap-1">
-                          <div
-                            className={cn(
-                              "size-1.5 rounded-full",
-                              assignee.status === "Online"
-                                ? "bg-green-500 animate-pulse"
-                                : "bg-primary-400/75",
-                            )}
-                          />
-                          <p>{assignee.status}</p>
-                        </div>
-                        <div className="flex items-center gap-1 mb-0.5">
-                          <BookUser className="size-3.5" />
-                          <p>{assignee.role}</p>
-                        </div>
-                        <div className="flex items-center gap-1 mb-0.5">
-                          <Box className="size-3.5" />
-                          <p>
-                            Product Launch Q2
-                            <span className="ml-1 text-primary-400/70">
-                              +{assignee.boardCount - 1}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-              <div className="flex w-[100px] justify-center">
-                <span className="flex items-center gap-1.5 rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
-                  <Calendar className="size-3" />
-                  {task.due}
-                </span>
-              </div>
-              <div className="flex w-[100px] justify-center">
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-xs",
-                    priorityStyles[task.priority],
-                  )}
-                >
-                  {task.priority}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="py-3">
+                  <div className="flex justify-center">
+                    <span className="flex items-center gap-1.5 rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
+                      <Calendar className="size-3" />
+                      {task.due}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="py-3">
+                  <div className="flex justify-center">
+                    <span
+                      className={cn(
+                        "rounded px-1.5 py-0.5 text-xs",
+                        priorityStyles[task.priority],
+                      )}
+                    >
+                      {task.priority}
+                    </span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </div>
   );
