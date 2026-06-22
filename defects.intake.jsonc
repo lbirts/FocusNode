@@ -160,12 +160,16 @@
       "id": "disclosure-stays-collapsed",
       "category": "overflow-clipping",
       "tier": "high",
-      "selector": "[data-testid=\"composer-details-panel\"]",
-      "whatsWrong": "submitting the Add Task form invalid leaves the Details disclosure collapsed, so the required-field error inside it is clipped to nothing instead of being revealed",
+      "selector": "[data-testid=\"composer-estimate\"]",
+      "whatsWrong": "submitting the Add Task form invalid leaves the Details disclosure collapsed (clipping the required-field error to nothing), and once revealed the invalid Estimate field is no longer outlined in red",
       "checks": [
         {
           "type": "bounding-box",
           "target": "[data-testid=\"composer-details-panel\"] must expand to a non-zero height that reveals its estimate field and error, not stay collapsed to zero height clipping its contents",
+        },
+        {
+          "type": "computed-style",
+          "target": "border-top-color",
         },
       ],
       "where": [
