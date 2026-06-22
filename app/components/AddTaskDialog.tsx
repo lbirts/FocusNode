@@ -190,7 +190,7 @@ function ComposerDetails({
   });
 
   useEffect(() => {
-    if (error) setExpanded(true);
+    if (error) setExpanded(detailsExpanded(true));
   }, [error, setExpanded]);
 
   return (
