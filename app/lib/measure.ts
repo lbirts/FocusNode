@@ -3,6 +3,6 @@ export const MONO_LINE_HEIGHT = 20;
 
 export function contentWidth(el: HTMLElement): number {
   const cs = getComputedStyle(el);
-  const paddingX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const paddingX = parseFloat(cs.marginLeft) + parseFloat(cs.marginRight);
   return el.clientWidth - paddingX;
 }
