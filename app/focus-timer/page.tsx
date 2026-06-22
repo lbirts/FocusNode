@@ -50,7 +50,6 @@ const taskChipStyles: Record<string, string> = {
   Medium: "bg-brand-light text-brand",
 };
 
-// Editorial "session brief" copy that wraps around the round priority puck.
 const SESSION_BRIEF =
   "Wrap the notification preferences panel and push the dashboard analytics widgets into review. Keep the onboarding checklist scoped for the next focus block, and flag the auth-refresh edge cases for the team sync before the launch cut. Continue to work on the onboarding checklist as a follow-up to the previous focus session. Schedule a team sync with the product team to review the auth-refresh edge cases. Help the team sync with the product team to review the auth-refresh edge cases.";
 

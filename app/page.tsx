@@ -24,6 +24,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  GripVertical,
   Lock,
   MoreHorizontal,
   Pencil,
@@ -42,6 +43,7 @@ import {
   useRef,
   useState,
 } from "react";
+import CardDetailDialog from "./components/TaskDetailDialog";
 import {
   Tooltip,
   TooltipContent,
@@ -134,6 +136,39 @@ function KanbanBoard() {
   }>({});
   const [highlightId, setHighlightId] = useState<number | null>(null);
   const highlightTimer = useRef<number | null>(null);
+  const [detail, setDetail] = useState<DropPayload | null>(null);
+
+  const openCardDetail = useCallback(
+    (payload: DropPayload) => setDetail(payload),
+    [],
+  );
+
+  const updateCard = useCallback(
+    (target: DropPayload, patch: Partial<Card>) => {
+      setSwimlanes((prev) =>
+        prev.map((s) =>
+          s.id !== target.fromSwimlane
+            ? s
+            : {
+                ...s,
+                columns: s.columns.map((c) =>
+                  c.id !== target.fromColumn
+                    ? c
+                    : {
+                        ...c,
+                        cards: c.cards.map((card) =>
+                          card.id === target.cardId
+                            ? { ...card, ...patch }
+                            : card,
+                        ),
+                      },
+                ),
+              },
+        ),
+      );
+    },
+    [],
+  );
 
   const teams = useMemo<AddTaskTeam[]>(
     () =>
@@ -259,6 +294,20 @@ function KanbanBoard() {
     return null;
   }, [drag, swimlanes]);
 
+  const detailData = useMemo(() => {
+    if (!detail) return null;
+    const lane = swimlanes.find((s) => s.id === detail.fromSwimlane);
+    const col = lane?.columns.find((c) => c.id === detail.fromColumn);
+    const card = col?.cards.find((c) => c.id === detail.cardId);
+    if (!lane || !col || !card) return null;
+    return {
+      card,
+      columnTitle: col.title,
+      swimlaneTitle: lane.title,
+      swimlane: lane,
+    };
+  }, [detail, swimlanes]);
+
   useEffect(() => {
     if (!clickDrag) return;
     function onKey(e: KeyboardEvent) {
@@ -351,6 +400,7 @@ function KanbanBoard() {
                           due: values.due,
                           tag: s.title,
                           assignee: values.assignee,
+                          description: values.description,
                         },
                         ...c.cards,
                       ],
@@ -379,6 +429,38 @@ function KanbanBoard() {
       }
       onClick={clickDrag ? () => endDrag() : undefined}
     >
+      <CardDetailDialog
+        open={detailData != null}
+        onOpenChange={(open) => {
+          if (!open) setDetail(null);
+        }}
+        card={detailData?.card ?? null}
+        board={board}
+        columnTitle={detailData?.columnTitle ?? ""}
+        swimlaneTitle={detailData?.swimlaneTitle ?? ""}
+        swimlane={detailData?.swimlane ?? null}
+        onUpdateCard={(patch) => {
+          if (detail) updateCard(detail, patch);
+        }}
+        onSetStatus={(ref, toColumnId) => {
+          moveCard(
+            ref.cardId,
+            ref.fromSwimlane,
+            ref.fromColumn,
+            ref.fromSwimlane,
+            toColumnId,
+          );
+          setDetail((d) =>
+            d &&
+            d.cardId === ref.cardId &&
+            d.fromSwimlane === ref.fromSwimlane &&
+            d.fromColumn === ref.fromColumn
+              ? { ...d, fromColumn: toColumnId }
+              : d,
+          );
+        }}
+        onOpenTask={openCardDetail}
+      />
       {clickDrag && drag && carriedCard && (
         <div
           data-testid="drag-ghost"
@@ -618,6 +700,7 @@ function KanbanBoard() {
                       onCardLift={liftCard}
                       onCardClickLift={clickLiftCard}
                       onCardDragEnd={endDrag}
+                      onCardOpen={openCardDetail}
                       onColumnDragOver={(columnId, over) =>
                         handleColumnDragOver(swimlane.id, columnId, over)
                       }
@@ -668,6 +751,7 @@ function SwimlaneColumns({
   onCardLift,
   onCardClickLift,
   onCardDragEnd,
+  onCardOpen,
   onColumnDragOver,
   onAddCard,
   onDropCard,
@@ -686,6 +770,7 @@ function SwimlaneColumns({
     y: number,
   ) => void;
   onCardDragEnd: () => void;
+  onCardOpen: (payload: DropPayload) => void;
   onColumnDragOver: (columnId: string, over: boolean) => void;
   onAddCard: (columnId: string) => void;
   onDropCard: (payload: DropPayload, columnId: string) => void;
@@ -842,6 +927,7 @@ function SwimlaneColumns({
             onCardLift={onCardLift}
             onCardClickLift={onCardClickLift}
             onCardDragEnd={onCardDragEnd}
+            onCardOpen={onCardOpen}
             onDragOverChange={(over) => onColumnDragOver(column.id, over)}
             onAddCard={() => onAddCard(column.id)}
             onDropCard={(payload) => onDropCard(payload, column.id)}
@@ -865,6 +951,7 @@ function SwimlaneSlot({
   onCardLift,
   onCardClickLift,
   onCardDragEnd,
+  onCardOpen,
   onDragOverChange,
   onAddCard,
   onDropCard,
@@ -886,6 +973,7 @@ function SwimlaneSlot({
     y: number,
   ) => void;
   onCardDragEnd: () => void;
+  onCardOpen: (payload: DropPayload) => void;
   onDragOverChange: (over: boolean) => void;
   onAddCard: () => void;
   onDropCard: (payload: DropPayload) => void;
@@ -942,6 +1030,7 @@ function SwimlaneSlot({
           onCardLift={onCardLift}
           onCardClickLift={onCardClickLift}
           onCardDragEnd={onCardDragEnd}
+          onCardOpen={onCardOpen}
           onDragOverChange={onDragOverChange}
           onAddCard={onAddCard}
           onDropCard={onDropCard}
@@ -964,6 +1053,7 @@ function KanbanColumn({
   onCardLift,
   onCardClickLift,
   onCardDragEnd,
+  onCardOpen,
   onDragOverChange,
   onAddCard,
   onDropCard,
@@ -985,6 +1075,7 @@ function KanbanColumn({
     y: number,
   ) => void;
   onCardDragEnd: () => void;
+  onCardOpen: (payload: DropPayload) => void;
   onDragOverChange: (over: boolean) => void;
   onAddCard: () => void;
   onDropCard: (payload: DropPayload) => void;
@@ -1169,6 +1260,7 @@ function KanbanColumn({
                             onLift={onCardLift}
                             onClickLift={onCardClickLift}
                             onDragEnd={onCardDragEnd}
+                            onCardOpen={onCardOpen}
                           />
                           {isLifted && showDropzone && drag && (
                             <motion.div
@@ -1327,6 +1419,7 @@ function KanbanCard({
   onLift,
   onClickLift,
   onDragEnd,
+  onCardOpen,
 }: {
   board: Board;
   card: Card;
@@ -1344,63 +1437,91 @@ function KanbanCard({
     y: number,
   ) => void;
   onDragEnd: () => void;
+  onCardOpen: (payload: DropPayload) => void;
 }) {
   const showPriority = width > COLUMN_CARD_PRIORITY_MIN_WIDTH;
   const nativeDragRef = useRef(false);
+  const payload: DropPayload = {
+    cardId: card.id,
+    fromSwimlane: swimlaneId,
+    fromColumn: columnId,
+  };
+  const cardHeight = (target: HTMLElement) => {
+    const el = target.closest('[data-testid="kanban-card"]');
+    return el ? el.getBoundingClientRect().height : 0;
+  };
   return (
     <div
-      draggable
       data-testid="kanban-card"
-      onDragStart={(e) => {
-        nativeDragRef.current = true;
-        const payload: DropPayload = {
-          cardId: card.id,
-          fromSwimlane: swimlaneId,
-          fromColumn: columnId,
-        };
-        e.dataTransfer.setData("application/json", JSON.stringify(payload));
-        e.dataTransfer.effectAllowed = "move";
-        const height = e.currentTarget.getBoundingClientRect().height;
-        window.setTimeout(() => onLift(payload, height), 0);
-      }}
-      onDragEnd={() => {
-        onDragEnd();
-        window.setTimeout(() => {
-          nativeDragRef.current = false;
-        }, 0);
-      }}
       onClick={(e) => {
-        if (nativeDragRef.current) return;
         if (dragActive) return;
         e.stopPropagation();
-        const payload: DropPayload = {
-          cardId: card.id,
-          fromSwimlane: swimlaneId,
-          fromColumn: columnId,
-        };
-        const height = e.currentTarget.getBoundingClientRect().height;
-        onClickLift(payload, height, e.clientX, e.clientY);
+        onCardOpen(payload);
       }}
       data-highlighted={highlighted || undefined}
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-grab active:cursor-grabbing transition-[box-shadow,background-color] duration-200",
+        "flex flex-col gap-3 rounded-lg border border-primary-100 bg-primary-50 p-3 cursor-pointer transition-[box-shadow,background-color] duration-200",
         !dragActive &&
           "hover:shadow-[0px_1px_3px_0px_#0000004D,0px_4px_8px_3px_#00000026]",
         lifted && "hidden",
         highlighted && "bg-primary-100",
       )}
     >
-      <div className="flex items-center justify-between">
-        <span
-          data-testid={`priority-badge-${card.priority.toLowerCase()}`}
-          className={cn(
-            "rounded",
-            priorityStyles[card.priority],
-            !showPriority ? "size-3" : "px-1.5 py-0.5 text-xs",
-          )}
-        >
-          {showPriority && card.priority}
-        </span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <button
+            type="button"
+            data-testid="card-grip"
+            aria-label="Drag card"
+            draggable
+            onDragStart={(e) => {
+              e.stopPropagation();
+              nativeDragRef.current = true;
+              e.dataTransfer.setData(
+                "application/json",
+                JSON.stringify(payload),
+              );
+              e.dataTransfer.effectAllowed = "move";
+              const el = e.currentTarget.closest(
+                '[data-testid="kanban-card"]',
+              ) as HTMLElement | null;
+              const height = el ? el.getBoundingClientRect().height : 0;
+              if (el) e.dataTransfer.setDragImage(el, 16, 16);
+              window.setTimeout(() => onLift(payload, height), 0);
+            }}
+            onDragEnd={(e) => {
+              e.stopPropagation();
+              onDragEnd();
+              window.setTimeout(() => {
+                nativeDragRef.current = false;
+              }, 0);
+            }}
+            onClick={(e) => {
+              if (nativeDragRef.current) return;
+              if (dragActive) return;
+              e.stopPropagation();
+              onClickLift(
+                payload,
+                cardHeight(e.currentTarget),
+                e.clientX,
+                e.clientY,
+              );
+            }}
+            className="shrink-0 cursor-grab text-primary-300 transition-colors hover:text-primary-500 active:cursor-grabbing"
+          >
+            <GripVertical className="size-4" />
+          </button>
+          <span
+            data-testid={`priority-badge-${card.priority.toLowerCase()}`}
+            className={cn(
+              "rounded",
+              priorityStyles[card.priority],
+              !showPriority ? "size-3" : "px-1.5 py-0.5 text-xs",
+            )}
+          >
+            {showPriority && card.priority}
+          </span>
+        </div>
         {card.due && (
           <span className="flex items-center gap-1.5 rounded bg-primary-100 px-1.5 py-0.5 text-xs text-primary-400">
             <Calendar className="size-3" />

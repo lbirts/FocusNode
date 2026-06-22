@@ -2,6 +2,8 @@
 
 import { users, type Priority, type User } from "@/app/lib/boards";
 import { detailsExpanded } from "@/app/lib/composer-disclosure";
+import { renderDescription } from "@/app/lib/description";
+import { RichTextarea } from "@/app/lib/rich-textarea";
 import { cn } from "@/app/lib/utils";
 import { Avatar, AvatarImage } from "@/ui/avatar";
 import { Button } from "@/ui/button";
@@ -51,6 +53,7 @@ export type AddTaskValues = {
   due: string;
   priority: Priority;
   assignee: User;
+  description: string;
 };
 
 type AddTaskFormData = {
@@ -61,6 +64,7 @@ type AddTaskFormData = {
   priority: Priority | null;
   assignee: User | null;
   estimate: string;
+  description: string;
 };
 
 const teamIcons: Record<string, ComponentType<{ className?: string }>> = {
@@ -97,7 +101,11 @@ const chipFieldNames = [
   "assignee",
 ] as const;
 
-type FormField = "title" | "estimate" | (typeof chipFieldNames)[number];
+type FormField =
+  | "title"
+  | "estimate"
+  | "description"
+  | (typeof chipFieldNames)[number];
 
 function startOfDay(date: Date) {
   const next = new Date(date);
@@ -173,6 +181,13 @@ const suite = create((data: AddTaskFormData, teams: AddTaskTeam[]) => {
       .message("Estimate must be a valid number in hours")
       .isNotNull()
       .isNumeric();
+  });
+  test("description", () => {
+    enforce(data.description)
+      .message("Description is required")
+      .isNotEmpty()
+      .message("Description must be less than 500 characters")
+      .maxLength(500);
   });
 });
 
@@ -258,6 +273,7 @@ export function AddTaskDialog({
   const [priority, setPriority] = useState<Priority | null>(null);
   const [assignee, setAssignee] = useState<User | null>(null);
   const [estimate, setEstimate] = useState("");
+  const [description, setDescription] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [validationSnapshot, setValidationSnapshot] =
     useState<SuiteResult | null>(null);
@@ -272,8 +288,9 @@ export function AddTaskDialog({
       priority,
       assignee,
       estimate,
+      description: description.trim(),
     }),
-    [title, teamId, statusId, due, priority, assignee, estimate],
+    [title, teamId, statusId, due, priority, assignee, estimate, description],
   );
 
   useEffect(() => {
@@ -289,6 +306,7 @@ export function AddTaskDialog({
     setPriority(null);
     setAssignee(null);
     setEstimate("");
+    setDescription("");
   }, [open, defaultTeamId, defaultStatusId]);
 
   const currentValidation = useMemo(() => {
@@ -341,6 +359,7 @@ export function AddTaskDialog({
       due: formatDue(due),
       priority,
       assignee,
+      description: formData.description,
     });
     onOpenChange(false);
   }
@@ -348,6 +367,7 @@ export function AddTaskDialog({
   const TeamIcon = (team && teamIcons[team.id.toLowerCase()]) || Users;
   const titleError = resolveFieldError("title");
   const estimateError = resolveFieldError("estimate");
+  const descriptionError = resolveFieldError("description");
   const chipErrors = chipFieldNames.flatMap((field) => {
     const error = resolveFieldError(field);
     return error ? [error] : [];
@@ -401,6 +421,26 @@ export function AddTaskDialog({
             {titleError && (
               <p role="alert" className="mt-1 text-xs text-red">
                 {titleError}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <RichTextarea
+              value={description}
+              onChange={setDescription}
+              render={(v) => renderDescription(v, { transparent: true })}
+              rows={3}
+              data-testid="composer-description"
+              placeholder="Add detail… use #tags and @mentions"
+              className={cn(
+                "w-full resize-none rounded-lg border bg-transparent p-3 text-sm text-primary-500 outline-none placeholder:text-primary-400",
+                descriptionError ? "border-red" : "border-primary-200",
+              )}
+            />
+            {descriptionError && (
+              <p role="alert" className="mt-1 text-xs text-red">
+                {descriptionError}
               </p>
             )}
           </div>

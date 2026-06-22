@@ -10,6 +10,13 @@ export type User = {
   boardCount: number;
 };
 
+export type Comment = {
+  id: number;
+  author: User;
+  createdAt: string;
+  body: string;
+};
+
 export type Card = {
   id: number;
   title: string;
@@ -17,6 +24,8 @@ export type Card = {
   due?: string;
   tag: string;
   assignee: User;
+  description?: string;
+  comments?: Comment[];
 };
 
 export type Column = {
@@ -90,6 +99,28 @@ export const boards: Board[] = [
                 due: "3/17",
                 tag: "Docs",
                 assignee: users[0],
+                description:
+                  "Refresh the #api reference and loop in @alex for the #v2 request examples before the #release cut.",
+                comments: [
+                  {
+                    id: 1,
+                    author: users[1],
+                    createdAt: "2026-06-21T08:30:00Z",
+                    body: "Bumped to **Urgent** — the `/v2/tokens` refresh path is the current blocker.",
+                  },
+                  {
+                    id: 2,
+                    author: users[2],
+                    createdAt: "2026-06-20T17:00:00Z",
+                    body: "Full spec: https://docs.focusnode.io/internal/api/v2/authentication/refresh-token-rotation-and-revocation-policy",
+                  },
+                  {
+                    id: 3,
+                    author: users[0],
+                    createdAt: "2026-06-19T09:00:00Z",
+                    body: "Repro on staging:\n\n```\nPOST /v2/tokens\nAuthorization: Bearer <expired-refresh-token-value-here>\n→ 401 token_expired\n```",
+                  },
+                ],
               },
               {
                 id: 102,
@@ -98,6 +129,8 @@ export const boards: Board[] = [
                 due: "3/23",
                 tag: "Design",
                 assignee: users[2],
+                description:
+                  "Pair with @anna on the #onboarding flow and capture #ux notes for @sam to review.",
               },
               {
                 id: 103,

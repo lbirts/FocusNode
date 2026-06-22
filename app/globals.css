@@ -173,10 +173,6 @@ body {
   }
 }
 
-/* Typewriter reveal for the daily-planner "Sync activity" latest line. The end
-   width is handed in per-entry via the --type-width custom property so the same
-   keyframes can drive lines of any length; pair it with a steps() timing
-   function whose step count matches the line's character count. */
 @keyframes sync-typewriter {
   from {
     width: 0;
@@ -186,7 +182,6 @@ body {
   }
 }
 
-/* Blinking caret at the typing edge of the Sync activity latest line. */
 @keyframes sync-caret {
   0%,
   49% {
