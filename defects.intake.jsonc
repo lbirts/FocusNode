@@ -1,7 +1,7 @@
 {
   "defects": [
     {
-      "branch": "defect/cluster2-mirror",
+      "branch": "defect/mirror-lineheight-dropped",
       "id": "mirror-lineheight-dropped",
       "category": "spacing-alignment",
       "tier": "high",
@@ -17,7 +17,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-mirror",
+      "branch": "defect/mirror-paddingtop-swap",
       "id": "mirror-paddingtop-swap",
       "category": "spacing-alignment",
       "tier": "high",
@@ -33,7 +33,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-mirror",
+      "branch": "defect/mirror-wordbreak-override",
       "id": "mirror-wordbreak-override",
       "category": "overflow-clipping",
       "tier": "high",
@@ -49,7 +49,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-sync-log",
+      "branch": "defect/pretext-contentwidth-onesided",
       "id": "pretext-contentwidth-onesided",
       "category": "overflow-clipping",
       "tier": "high",
@@ -70,7 +70,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-sync-log",
+      "branch": "defect/pretext-lineheight-compressed",
       "id": "pretext-lineheight-compressed",
       "category": "overflow-clipping",
       "tier": "high",
@@ -91,7 +91,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-sync-log",
+      "branch": "defect/typewriter-keyframe-clip",
       "id": "typewriter-keyframe-clip",
       "category": "overflow-clipping",
       "tier": "mid",
@@ -107,7 +107,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-progress",
+      "branch": "defect/progress-ceil-overfill",
       "id": "progress-ceil-overfill",
       "category": "spacing-alignment",
       "tier": "mid",
@@ -123,7 +123,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-card-detail",
+      "branch": "defect/description-token-invisible",
       "id": "description-token-invisible",
       "category": "color",
       "tier": "high",
@@ -139,7 +139,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-table",
+      "branch": "defect/workload-table-autolayout",
       "id": "workload-table-autolayout",
       "category": "overflow-clipping",
       "tier": "high",
@@ -156,7 +156,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-disclosure",
+      "branch": "defect/disclosure-stays-collapsed",
       "id": "disclosure-stays-collapsed",
       "category": "overflow-clipping",
       "tier": "high",
@@ -177,7 +177,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-wrap-margin",
+      "branch": "defect/wrap-margin-inflate",
       "id": "wrap-margin-inflate",
       "category": "spacing-alignment",
       "tier": "mid",
@@ -198,7 +198,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-wrap-side",
+      "branch": "defect/wrap-side-defloat",
       "id": "wrap-side-defloat",
       "category": "layout",
       "tier": "high",
@@ -219,7 +219,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-card-detail",
+      "branch": "defect/comment-code-overflow",
       "id": "comment-code-overflow",
       "category": "overflow-clipping",
       "tier": "high",
@@ -240,7 +240,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-card-detail",
+      "branch": "defect/comment-link-overflow",
       "id": "comment-link-overflow",
       "category": "overflow-clipping",
       "tier": "high",
@@ -259,6 +259,52 @@
           "viewport": "desktop",
         },
       ],
+    },
+    {
+      "branch": "defect/typewriter-steps-mismatch",
+      "id": "typewriter-steps-mismatch",
+      "category": "overflow-clipping",
+      "tier": "mid",
+      "selector": "[data-testid=\"sync-log-latest\"]",
+      "whatsWrong": "as the Sync activity latest line types itself in, a sampled frame stops on a half-drawn character because the typewriter advances by a fractional glyph per step",
+      "checks": [{ "type": "computed-style", "target": "width" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "sync-typing",
+          "viewport": "desktop",
+          "at": 1200,
+        },
+      ],
+    },
+  ],
+  "clusters": [
+    {
+      "id": "mirror",
+      "defects": [
+        "mirror-lineheight-dropped",
+        "mirror-paddingtop-swap",
+        "mirror-wordbreak-override",
+      ],
+      "note": "All three corrupt the rich-textarea mirror engine, so the description-editor highlights drift three independent ways at once — line height, top inset, and word-break — hardest to fully localise together.",
+    },
+    {
+      "id": "sync-log",
+      "defects": [
+        "pretext-contentwidth-onesided",
+        "pretext-lineheight-compressed",
+        "typewriter-keyframe-clip",
+      ],
+      "note": "The Sync panel overflows from TWO compounding measure.ts causes (fixing one still leaves it overflowing) while the latest line is separately clipped — all visible in one view.",
+    },
+    {
+      "id": "card-detail",
+      "defects": [
+        "description-token-invisible",
+        "comment-code-overflow",
+        "comment-link-overflow",
+      ],
+      "note": "The card-detail modal shows invisible description tokens plus a code block and a long link both overflowing the comment thread.",
     },
   ],
 }

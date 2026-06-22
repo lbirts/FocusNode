@@ -352,6 +352,21 @@
             { "waitMs": 2600 },
           ],
         },
+
+        // Sync activity latest line caught mid-reveal: scroll the rail into
+        // view; the line's CSS-steps() typewriter is an entrance animation
+        // (plays on load), sampled at 1200ms — 50% of the 2.4s reveal, a frozen
+        // mid-typing frame where the step quantisation shows.
+        {
+          "name": "sync-typing",
+          "setup": [
+            { "scrollTo": { "selector": "[data-testid='sync-log-panel']" } },
+          ],
+          "animation": {
+            "trigger": [],
+            "at": [1200],
+          },
+        },
       ],
       "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
     },
