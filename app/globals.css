@@ -178,7 +178,7 @@ body {
     width: 0;
   }
   to {
-    width: var(--type-width, 100%);
+    width: calc(var(--type-width, 100%) - 3.3ch);
   }
 }
 
@@ -192,4 +192,3 @@ body {
     border-color: transparent;
   }
 }
-
