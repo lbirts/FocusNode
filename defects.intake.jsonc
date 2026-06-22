@@ -222,23 +222,6 @@
         },
       ],
     },
-    {
-      "branch": "defect/typewriter-steps-mismatch",
-      "id": "typewriter-steps-mismatch",
-      "category": "overflow-clipping",
-      "tier": "mid",
-      "selector": "[data-testid=\"sync-log-latest\"]",
-      "whatsWrong": "as the Sync activity latest line types itself in, a sampled frame stops on a half-drawn character because the typewriter advances by a fractional glyph per step",
-      "checks": [{ "type": "computed-style", "target": "width" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "sync-typing",
-          "viewport": "desktop",
-          "at": 1200,
-        },
-      ],
-    },
   ],
   "clusters": [
     {
@@ -261,10 +244,7 @@
     },
     {
       "id": "card-detail",
-      "defects": [
-        "description-token-invisible",
-        "comment-minwidth-blowout",
-      ],
+      "defects": ["description-token-invisible", "comment-minwidth-blowout"],
       "note": "The card-detail modal shows invisible description-token pills plus a comment whose code block blows its bubble out past the comment thread — two independent failures in one view.",
     },
   ],
