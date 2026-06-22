@@ -1,7 +1,7 @@
 {
   "defects": [
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-mirror",
       "id": "mirror-lineheight-dropped",
       "category": "spacing-alignment",
       "tier": "high",
@@ -17,7 +17,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-mirror",
       "id": "mirror-paddingtop-swap",
       "category": "spacing-alignment",
       "tier": "high",
@@ -33,7 +33,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-mirror",
       "id": "mirror-wordbreak-override",
       "category": "overflow-clipping",
       "tier": "high",
@@ -49,7 +49,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-sync-log",
       "id": "pretext-contentwidth-onesided",
       "category": "overflow-clipping",
       "tier": "high",
@@ -70,7 +70,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-sync-log",
       "id": "pretext-lineheight-compressed",
       "category": "overflow-clipping",
       "tier": "high",
@@ -91,7 +91,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-sync-log",
       "id": "typewriter-keyframe-clip",
       "category": "overflow-clipping",
       "tier": "mid",
@@ -107,7 +107,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-progress",
       "id": "progress-ceil-overfill",
       "category": "spacing-alignment",
       "tier": "mid",
@@ -123,7 +123,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-card-detail",
       "id": "description-token-invisible",
       "category": "color",
       "tier": "high",
@@ -139,7 +139,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-table",
       "id": "workload-table-autolayout",
       "category": "overflow-clipping",
       "tier": "high",
@@ -156,7 +156,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-disclosure",
       "id": "disclosure-stays-collapsed",
       "category": "overflow-clipping",
       "tier": "high",
@@ -177,7 +177,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-wrap-margin",
       "id": "wrap-margin-inflate",
       "category": "spacing-alignment",
       "tier": "mid",
@@ -198,7 +198,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-wrap-side",
       "id": "wrap-side-defloat",
       "category": "layout",
       "tier": "high",
@@ -219,7 +219,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-card-detail",
       "id": "comment-code-overflow",
       "category": "overflow-clipping",
       "tier": "high",
@@ -240,7 +240,7 @@
       ],
     },
     {
-      "branch": "defect/cluster2-text-containment",
+      "branch": "defect/cluster2-card-detail",
       "id": "comment-link-overflow",
       "category": "overflow-clipping",
       "tier": "high",
