@@ -96,7 +96,7 @@
       "category": "overflow-clipping",
       "tier": "mid",
       "selector": "[data-testid=\"sync-log-latest\"]",
-      "whatsWrong": "the Sync activity latest line is permanently a character-width too narrow, so its final glyph stays clipped after the typewriter reveal settles",
+      "whatsWrong": "the Sync activity latest line is permanently too narrow, so its trailing characters stay clipped after the typewriter reveal settles",
       "checks": [{ "type": "computed-style", "target": "width" }],
       "where": [
         {
@@ -148,7 +148,7 @@
       "checks": [
         {
           "type": "bounding-box",
-          "target": "[data-testid=\"workload-name-cell\"] must stay at its fixed column width and truncate the long name, not expand to fit the full unwrapped name and push the sibling columns past the right edge of [data-testid=\"workload-table\"]",
+          "target": "[data-testid=\"workload-name-cell\"] must stay at its fixed column width and truncate the long name, not expand far past that width to fit the full unwrapped name (which shoves the sibling columns rightward, out of alignment, within [data-testid=\"workload-table\"])",
         },
       ],
       "where": [
