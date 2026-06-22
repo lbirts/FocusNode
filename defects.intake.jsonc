@@ -33,13 +33,13 @@
       ],
     },
     {
-      "branch": "defect/mirror-wordbreak-override",
-      "id": "mirror-wordbreak-override",
-      "category": "overflow-clipping",
+      "branch": "defect/mirror-letterspacing-drift",
+      "id": "mirror-letterspacing-drift",
+      "category": "spacing-alignment",
       "tier": "high",
       "selector": "[data-testid=\"richtext-backdrop\"]",
-      "whatsWrong": "in the description editor the highlights drift sideways from their words because the highlight backdrop breaks lines mid-word while the typed text breaks only at spaces",
-      "checks": [{ "type": "computed-style", "target": "word-break" }],
+      "whatsWrong": "in the description editor the #tag/@mention highlights drift progressively rightward off their words, because the highlight backdrop spaces its characters wider than the typed text",
+      "checks": [{ "type": "computed-style", "target": "letter-spacing" }],
       "where": [
         {
           "screen": "kanban",
@@ -284,9 +284,9 @@
       "defects": [
         "mirror-lineheight-dropped",
         "mirror-paddingtop-swap",
-        "mirror-wordbreak-override",
+        "mirror-letterspacing-drift",
       ],
-      "note": "All three corrupt the rich-textarea mirror engine, so the description-editor highlights drift three independent ways at once — line height, top inset, and word-break — hardest to fully localise together.",
+      "note": "All three corrupt the rich-textarea mirror engine, so the description-editor highlights drift three independent ways at once — line height, top inset, and letter-spacing — hardest to fully localise together.",
     },
     {
       "id": "sync-log",
