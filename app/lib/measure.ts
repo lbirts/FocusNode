@@ -1,5 +1,5 @@
 export const MONO_FONT = '13px ui-monospace, monospace';
-export const MONO_LINE_HEIGHT = 20;
+export const MONO_LINE_HEIGHT = 16;
 
 export function contentWidth(el: HTMLElement): number {
   const cs = getComputedStyle(el);
