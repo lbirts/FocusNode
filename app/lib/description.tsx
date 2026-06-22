@@ -7,14 +7,14 @@ export function renderDescription(
   value: string,
   opts?: { transparent?: boolean },
 ): ReactNode {
-  const textClass = opts?.transparent ? "text-transparent" : "text-inherit";
+  const textClass = opts?.transparent ? "text-transparent" : "text-transparent";
   return value.split(DESCRIPTION_TOKEN).map((part, i) => {
     if (/^#[\w-]+$/.test(part))
       return (
         <mark
           key={i}
           data-testid="description-token"
-          className={cn("rounded bg-brand-light", textClass)}
+          className={cn("rounded bg-brand-light text-brand-light!", textClass)}
         >
           {part}
         </mark>
@@ -24,7 +24,10 @@ export function renderDescription(
         <mark
           key={i}
           data-testid="description-token"
-          className={cn("rounded bg-secondary-50", textClass)}
+          className={cn(
+            "rounded bg-secondary-50 text-secondary-50!",
+            textClass,
+          )}
         >
           {part}
         </mark>

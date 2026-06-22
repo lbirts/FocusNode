@@ -305,7 +305,7 @@ function CardDetailBody({
               className="whitespace-pre-wrap rounded-lg border border-primary-100 bg-primary-50 p-3 text-left text-sm text-primary-600 hover:border-primary-200"
             >
               {card.description ? (
-                renderDescription(card.description)
+                renderDescription(card.description, { transparent: true })
               ) : (
                 <span className="text-primary-400">Add a description…</span>
               )}
