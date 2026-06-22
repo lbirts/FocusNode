@@ -1,4 +1,4 @@
 export function progressPercent(done: number, total: number): number {
   if (total === 0) return 0;
-  return Math.round((done / total) * 100);
+  return Math.ceil((done / total) * 100);
 }
