@@ -177,27 +177,6 @@
       ],
     },
     {
-      "branch": "defect/wrap-margin-inflate",
-      "id": "wrap-margin-inflate",
-      "category": "spacing-alignment",
-      "tier": "mid",
-      "selector": "[data-testid=\"session-brief-text\"]",
-      "whatsWrong": "the session brief is shoved off the priority ring behind a large dead gutter and wraps into extra lines, because the magazine wrap reserves too wide a margin around the ring",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "[data-testid=\"session-brief-text\"] must wrap tightly around [data-testid=\"priority-ring\"] at golden's block height; an inflated wrap margin narrows the text band and adds wrapped lines, making the rendered paragraph taller",
-        },
-      ],
-      "where": [
-        {
-          "screen": "focus-timer",
-          "state": "finished",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
       "branch": "defect/wrap-side-defloat",
       "id": "wrap-side-defloat",
       "category": "layout",
@@ -219,37 +198,16 @@
       ],
     },
     {
-      "branch": "defect/comment-code-overflow",
-      "id": "comment-code-overflow",
+      "branch": "defect/comment-minwidth-blowout",
+      "id": "comment-minwidth-blowout",
       "category": "overflow-clipping",
       "tier": "high",
       "selector": "[data-testid=\"comment-code\"]",
-      "whatsWrong": "a comment's fenced code block runs off the side of the comment thread instead of scrolling within its bubble, because the code block lost its horizontal-scroll containment",
+      "whatsWrong": "in the task detail modal a comment's fenced code block spills out past the right edge of the comment thread instead of scrolling inside its own bubble, because the comment body column stretches to fit its widest line rather than holding the thread's width",
       "checks": [
         {
           "type": "bounding-box",
-          "target": "the right edge of [data-testid=\"comment-code\"] must sit at or inside the right edge of [data-testid=\"comment-list\"] — the code block must stay within the comment thread, not overflow horizontally past it",
-        },
-      ],
-      "where": [
-        {
-          "screen": "kanban",
-          "state": "card-detail-open",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/comment-link-overflow",
-      "id": "comment-link-overflow",
-      "category": "overflow-clipping",
-      "tier": "high",
-      "selector": "[data-testid=\"comment-link\"]",
-      "whatsWrong": "a long link in a comment runs off the side of the comment thread instead of wrapping inside its bubble, because the link no longer breaks long words",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "the right edge of [data-testid=\"comment-link\"] must sit at or inside the right edge of [data-testid=\"comment-list\"] — the link must wrap within the comment thread, not overflow horizontally past it",
+          "target": "the right edge of [data-testid=\"comment-code\"] must sit at or inside the right edge of [data-testid=\"comment-list\"] — the comment bubble must hold the thread width and let the long code line scroll inside the code block, not stretch the whole bubble wider than the thread and overflow past it",
         },
       ],
       "where": [
@@ -301,10 +259,9 @@
       "id": "card-detail",
       "defects": [
         "description-token-invisible",
-        "comment-code-overflow",
-        "comment-link-overflow",
+        "comment-minwidth-blowout",
       ],
-      "note": "The card-detail modal shows invisible description tokens plus a code block and a long link both overflowing the comment thread.",
+      "note": "The card-detail modal shows invisible description-token pills plus a comment whose code block blows its bubble out past the comment thread — two independent failures in one view.",
     },
   ],
 }

@@ -118,7 +118,7 @@ export const boards: Board[] = [
                     id: 3,
                     author: users[0],
                     createdAt: "2026-06-19T09:00:00Z",
-                    body: "Repro on staging:\n\n```\nPOST /v2/tokens\nAuthorization: Bearer <expired-refresh-token-value-here>\n→ 401 token_expired\n```",
+                    body: "Repro on staging:\n\n```\nPOST /v2/tokens\nAuthorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyZWZyZXNoLTAxOTIiLCJzY29wZSI6InRva2VuOnJvdGF0ZSJ9.sig-9f2c1a7b\n→ 401 token_expired\n```",
                   },
                 ],
               },
