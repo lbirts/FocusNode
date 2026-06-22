@@ -10,7 +10,7 @@ export const PROPERTIES = [
   "borderBottomWidth",
   "borderLeftWidth",
   "borderStyle",
-  "paddingTop",
+  "paddingBottom",
   "paddingRight",
   "paddingBottom",
   "paddingLeft",
