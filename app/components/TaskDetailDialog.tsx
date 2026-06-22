@@ -367,7 +367,7 @@ function CommentThread({
               <Avatar size="sm" className="mt-0.5 size-6! shrink-0">
                 <AvatarImage src={c.author.src} alt="User profile pic" />
               </Avatar>
-              <div className="min-w-0 flex-1 rounded-lg border border-primary-100 bg-primary-50 p-2.5">
+              <div className="flex-1 rounded-lg border border-primary-100 bg-primary-50 p-2.5">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-primary-600">
                     {c.author.name}
