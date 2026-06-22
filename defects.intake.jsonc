@@ -49,12 +49,12 @@
       ],
     },
     {
-      "branch": "defect/pretext-contentwidth-onesided",
-      "id": "pretext-contentwidth-onesided",
+      "branch": "defect/pretext-contentwidth-margins",
+      "id": "pretext-contentwidth-margins",
       "category": "overflow-clipping",
       "tier": "high",
       "selector": "[data-testid=\"sync-log-panel\"]",
-      "whatsWrong": "the Sync activity log is sized too short and clips its last line, because the wrap width measured for the log subtracts only one side of the panel's horizontal padding",
+      "whatsWrong": "the Sync activity log is sized too short and clips its last line, because the wrap width measured for the log subtracts the panel's horizontal margins instead of its padding, over-measuring the available width",
       "checks": [
         {
           "type": "bounding-box",
@@ -291,7 +291,7 @@
     {
       "id": "sync-log",
       "defects": [
-        "pretext-contentwidth-onesided",
+        "pretext-contentwidth-margins",
         "pretext-lineheight-compressed",
         "typewriter-keyframe-clip",
       ],
