@@ -4,6 +4,7 @@ import Markdown from "markdown-to-jsx";
 const OVERRIDES = {
   a: {
     props: {
+      "data-testid": "comment-link",
       className: "break-words text-brand underline",
       target: "_blank",
       rel: "noreferrer",
@@ -18,6 +19,7 @@ const OVERRIDES = {
   },
   pre: {
     props: {
+      "data-testid": "comment-code",
       className:
         "overflow-x-auto rounded-lg bg-primary-100 p-2 font-mono text-[12px] text-primary-600",
     },

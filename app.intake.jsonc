@@ -45,23 +45,63 @@
           ],
         },
 
-        // Drag-and-drop — card picked up. Clicking a card lifts it: a
+        // Drag-and-drop — card picked up. Clicking a card's grip lifts it: a
         // cursor-following ghost ([data-testid='drag-ghost']) appears at the
         // pointer, the source card is hidden, and its slot holds an in-place
         // placeholder ([data-testid='card-dropzone']) the height of the card.
         {
           "name": "card-lifted",
-          "setup": [{ "click": "[data-testid='kanban-card']" }],
+          "setup": [{ "click": "[data-testid='card-grip']" }],
         },
 
         // Drag-and-drop — carrying over another column. After lifting the
-        // first Backlog card, hovering To Do highlights it as the drop target
-        // and reveals its dropzone; the ghost sits over that column.
+        // first Backlog card by its grip, hovering To Do highlights it as the
+        // drop target and reveals its dropzone; the ghost sits over that column.
         {
           "name": "card-over-column",
           "setup": [
-            { "click": "[data-testid='kanban-card']" },
+            { "click": "[data-testid='card-grip']" },
             { "hover": "[data-testid='kanban-column-3']" },
+          ],
+        },
+
+        // Task detail modal — clicking a card's body (not its grip) opens the
+        // Jira-style detail dialog for the first Backlog card, showing its
+        // highlighted description tokens and the markdown comment thread.
+        {
+          "name": "card-detail-open",
+          "setup": [
+            { "click": "[data-testid='kanban-card']" },
+            { "waitForSelector": "[data-testid='card-detail-dialog']" },
+          ],
+        },
+
+        // Detail modal with the description in edit mode: clicking the
+        // read-state description swaps in the rich-textarea editor, whose
+        // mirrored backdrop ([data-testid='richtext-backdrop']) draws the
+        // #tag/@mention highlights behind the typed text.
+        {
+          "name": "card-description-editing",
+          "setup": [
+            { "click": "[data-testid='kanban-card']" },
+            { "waitForSelector": "[data-testid='card-detail-dialog']" },
+            { "click": "[data-testid='card-detail-description']" },
+            {
+              "waitForSelector": "[data-testid='card-detail-description-input']",
+            },
+          ],
+        },
+
+        // Epic view: from the detail modal, clicking the swimlane name opens
+        // the swimlane-as-epic list with one completion progress bar
+        // ([data-testid='epic-progress-fill']) over the child-issue rows.
+        {
+          "name": "epic-view-open",
+          "setup": [
+            { "click": "[data-testid='kanban-card']" },
+            { "waitForSelector": "[data-testid='card-detail-dialog']" },
+            { "click": "[data-testid='swimlane-epic-link']" },
+            { "waitForSelector": "[data-testid='epic-task-list']" },
           ],
         },
       ],
@@ -180,6 +220,19 @@
             { "waitForSelector": "[data-testid='command-palette']" },
           ],
         },
+
+        // Add Task composer submitted empty: validation runs and the Details
+        // disclosure auto-expands so the required-field error inside it
+        // ([data-testid='composer-details-panel']) is revealed instead of being
+        // clipped away by the collapsed panel.
+        {
+          "name": "composer-invalid-submit",
+          "setup": [
+            { "click": "[data-testid='add-task']" },
+            { "click": "[data-testid='add-task-submit']" },
+            { "waitForSelector": "[data-testid='composer-details-panel']" },
+          ],
+        },
       ],
       "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],
     },
@@ -285,6 +338,19 @@
             "trigger": [{ "click": "[data-testid='pull-from-boards']" }],
             "at": [500],
           },
+        },
+
+        // Sync activity panel: scroll the right rail to the pretext-measured
+        // monospace log and let the CSS-steps "latest" typewriter settle
+        // (animation is 2.4s) so the panel height ([data-testid='sync-log-panel'])
+        // and the settled latest line ([data-testid='sync-log-latest']) are at
+        // rest.
+        {
+          "name": "sync-activity",
+          "setup": [
+            { "scrollTo": { "selector": "[data-testid='sync-log-panel']" } },
+            { "waitMs": 2600 },
+          ],
         },
       ],
       "viewports": [{ "name": "desktop", "width": 1440, "height": 900 }],

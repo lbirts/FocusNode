@@ -11,13 +11,21 @@ export function renderDescription(
   return value.split(DESCRIPTION_TOKEN).map((part, i) => {
     if (/^#[\w-]+$/.test(part))
       return (
-        <mark key={i} className={cn("rounded bg-brand-light", textClass)}>
+        <mark
+          key={i}
+          data-testid="description-token"
+          className={cn("rounded bg-brand-light", textClass)}
+        >
           {part}
         </mark>
       );
     if (/^@[\w-]+$/.test(part))
       return (
-        <mark key={i} className={cn("rounded bg-secondary-50", textClass)}>
+        <mark
+          key={i}
+          data-testid="description-token"
+          className={cn("rounded bg-secondary-50", textClass)}
+        >
           {part}
         </mark>
       );

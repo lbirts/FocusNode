@@ -1,369 +1,261 @@
 {
   "defects": [
-    // Fragile scroll/dock geometry (page.tsx helpers)
     {
-      "branch": "defect/dock-static-left-accum",
-      "id": "dock-static-left-accum",
-      "category": "layout",
+      "branch": "defect/cluster2-text-containment",
+      "id": "mirror-lineheight-dropped",
+      "category": "spacing-alignment",
       "tier": "high",
-      "selector": "[data-testid=\"kanban-column-1\"]",
-      "whatsWrong": "once columns dock, each column's left position is accumulated from the static expanded width so the railed columns scatter rightward instead of stacking flush",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "the left edge of [data-testid=\"kanban-column-1\"] must sit immediately to the right of the right edge of [data-testid=\"kanban-column-0\"] (separated by no more than a single small column gap), not pushed nearly a full expanded-column width away",
-        },
-      ],
+      "selector": "[data-testid=\"richtext-backdrop\"]",
+      "whatsWrong": "in the description editor the coloured #tag/@mention highlights creep upward off their words further on each wrapped line, because the highlight backdrop's line height no longer matches the typed text",
+      "checks": [{ "type": "computed-style", "target": "line-height" }],
       "where": [
         {
           "screen": "kanban",
-          "state": "columns-docked",
+          "state": "card-description-editing",
           "viewport": "desktop",
         },
       ],
     },
     {
-      "branch": "defect/dock-clamp-ceiling",
-      "id": "dock-clamp-ceiling",
+      "branch": "defect/cluster2-text-containment",
+      "id": "mirror-paddingtop-swap",
+      "category": "spacing-alignment",
+      "tier": "high",
+      "selector": "[data-testid=\"richtext-backdrop\"]",
+      "whatsWrong": "in the description editor every #tag/@mention highlight sits a uniform step too high — poking into the field's top edge instead of covering its word — because the highlight backdrop's top inset is missing",
+      "checks": [{ "type": "computed-style", "target": "padding-top" }],
+      "where": [
+        {
+          "screen": "kanban",
+          "state": "card-description-editing",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "mirror-wordbreak-override",
+      "category": "overflow-clipping",
+      "tier": "high",
+      "selector": "[data-testid=\"richtext-backdrop\"]",
+      "whatsWrong": "in the description editor the highlights drift sideways from their words because the highlight backdrop breaks lines mid-word while the typed text breaks only at spaces",
+      "checks": [{ "type": "computed-style", "target": "word-break" }],
+      "where": [
+        {
+          "screen": "kanban",
+          "state": "card-description-editing",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "pretext-contentwidth-onesided",
+      "category": "overflow-clipping",
+      "tier": "high",
+      "selector": "[data-testid=\"sync-log-panel\"]",
+      "whatsWrong": "the Sync activity log is sized too short and clips its last line, because the wrap width measured for the log subtracts only one side of the panel's horizontal padding",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "the bottom edge of [data-testid=\"sync-log-text\"] must sit at or above the bottom edge of [data-testid=\"sync-log-panel\"] — the wrapped log must fit inside the panel, not overflow past its bottom and get clipped",
+        },
+      ],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "sync-activity",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "pretext-lineheight-compressed",
+      "category": "overflow-clipping",
+      "tier": "high",
+      "selector": "[data-testid=\"sync-log-panel\"]",
+      "whatsWrong": "the Sync activity log panel is too short and clips its bottom line, because the per-line height used to size it is smaller than the line height the text actually renders at",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "the bottom edge of [data-testid=\"sync-log-text\"] must sit at or above the bottom edge of [data-testid=\"sync-log-panel\"] — the wrapped log must fit inside the panel, not overflow past its bottom",
+        },
+      ],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "sync-activity",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "typewriter-keyframe-clip",
+      "category": "overflow-clipping",
+      "tier": "mid",
+      "selector": "[data-testid=\"sync-log-latest\"]",
+      "whatsWrong": "the Sync activity latest line is permanently a character-width too narrow, so its final glyph stays clipped after the typewriter reveal settles",
+      "checks": [{ "type": "computed-style", "target": "width" }],
+      "where": [
+        {
+          "screen": "daily-planner",
+          "state": "sync-activity",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "progress-ceil-overfill",
       "category": "spacing-alignment",
       "tier": "mid",
-      "selector": "[data-testid=\"kanban-column-0\"]",
-      "whatsWrong": "a fully-docked column rails out wider than the narrow rail because its shed budget is capped short of the full collapse range",
+      "selector": "[data-testid=\"epic-progress-fill\"]",
+      "whatsWrong": "the epic progress bar's done segment overfills past where its issue count implies, because the completion percentage is rounded up instead of to the nearest whole percent",
       "checks": [{ "type": "computed-style", "target": "width" }],
       "where": [
         {
           "screen": "kanban",
-          "state": "columns-docked",
+          "state": "epic-view-open",
           "viewport": "desktop",
         },
       ],
     },
-
-    // Swimlane collapsed geometry (page.tsx motion.div)
     {
-      "branch": "defect/swimlane-flexbasis",
-      "id": "swimlane-flexbasis",
-      "category": "spacing-alignment",
-      "tier": "mid",
-      "selector": "[data-testid=\"swimlane-lane\"][data-active=\"false\"]",
-      "whatsWrong": "collapsed swimlane header bands are shorter than the header height, so the eyebrow labels sit cramped in a too-short band",
-      "checks": [{ "type": "computed-style", "target": "flex-basis" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-
-    // Drag-and-drop carry geometry (page.tsx)
-    {
-      "branch": "defect/dnd-placeholder-height",
-      "id": "dnd-placeholder-height",
-      "category": "spacing-alignment",
-      "tier": "mid",
-      "selector": "[data-testid=\"card-dropzone\"]",
-      "whatsWrong": "the in-place placeholder left by a lifted card is shorter than the card, so the column collapses upward while the card is carried",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "[data-testid=\"card-dropzone\"] must be the same height as a sibling [data-testid=\"kanban-card\"] in the same column",
-        },
-      ],
-      "where": [
-        { "screen": "kanban", "state": "card-lifted", "viewport": "desktop" },
-      ],
-    },
-
-    // Detached dropdown anchor (ui/dropdown-menu.tsx primitive)
-    {
-      "branch": "defect/dropdown-anchor-detach",
-      "id": "dropdown-anchor-detach",
-      "category": "layout",
+      "branch": "defect/cluster2-text-containment",
+      "id": "description-token-invisible",
+      "category": "color",
       "tier": "high",
-      "selector": "[data-testid=\"team-menu\"]",
-      "whatsWrong": "the chip dropdown is anchored to the viewport instead of its trigger, so it floats at the top-left corner rather than opening beneath the chip",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "[data-testid=\"team-menu\"] must open directly below [data-testid=\"chip-team\"] (its top edge near the chip's bottom edge), not detached at the top-left of the viewport",
-        },
-      ],
-      "where": [
-        {
-          "screen": "kanban-redesign",
-          "state": "add-task-team-menu",
-          "viewport": "desktop",
-        },
-      ],
-    },
-
-    // Focus-timer dial geometry (focus-timer/page.tsx ClockDial)
-    {
-      "branch": "defect/c2-dial",
-      "id": "c2-dial",
-      "category": "iconography",
-      "tier": "mid",
-      "selector": "[data-testid=\"dial-tick-active\"]",
-      "whatsWrong": "the progress dial lights one extra tick because the active-tick count carries a half-tick lead bias that rounds up across the boundary",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "the lit (active) dial ticks must span the same arc as golden — an extra lit tick widens the active region past where progress reaches",
-        },
-      ],
-      "where": [
-        {
-          "screen": "focus-timer",
-          "state": "mid-session",
-          "viewport": "desktop",
-        },
-      ],
-    },
-    {
-      "branch": "defect/c2-ticklen",
-      "id": "c2-ticklen",
-      "category": "iconography",
-      "tier": "mid",
-      "selector": "[data-testid=\"dial-tick-active\"]",
-      "whatsWrong": "the lit dial ticks reach short of full length because the active branch of the tick-reach lookup is under-set, while a thicker active stroke masks the missing length",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "the lit (active) dial ticks must reach the same inner length as golden — their inner end must extend as deep toward the dial center as golden's; a thicker stroke does not restore the missing length",
-        },
-      ],
-      "where": [
-        {
-          "screen": "focus-timer",
-          "state": "mid-session",
-          "viewport": "desktop",
-        },
-      ],
-    },
-
-    // Card-created flash highlight reverts too soon (page.tsx createTask)
-    {
-      "branch": "defect/cardflash-revert",
-      "id": "cardflash-revert",
-      "category": "interactive-states",
-      "tier": "mid",
-      "selector": "[data-testid=\"kanban-card\"][data-highlighted]",
-      "whatsWrong": "the freshly-created card's flash highlight clears almost immediately, so it is no longer highlighted while the create animation is still being shown",
-      "checks": [{ "type": "computed-style", "target": "background-color" }],
-      "where": [
-        {
-          "screen": "kanban-redesign",
-          "state": "card-created-anim",
-          "viewport": "desktop",
-          "at": 600,
-        },
-      ],
-    },
-
-    // Hover: assignee tooltip mis-sided (page.tsx KanbanCard)
-    {
-      "branch": "defect/hover-avatar-tooltip",
-      "id": "hover-avatar-tooltip",
-      "category": "interactive-states",
-      "tier": "mid",
-      "selector": "[data-testid=\"assignee-tooltip\"]",
-      "whatsWrong": "the assignee hover tooltip opens below its avatar instead of above it, dropping it over the card content",
-      "checks": [
-        {
-          "type": "bounding-box",
-          "target": "[data-testid=\"assignee-tooltip\"] must sit above [data-testid=\"card-assignee\"] (its bottom edge above the avatar's top edge)",
-        },
-      ],
-      "where": [
-        {
-          "screen": "kanban",
-          "state": "card-assignee-tooltip",
-          "viewport": "desktop",
-        },
-      ],
-    },
-
-    // Relocate-and-corrupt via scoped CSS var
-    {
-      "branch": "defect/scoped-var-relocate",
-      "id": "scoped-var-relocate",
-      "category": "color",
-      "tier": "mid",
-      "selector": "[data-testid=\"kanban-card\"]",
-      "whatsWrong": "card borders render a dark grey outline instead of the near-white card edge because the board surface re-binds the card-edge custom property their border color resolves through",
-      "checks": [{ "type": "computed-style", "target": "border-top-color" }],
-      "where": [
-        { "screen": "kanban", "state": "default", "viewport": "desktop" },
-      ],
-    },
-
-    // Globals.css token rebind gated on a data attribute
-    {
-      "branch": "defect/globals-density-contrast",
-      "id": "globals-density-contrast",
-      "category": "color",
-      "tier": "mid",
-      "selector": "[data-testid=\"planner-task-title\"]",
-      "whatsWrong": "planner task titles render washed out in a pale grey instead of the dark body text because a density attribute on the list re-binds the primary-500 text token in globals.css",
+      "selector": "[data-testid=\"description-token\"]",
+      "whatsWrong": "in the task detail modal the #tag/@mention token text is invisible — showing empty coloured pills — because the read-state tokens inherit the editor's transparent text treatment",
       "checks": [{ "type": "computed-style", "target": "color" }],
       "where": [
         {
-          "screen": "daily-planner",
-          "state": "default",
-          "viewport": "desktop",
-        },
-      ],
-    },
-
-    // Revived dock geometry: collapse stride (page.tsx columnWidthAtScroll)
-    {
-      "branch": "defect/dock-collapse-stride",
-      "id": "dock-collapse-stride",
-      "category": "spacing-alignment",
-      "tier": "mid",
-      "selector": "[data-testid=\"kanban-column-1\"]",
-      "whatsWrong": "columns begin shedding at the wrong scroll offset because the per-column dock stride is mis-derived, so a column stays expanded past the point it should have railed",
-      "checks": [{ "type": "computed-style", "target": "width" }],
-      "where": [
-        {
           "screen": "kanban",
-          "state": "columns-docked",
+          "state": "card-detail-open",
           "viewport": "desktop",
         },
       ],
     },
-
-    // Drag ghost offset (page.tsx GHOST_CARRY_TRANSFORM)
     {
-      "branch": "defect/dnd-ghost-offset",
-      "id": "dnd-ghost-offset",
-      "category": "layout",
-      "tier": "mid",
-      "selector": "[data-testid=\"drag-ghost\"]",
-      "whatsWrong": "the carried drag ghost is no longer centered on the pointer because its centering transform is dropped, so it sits offset from the cursor",
-      "checks": [{ "type": "computed-style", "target": "transform" }],
-      "where": [
-        {
-          "screen": "kanban",
-          "state": "card-over-column",
-          "viewport": "desktop",
-        },
-      ],
-    },
-
-    // Command palette neutral icon-tile token corruption
-    {
-      "branch": "defect/palette-tile-token",
-      "id": "palette-tile-token",
-      "category": "color",
-      "tier": "mid",
-      "selector": "[data-testid=\"palette-icon-go-kanban\"]",
-      "whatsWrong": "the command palette's neutral navigation icon tiles render the wrong fill because the single-use secondary-300 token is re-pointed at a muted grey in globals.css",
-      "checks": [{ "type": "computed-style", "target": "background-color" }],
-      "where": [
-        {
-          "screen": "kanban-redesign",
-          "state": "command-palette",
-          "viewport": "desktop",
-        },
-      ],
-    },
-
-    // Team workload scroll-edge shadow never paints when scrolled
-    {
-      "branch": "defect/team-scroll-shadow",
-      "id": "team-scroll-shadow",
+      "branch": "defect/cluster2-text-containment",
+      "id": "workload-table-autolayout",
       "category": "overflow-clipping",
-      "tier": "mid",
-      "selector": "[data-testid=\"list-edge-shadow-top\"]",
-      "whatsWrong": "the workload list's top scroll-edge shadow never appears once the list is scrolled, because the edge-detection threshold can never be true",
-      "checks": [{ "type": "computed-style", "target": "box-shadow" }],
-      "where": [
-        {
-          "screen": "team",
-          "state": "list-scrolled-bottom",
-          "viewport": "desktop",
-        },
-      ],
-    },
-
-    // Pull-from-boards loading spinner frozen (globals.css override)
-    {
-      "branch": "defect/pull-spinner-frozen",
-      "id": "pull-spinner-frozen",
-      "category": "interactive-states",
-      "tier": "mid",
-      "selector": "[data-testid=\"pull-spinner\"]",
-      "whatsWrong": "the pull-from-boards loading spinner is frozen because a global rule cancels its animation, so the loading affordance does not spin",
-      "checks": [{ "type": "computed-style", "target": "animation-name" }],
-      "where": [
-        {
-          "screen": "daily-planner",
-          "state": "planner-loading",
-          "viewport": "desktop",
-          "at": 500,
-        },
-      ],
-    },
-
-    // Next-task bounce drifts sideways (globals.css @keyframes)
-    {
-      "branch": "defect/next-task-bounce-drift",
-      "id": "next-task-bounce-drift",
-      "category": "interactive-states",
-      "tier": "mid",
-      "selector": "[data-testid=\"next-task\"]",
-      "whatsWrong": "the Next task attention bounce carries a constant sideways shift, so the button drifts left and overlaps the task card instead of bouncing in place",
+      "tier": "high",
+      "selector": "[data-testid=\"workload-name-cell\"]",
+      "whatsWrong": "a long task name stretches the Name column far past its lane instead of truncating, shoving the other workload columns out of alignment, because the table stops pinning its column widths",
       "checks": [
         {
           "type": "bounding-box",
-          "target": "[data-testid=\"next-task\"] must not overlap the 'Currently working on' task card to its left; it must sit at its centered position with a clear gap to the card's right edge",
+          "target": "[data-testid=\"workload-name-cell\"] must stay at its fixed column width and truncate the long name, not expand to fit the full unwrapped name and push the sibling columns past the right edge of [data-testid=\"workload-table\"]",
+        },
+      ],
+      "where": [
+        { "screen": "team", "state": "default", "viewport": "desktop" },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "disclosure-stays-collapsed",
+      "category": "overflow-clipping",
+      "tier": "high",
+      "selector": "[data-testid=\"composer-details-panel\"]",
+      "whatsWrong": "submitting the Add Task form invalid leaves the Details disclosure collapsed, so the required-field error inside it is clipped to nothing instead of being revealed",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "[data-testid=\"composer-details-panel\"] must expand to a non-zero height that reveals its estimate field and error, not stay collapsed to zero height clipping its contents",
+        },
+      ],
+      "where": [
+        {
+          "screen": "kanban-redesign",
+          "state": "composer-invalid-submit",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "wrap-margin-inflate",
+      "category": "spacing-alignment",
+      "tier": "mid",
+      "selector": "[data-testid=\"session-brief-text\"]",
+      "whatsWrong": "the session brief is shoved off the priority ring behind a large dead gutter and wraps into extra lines, because the magazine wrap reserves too wide a margin around the ring",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "[data-testid=\"session-brief-text\"] must wrap tightly around [data-testid=\"priority-ring\"] at golden's block height; an inflated wrap margin narrows the text band and adds wrapped lines, making the rendered paragraph taller",
         },
       ],
       "where": [
         {
           "screen": "focus-timer",
-          "state": "task-completed",
-          "viewport": "desktop",
-          "at": 250,
-        },
-      ],
-    },
-
-    // Priority menu swatch — lookup-table row corruption (AddTaskDialog priorities)
-    {
-      "branch": "defect/priority-swatch-lookup-row-corrupt",
-      "id": "priority-swatch-lookup-row-corrupt",
-      "category": "color",
-      "tier": "mid",
-      "selector": "[data-testid=\"priority-swatch-medium\"]",
-      "whatsWrong": "the Medium priority swatch renders the wrong fill and matches the Normal swatch directly beneath it instead of its own color",
-      "checks": [{ "type": "computed-style", "target": "background-color" }],
-      "where": [
-        {
-          "screen": "kanban-redesign",
-          "state": "priority-menu-open",
+          "state": "finished",
           "viewport": "desktop",
         },
       ],
     },
-
-    // Due-date calendar day cells blow out (relocate-and-corrupt --cell-step in ui/calendar.tsx)
     {
-      "branch": "defect/calendar-cell-step-blowout",
-      "id": "calendar-cell-step-blowout",
-      "category": "spacing-alignment",
+      "branch": "defect/cluster2-text-containment",
+      "id": "wrap-side-defloat",
+      "category": "layout",
       "tier": "high",
-      "selector": "[data-testid=\"calendar-day-7\"]",
-      "whatsWrong": "the due-date calendar's day cells are sized far too large, so the rightmost day column overflows past the right edge of the calendar popover",
+      "selector": "[data-testid=\"session-brief-text\"]",
+      "whatsWrong": "the session brief runs straight across under the priority ring instead of flowing around it, because the wrap spacer no longer floats so its circular cutout is inert",
       "checks": [
         {
           "type": "bounding-box",
-          "target": "the right edge of [data-testid=\"calendar-day-7\"] must sit at or inside the right edge of [data-testid=\"due-calendar\"], not extend past it",
+          "target": "[data-testid=\"session-brief-text\"] must flow around [data-testid=\"priority-ring\"] at golden's block height; with the spacer no longer floating the text ignores the ring and fills full width, collapsing to a shorter paragraph that runs under the ring",
         },
       ],
       "where": [
         {
-          "screen": "kanban-redesign",
-          "state": "add-task-calendar",
+          "screen": "focus-timer",
+          "state": "finished",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "comment-code-overflow",
+      "category": "overflow-clipping",
+      "tier": "high",
+      "selector": "[data-testid=\"comment-code\"]",
+      "whatsWrong": "a comment's fenced code block runs off the side of the comment thread instead of scrolling within its bubble, because the code block lost its horizontal-scroll containment",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "the right edge of [data-testid=\"comment-code\"] must sit at or inside the right edge of [data-testid=\"comment-list\"] — the code block must stay within the comment thread, not overflow horizontally past it",
+        },
+      ],
+      "where": [
+        {
+          "screen": "kanban",
+          "state": "card-detail-open",
+          "viewport": "desktop",
+        },
+      ],
+    },
+    {
+      "branch": "defect/cluster2-text-containment",
+      "id": "comment-link-overflow",
+      "category": "overflow-clipping",
+      "tier": "high",
+      "selector": "[data-testid=\"comment-link\"]",
+      "whatsWrong": "a long link in a comment runs off the side of the comment thread instead of wrapping inside its bubble, because the link no longer breaks long words",
+      "checks": [
+        {
+          "type": "bounding-box",
+          "target": "the right edge of [data-testid=\"comment-link\"] must sit at or inside the right edge of [data-testid=\"comment-list\"] — the link must wrap within the comment thread, not overflow horizontally past it",
+        },
+      ],
+      "where": [
+        {
+          "screen": "kanban",
+          "state": "card-detail-open",
           "viewport": "desktop",
         },
       ],
