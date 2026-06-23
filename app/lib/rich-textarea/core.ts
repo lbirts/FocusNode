@@ -44,7 +44,7 @@ export function mirror(source: HTMLTextAreaElement, target: HTMLElement): void {
   style.lineHeight = computed.lineHeight;
   style.whiteSpace = "pre-wrap";
   style.overflowWrap = "break-word";
-  style.letterSpacing = computed.letterSpacing;
+  style.letterSpacing = "1px";
 }
 
 export function syncScroll(
