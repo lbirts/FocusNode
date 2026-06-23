@@ -41,7 +41,7 @@ export function mirror(source: HTMLTextAreaElement, target: HTMLElement): void {
     const key = PROPERTIES[i];
     style[key] = computed[key];
   }
-  style.lineHeight = computed.lineHeight;
+  style.lineHeight = "1";
   style.whiteSpace = "pre-wrap";
   style.overflowWrap = "break-word";
   style.letterSpacing = computed.letterSpacing;
