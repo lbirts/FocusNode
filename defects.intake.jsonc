@@ -96,13 +96,14 @@
       "category": "overflow-clipping",
       "tier": "mid",
       "selector": "[data-testid=\"sync-log-latest\"]",
-      "whatsWrong": "the Sync activity latest line is permanently too narrow, so its trailing characters stay clipped after the typewriter reveal settles",
+      "whatsWrong": "the Sync activity latest line's typewriter reveal runs short — at the sampled mid-type frame it is narrower than the golden reveal — because the reveal animation's end width is a few characters too narrow",
       "checks": [{ "type": "computed-style", "target": "width" }],
       "where": [
         {
           "screen": "daily-planner",
-          "state": "sync-activity",
+          "state": "sync-typing",
           "viewport": "desktop",
+          "at": 1200,
         },
       ],
     },
